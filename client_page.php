@@ -69,8 +69,6 @@ function ProcessDB() {
 
   if(!isset($owner))  $owner=$user ; 
 
-          $owner_=$db->real_escape_string($owner) ;
-
   if($owner!=$user)  $read_only=true ; 
   else               $read_only=false ; 
 
@@ -126,8 +124,8 @@ function ProcessDB() {
         else                 $page_=$fields[1] ;
 //- - - - - - - - - - - - - - Добавляем новую страницу
                        $sql="Insert into ".
-                            "`access_list`(`Owner`,  `Login`,  `Page`,      `Crypto`)".
-                            "       values('$user_', '$user_', '$new_page', '$crypto_')" ;
+                            "`access_list`(`Owner`,  `Login`,  `Page`,   `Crypto`)".
+                            "       values('$user_', '$user_', '$page_', '$crypto_')" ;
        $res=$db->query($sql) ;
     if($res===false) {
                FileLog("ERROR", "Insert ACCESS_LIST... : ".$db->error) ;
@@ -138,8 +136,8 @@ function ProcessDB() {
     }
 
                        $sql="Insert into ".
-                            "`client_pages`(`Owner`,  `Page`,      `Type`,   `Creator`, `Check`,   `Title`,   `Remark`  )".
-                            "        values('$user_', '$new_page', 'client', '$user_',  '$check_', '$title_', '$remark_')" ;
+                            "`client_pages`(`Owner`,  `Page`,   `Type`,   `Creator`, `Check`,   `Title`,   `Remark`  )".
+                            "        values('$user_', '$page_', 'client', '$user_',  '$check_', '$title_', '$remark_')" ;
        $res=$db->query($sql) ;
     if($res===false) {
                FileLog("ERROR", "Insert CLIENT_PAGES... : ".$db->error) ;

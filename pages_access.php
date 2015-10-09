@@ -27,11 +27,13 @@ function ProcessDB() {
                          $receiver=$_POST["Receiver"] ;
                          $letter  =$_POST["Letter"] ;
                          $invite  =$_POST["Invite"] ;
+                         $incopy  =$_POST["InCopy"] ;
 
   FileLog("START", "    Session:".$session) ;
   FileLog("",      "   Receiver:".$receiver) ;
   FileLog("",      "     Letter:".$letter) ;
   FileLog("",      "     Invite:".$invite) ;
+  FileLog("",      "     InCopy:".$incopy) ;
 
 //--------------------------- Подключение БД
 
@@ -53,8 +55,8 @@ function ProcessDB() {
 //--------------------------- Формирование списка специальностей
 
                      $sql="Select code, name".
-			  "  From `ref_doctor_specialities`".
-			  " Where `language`='RU'" ;
+			  "  From ref_doctor_specialities".
+			  " Where language='RU'" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select REF_DOCTOR_SPECIALITIES... : ".$db->error) ;
@@ -64,13 +66,13 @@ function ProcessDB() {
   }
   else
   {  
-       echo "   a_specialities[\"Dummy\"]=\"\" ;\n" ;
+       echo "   a_specialities['Dummy']=\"\" ;\n" ;
 
      for($i=0 ; $i<$res->num_rows ; $i++)
      {
 	      $fields=$res->fetch_row() ;
 
-       echo "   a_specialities[\"".$fields[0]."\"]=\"".$fields[1]."\" ;\n" ;
+       echo "   a_specialities['".$fields[0]."']='".$fields[1]."' ;\n" ;
      }
   }
 
@@ -79,7 +81,7 @@ function ProcessDB() {
 //--------------------------- Формирование списка врачей
 
                      $sql="Select owner, name_f, name_i, name_o, speciality".
-			  "  From `doctor_page_main`".
+			  "  From doctor_page_main".
 			  "  Order by name_f, name_i, name_o" ;
      $res=$db->query($sql) ;
   if($res===false) {
@@ -95,7 +97,7 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
                 $decl=$fields[1]." ".$fields[2]." ".$fields[3]."=".$fields[4] ;
 
-       echo "   a_doctors[\"".$fields[0]."\"]=\"".$decl."\" ;\n" ;
+       echo "   a_doctors['".$fields[0]."']='".$decl."' ;\n" ;
      }
   }
 
@@ -108,9 +110,10 @@ function ProcessDB() {
           $receiver=$db->real_escape_string($receiver) ;
           $letter  =$db->real_escape_string($letter) ;
           $invite  =$db->real_escape_string($invite) ;
+          $incopy  =$db->real_escape_string($incopy) ;
 
-       $res=$db->query("Insert into `messages`(`Receiver`,`Sender`,`Type`,`Text`,`Details`)".
-                       " values('$receiver','$user','CLIENT_ACCESS_INVITE','$invite','$letter')") ;
+       $res=$db->query("Insert into messages(Receiver,Sender,Type,Text,Details,Copy)".
+                       " values('$receiver','$user','CLIENT_ACCESS_INVITE','$invite','$letter','$incopy')") ;
     if($res===false) {
              FileLog("ERROR", "Insert MESSAGES... : ".$db->error) ;
                      $db->rollback();
@@ -127,12 +130,12 @@ function ProcessDB() {
 
 //--------------------------- Формирование записи о ключе подписи и о головной странице
 
-                     $sql="Select a.crypto, u.sign_s_key".
-			  "  From `access_list` a, `users` u".
-			  " Where a.`owner`=u.login".
-			  "  and  a.`owner`='$user_'".
-			  "  and  a.login  ='$user_'".
-			  "  and  a.page   = 0" ;
+                     $sql="Select a.crypto, u.sign_s_key, u.msg_key".
+			  "  From access_list a, users u".
+			  " Where a.owner=u.login".
+			  "  and  a.owner='$user_'".
+			  "  and  a.login='$user_'".
+			  "  and  a.page = 0" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select ACCESS_LIST... : ".$db->error) ;
@@ -144,13 +147,15 @@ function ProcessDB() {
   {      
 	      $fields=$res->fetch_row() ;
 
-       echo "    link_key     =\"".$fields[0]."\" ;			\n" ;
-       echo "    link_key     =Crypto_decode(link_key, password) ;	\n" ;
-       echo "    a_pages_keys[\"0\"]=link_key ;				\n" ;
+       echo "    link_key      ='".$fields[0]."' ;			\n" ;
+       echo "    link_key      =Crypto_decode(link_key, password) ;	\n" ;
+       echo " a_pages_keys['0']=link_key ;				\n" ;
 
-       echo "    link_key     =\"".$fields[1]."\" ;			\n" ;
-       echo "    link_key     =Crypto_decode(link_key, password) ;	\n" ;
-       echo "    sender_key   =link_key ;				\n" ;
+       echo "    sender_key    ='".$fields[1]."' ;			\n" ;
+       echo "    sender_key    =Crypto_decode(sender_key, password) ;	\n" ;
+
+       echo "       msg_key    ='".$fields[2]."' ;			\n" ;
+       echo "       msg_key    =Crypto_decode(msg_key, password) ;	\n" ;
   }
 
      $res->close() ;
@@ -158,12 +163,12 @@ function ProcessDB() {
 //--------------------------- Формирование списка страниц пациента
 
                      $sql="Select p.page, p.title, a.crypto".
-			  "  From `client_pages` p, `access_list` a".
-			  " Where p.`owner`='$user_'".
-			  "  and  p.`page`>0".
-			  "  and  a.`owner`='$user_'".
-			  "  and  a.`login`='$user_'".
-			  "  and  a.`page`=p.`page`" ;
+			  "  From client_pages p, access_list a".
+			  " Where p.owner='$user_'".
+			  "  and  p.page>0".
+			  "  and  a.owner='$user_'".
+			  "  and  a.login='$user_'".
+			  "  and  a.page = p.page" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select CLIENT_PAGES... : ".$db->error) ;
@@ -183,12 +188,12 @@ function ProcessDB() {
 
 		$link_href="Client_page?Session=".$session."&Page=".$fields[0] ;
 
-       echo "    link_key     =\"".$fields[2]."\" ;			\n" ;
+       echo "    link_key     ='".$fields[2]."' ;			\n" ;
        echo "    link_key     =Crypto_decode(link_key, password) ;	\n" ;
-       echo "    link_text    =\"".$fields[1]."\" ;			\n" ;
+       echo "    link_text    ='".$fields[1]."' ;			\n" ;
        echo "    link_text    =Crypto_decode(link_text, link_key) ;	\n" ;
-       echo "  AddNewPage(link_text, \"".$fields[0]."\") ;		\n" ;
-       echo "    a_pages_keys[\"".$fields[0]."\"]=link_key ;		\n" ;
+       echo "  AddNewPage(link_text, '".$fields[0]."') ;		\n" ;
+       echo "    a_pages_keys['".$fields[0]."']=link_key ;		\n" ;
      }
   }
 
@@ -196,8 +201,8 @@ function ProcessDB() {
 
 //--------------------------- Формирование полей выбора доктора
 
-        echo     "  AddNewSpeciality(\"\") ;\n" ;
-        echo     "   FormDoctorsList(\"\") ;\n" ;
+        echo     "  AddNewSpeciality('') ;\n" ;
+        echo     "   FormDoctorsList('') ;\n" ;
 
 //--------------------------- Завершение
 
@@ -211,8 +216,8 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
     echo  "return ;" ;
 }
 
@@ -221,8 +226,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Доступ к указанным страницам предоставлен.\" ;" ;
+    echo  "i_error.style.color='green' ;					\n" ;
+    echo  "i_error.innerHTML  ='Доступ к указанным страницам предоставлен.' ;	\n" ;
 }
 //============================================== 
 ?>
@@ -252,8 +257,10 @@ function SuccessMsg() {
     var  i_receiver ;
     var  i_letter ;
     var  i_invite ;
+    var  i_incopy ;
     var  password ;
     var  sender_key ;
+    var  msg_key ;
     var  a_pages_keys ;
     var  a_specialities ;
     var  a_doctors ;
@@ -266,6 +273,7 @@ function SuccessMsg() {
        i_receiver=document.getElementById("Receiver") ;
        i_letter  =document.getElementById("Letter") ;
        i_invite  =document.getElementById("Invite") ;
+       i_incopy  =document.getElementById("InCopy") ;
 
        password=TransitContext("restore", "password", "") ;
 
@@ -306,8 +314,9 @@ function SuccessMsg() {
      if(error_text=="")
      {
            doctor_key=parent.frames['details'].document.getElementById('Sign_key').value ;
-       i_letter.value=Sign_encode(i_letter.value, sender_key, doctor_key) ;
-       i_invite.value=Sign_encode(i_invite.value, sender_key, doctor_key) ;
+       i_incopy.value=Crypto_encode(i_invite.value, msg_key) ;
+       i_letter.value=  Sign_encode(i_letter.value, sender_key, doctor_key) ;
+       i_invite.value=  Sign_encode(i_invite.value, sender_key, doctor_key) ;
      }
 
         i_error.style.color="red" ;
@@ -494,6 +503,7 @@ function SuccessMsg() {
 
 	<input type="hidden" name="Receiver" id="Receiver" >
 	<input type="hidden" name="Letter"   id="Letter" >
+	<input type="hidden" name="InCopy"   id="InCopy" >
 
   </form>
 

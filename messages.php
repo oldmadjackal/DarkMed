@@ -275,6 +275,7 @@ function SuccessMsg() {
 									            v_form="message_details_any.php" ;
 					  if(p_type=="CLIENT_ACCESS_INVITE"      )  v_form="message_details_invite.php" ;
 					  if(p_type=="CLIENT_PRESCRIPTIONS_ALERT")  v_form="message_details_prescr.php" ;
+					  if(p_type=="CHAT_MESSAGE"              )  v_form="message_details_simple.php" ;
 						parent.frames["details"].location.assign(v_form+
                                                                                          "?Session="+v_session+
                                                                                          "&Message="+p_id) ;

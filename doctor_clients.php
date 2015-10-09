@@ -369,6 +369,19 @@ function SuccessMsg() {
        i_list_new.id   =p_client+"_pages" ;
        i_list_new.class="level2" ;
 
+	  i_link_new        =document.createElement("a") ;
+          i_link_new.id     =p_client+"_messages" ;
+          i_link_new.href   ="messages_chat_lr.php?Session="+v_session+"&Sender="+p_client ;
+          i_text_new        =document.createTextNode("Переписка") ;
+          i_link_new.appendChild(i_text_new) ;
+
+	  i_roww_new        =document.createElement("li") ;
+          i_roww_new.appendChild(i_link_new) ;
+          i_list_new.appendChild(i_roww_new) ;
+
+	  i_roww_new        =document.createElement("br") ;
+          i_list_new.appendChild(i_roww_new) ;
+
     for(var elem in a_page_title)
     {
          words=elem.split(':') ;
@@ -409,7 +422,9 @@ function SuccessMsg() {
 
 	  i_roww_new        =document.createElement("li") ;
           i_roww_new.appendChild(i_link_new) ;
+          i_list_new.appendChild(i_roww_new) ;
 
+	  i_roww_new        =document.createElement("br") ;
           i_list_new.appendChild(i_roww_new) ;
 
     for(var elem in a_prsc_title)

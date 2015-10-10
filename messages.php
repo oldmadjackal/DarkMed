@@ -75,7 +75,8 @@ function ProcessDB() {
                           "       inner join users u on u.login=m.sender ".
                           "       inner join client_page_main c on c.owner=m.sender ".
                           "       left outer join access_list a on a.owner=c.owner and a.login=m.receiver and a.page=0 ".
-			  " Where m.`receiver`='$user_'".
+			  " Where m.receiver='$user_'".
+			  "  and  m.read is null".
                           " Order by m.id desc" ;
   }
   else
@@ -86,7 +87,8 @@ function ProcessDB() {
                           "       inner join ref_messages_types t on t.code=m.type and  t.language='RU' ".
                           "       inner join users u on u.login=m.sender ".
                           "       inner join doctor_page_main d on d.owner=m.sender ".
-			  " Where m.`receiver`='$user_'".
+			  " Where m.receiver='$user_'".
+			  "  and  m.read is null".
                           " Order by m.id desc" ;
   }
 
@@ -239,6 +241,7 @@ function SuccessMsg() {
 
        i_row_new = document.createElement("tr") ;
        i_row_new . className = "table" ;
+       i_row_new . id        = "Msg_"+p_id ;
 
        i_col_new = document.createElement("td") ;
        i_txt_new = document.createTextNode(p_id) ;
@@ -297,7 +300,7 @@ function SuccessMsg() {
        i_del_new . type   ="button" ;
        i_del_new . value  ="Прочитано" ;
        i_del_new . id     ="Delete_"+p_id ;
-       i_del_new . onclick="DeleteMessage" ;
+       i_del_new . onclick= function(e) {  MarkRead(p_id) ;  } ;
 
        i_col_new = document.createElement("td") ;
        i_col_new . appendChild(i_shw_new) ;
@@ -309,6 +312,20 @@ function SuccessMsg() {
 
     return ;         
   } 
+
+  function MarkRead(p_id)
+  {
+    var  i_message ;
+    var  v_session ;
+
+         i_message=document.getElementById("Msg_"+p_id) ;
+         i_message.style.textDecoration="line-through" ;
+
+	 v_session=TransitContext("restore","session","") ;
+
+	parent.frames["details"].location.assign("message_details_markread?Session="+v_session+
+                                                                         "&Message="+p_id) ;
+  }
 
 <?php
   require("common.inc") ;

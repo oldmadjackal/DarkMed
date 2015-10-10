@@ -61,7 +61,7 @@ function FileLog($category, $text)
   global  $glb_cfg_log_file ;
 
           $timestamp=date("Y-m-d h:i:s")."  " ;
-          $script   =substr($glb_script."               ", 0, 15)."  " ;
+          $script   =substr($glb_script."                    ", 0, 25)."  " ;
           $port_id  =substr($_SERVER["REMOTE_PORT"]."      ", 0, 6)."  " ;
           $mark     =substr($category."       ", 0, 7)."  " ;
 

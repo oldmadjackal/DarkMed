@@ -72,10 +72,11 @@ function ProcessDB() {
 
 //--------------------------- Извлечение данных страницы
 
-                       $sql="Select title, remark".
-                            "  From client_pages".
-                            " Where owner='$owner_'".
-                            "  and  page = $page_" ;
+                       $sql="Select p.title, p.remark, p.creator, CONCAT_WS(' ', d.name_f,d.name_i,d.name_o)".
+                            "  From client_pages p, doctor_page_main d".
+                            " Where d.owner=p.creator".
+			    "  and  p.owner='$owner_'".
+                            "  and  p.page = $page_" ;
        $res=$db->query($sql) ;
     if($res===false) {
           FileLog("ERROR", "DB query(Select CLIENT_PAGES...) : ".$db->error) ;
@@ -90,6 +91,8 @@ function ProcessDB() {
 
                    $title    =$fields[0] ;
                    $remark   =$fields[1] ;
+                   $creator  =$fields[2] ;
+                   $creator_n=$fields[3] ;
 
         FileLog("", "User ".$owner." additional page ".$page_." presented successfully") ;
 
@@ -125,8 +128,10 @@ function ProcessDB() {
 
 //--------------------------- Отображение данных на странице
 
-      echo     "  i_title .innerHTML='".$title. "' ;\n" ;
-      echo     "  i_remark.innerHTML='".$remark."' ;\n" ;
+      echo     "    creator          ='".$creator  ."'	;\n" ;
+      echo     "  i_title  .innerHTML='".$title    ."'	;\n" ;
+      echo     "  i_creator.innerHTML='".$creator_n."'	;\n" ;
+      echo     "  i_remark .innerHTML='".$remark   ."'	;\n" ;
 
 //--------------------------- Завершение
 
@@ -184,13 +189,12 @@ function SuccessMsg() {
 <script type="text/javascript">
 <!--
 
-    var  i_table ;    
     var  i_title ;
+    var  i_creator ;
     var  i_remark ;
     var  i_set ;
     var  i_error ;
-    var  password ;
-    var  page_key ;
+    var  creator ;
 
     var  a_plist_id ;
     var  a_plist_name ;
@@ -199,12 +203,14 @@ function SuccessMsg() {
 
   function FirstField() 
   {
+    var  password ;
+    var  page_key ;
     var  prescr_id ;
     var  prescr_name ;
     var  prescr_remark ;
 
-       i_table  =document.getElementById("Fields") ;
        i_title  =document.getElementById("Title") ;
+       i_creator=document.getElementById("Creator") ;
        i_remark =document.getElementById("Remark") ;
        i_set    =document.getElementById("Prescriptions") ;
        i_error  =document.getElementById("Error") ;
@@ -231,7 +237,6 @@ function SuccessMsg() {
 
           AddListRow(i, prescr_id, prescr_name, prescr_remark) ;
        }
-
 
          return true ;
   }
@@ -299,6 +304,25 @@ function SuccessMsg() {
     window.open("prescription_view.php?Id="+p_id) ;
   }
 
+  function WhoIsIt()
+  {
+    var  v_session ;
+
+         v_session=TransitContext("restore","session","") ;
+
+    window.open("doctor_view.php"+"?Session="+v_session+"&Owner="+creator) ;
+  } 
+
+  function ChatWith()
+  {
+    var  v_session ;
+
+	 v_session=TransitContext("restore","session","") ;
+
+	location.assign("messages_chat_lr.php?Session="+v_session+"&Sender="+creator) ;
+  }
+
+
 <?php
   require("common.inc") ;
 ?>
@@ -332,10 +356,17 @@ function SuccessMsg() {
     </tbody>
   </table>
 
-  <div><br></div>
+  <div class="error" id="Error"></div>
   <form onsubmit="return SendFields();" method="POST" id="Form">
 
   <b><div class="fieldC" id="Title"></div></b>
+  <br>
+  <div class="fieldC">
+    <span><b>Врач: </b></span>
+    <span id="Creator"></span>
+    <input type="button" value="Кто это?" onclick=WhoIsIt()>
+    <input type="button" value="Переписка" onclick=ChatWith()>
+  </div>
   <br>
   <div left=5m id="Remark"></div> 
   <br>

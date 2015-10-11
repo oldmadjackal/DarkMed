@@ -31,6 +31,7 @@ function ProcessDB() {
   FileLog("",      "     Sender:".$sender) ;
 
 //--------------------------- Подключение БД
+
      $db=DbConnect($error) ;
   if($db===false) {
                     ErrorMsg($error) ;
@@ -105,23 +106,25 @@ function ProcessDB() {
      {
 		      $fields=$res->fetch_row() ;
 
-	       echo "    msg_id   ='".$fields[1]."' ;	\n" ;
-	       echo "    msg_type ='".$fields[2]."' ;	\n" ;
-	       echo "    msg_type_='".$fields[3]."' ;	\n" ;
-	       echo "    msg_sent ='".$fields[6]."' ;	\n" ;
+	if($i==0)  echo "    top_id   ='".$fields[1]."' ;	\n" ;
+
+		   echo "    msg_id   ='".$fields[1]."' ;	\n" ;
+		   echo "    msg_type ='".$fields[2]."' ;	\n" ;
+		   echo "    msg_type_='".$fields[3]."' ;	\n" ;
+		   echo "    msg_sent ='".$fields[6]."' ;	\n" ;
 
 	if($fields[0]==$user) {
-	       echo "    msg_dir  ='S' ;		\n" ;
-	       echo "    msg_text ='".$fields[5]."' ;	\n" ;
-	       echo "    msg_text =Crypto_decode(msg_text, msg_key) ;	\n" ;
+		   echo "    msg_dir  ='S' ;					\n" ;
+		   echo "    msg_text ='".$fields[5]."' ;			\n" ;
+	 	   echo "    msg_text =Crypto_decode(msg_text, msg_key) ;	\n" ;
 	}
         else		      {
-	       echo "    msg_dir  ='R' ;		\n" ;
-	       echo "    msg_text ='".$fields[4]."' ;	\n" ;
-	       echo "    msg_text =Sign_decode(msg_text, snd_p_key, rec_s_key) ;	\n" ;
+		   echo "    msg_dir  ='R' ;						\n" ;
+	 	   echo "    msg_text ='".$fields[4]."' ;				\n" ;
+		   echo "    msg_text =Sign_decode(msg_text, snd_p_key, rec_s_key) ;	\n" ;
 	}
 
-       echo "  AddNewMessage(msg_dir, msg_id, msg_type, msg_type_, msg_text, msg_sent) ;	\n" ;
+		   echo "  AddNewMessage(msg_dir, msg_id, msg_type, msg_type_, msg_text, msg_sent) ;	\n" ;
      }
   }
 
@@ -176,9 +179,6 @@ function SuccessMsg() {
 
     var  i_messages ;
     var  i_error ;
-    var  password ;
-    var  session ;
-    var  partner ;
     var  rec_s_key ;
     var  rec_p_key ;
     var  snd_p_key ;
@@ -186,6 +186,11 @@ function SuccessMsg() {
 
   function FirstField() 
   {
+    var  session ;
+    var  partner ;
+    var  password ;
+    var  top_id ;
+
 
        i_messages=document.getElementById("Messages") ;
        i_error   =document.getElementById("Error") ;
@@ -198,7 +203,8 @@ function SuccessMsg() {
 ?>
 
 	parent.frames["details"].location.assign("message_details_chat.php?Session="+session+
-                                                                        "&Receiver="+partner) ;
+                                                                        "&Receiver="+partner+
+                                                                         "&TopRead="+top_id) ;
 
          return true ;
   }

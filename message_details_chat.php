@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Message_details_invite.php" ;
+   $glb_script="Message_details_chat.php" ;
 
   require("stdlib.php") ;
 
@@ -24,11 +24,13 @@ function ProcessDB() {
 
                         $session =$_GET ["Session"] ;
                         $receiver=$_GET ["Receiver"] ;
+                        $topread =$_GET ["TopRead"] ;
                         $text    =$_POST["Text"] ;
                         $copy    =$_POST["Copy"] ;
 
   FileLog("START", "    Session:".$session) ;
   FileLog("",      "   Receiver:".$receiver) ;
+  FileLog("",      "    TopRead:".$topread) ;
   FileLog("",      "       Text:".$text) ;
   FileLog("",      "       Copy:".$copy) ;
 
@@ -118,8 +120,8 @@ function ProcessDB() {
 		       $sql="Select a.crypto, c.name_f, c.name_i, c.name_o".
 			    "  From client_page_main c ".
                             "       left outer join access_list a on a.owner=c.owner and a.page=0".
-			  " Where  c.owner='$receiver_'".
-			  "  and   a.login='$user_'" ;
+			    " Where  c.owner='$receiver_'".
+			    "  and   a.login='$user_'" ;
        $res=$db->query($sql) ;
     if($res===false) {
           FileLog("ERROR", "Select CLIENT_MAIN_PAGE ... : ".$db->error) ;
@@ -151,11 +153,13 @@ function ProcessDB() {
 
   if(isset($text)) 
   {
+//- - - - - - - - - - - - - - Регистрация сообщения
           $text=$db->real_escape_string($text) ;
           $copy=$db->real_escape_string($copy) ;
 
-       $res=$db->query("Insert into messages(Receiver,Sender,Type,Text,Copy)".
-                       " values('$receiver_','$user_','CHAT_MESSAGE','$text','$copy')") ;
+                       $sql="Insert into messages(Receiver,Sender,Type,Text,Copy)".
+                                         " values('$receiver_','$user_','CHAT_MESSAGE','$text','$copy')" ;
+       $res=$db->query($sql) ;
     if($res===false) {
              FileLog("ERROR", "Insert MESSAGES... : ".$db->error) ;
                      $db->rollback();
@@ -163,12 +167,30 @@ function ProcessDB() {
             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка создания сообщения") ;
                          return ;
     }
+//- - - - - - - - - - - - - - Простановка метки "Прочитано"
+          $topread=$db->real_escape_string($topread) ;
+
+                       $sql="Update messages".
+                            "   Set `read`='Y'".
+                            " Where sender  ='$receiver_'".
+                            "  and  receiver='$user_'".
+                            "  and  type='CHAT_MESSAGE'".
+                            "  and  id<=$topread".
+                            "  and  `read` is null" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+             FileLog("ERROR", "Update MESSAGES... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка простановки меток 'прочитано'") ;
+                         return ;
+    }
+//- - - - - - - - - - - - - -
+             $db->commit() ;
 
 		echo "  parent.frames['section'].location.reload() ;	\n" ;
 
         FileLog("", "Message for User ".$receiver." sent successfully") ;
-
-             $db->commit() ;
 
               SuccessMsg() ;
   }
@@ -208,7 +230,7 @@ function SuccessMsg() {
 
 <head>
 
-<title>DarkMed Message details any-form</title>
+<title>DarkMed Message details chat</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">

@@ -273,9 +273,8 @@ function ProcessDB() {
           $put_id_=$db->real_escape_string($put_id) ;
 
                      $sql="Select e.prescription_id, r.type, e.remark".
-			  "  From sets_elements e, prescriptions_registry r".
-                          " Where e.prescription_id=r.id".
-                          "  and  e.set_id=$put_id_".
+			  "  From sets_elements e left outer join prescriptions_registry r on e.prescription_id=r.id".
+                          " Where e.set_id=$put_id_".
                           " Order by e.order_num" ;
      $res=$db->query($sql) ;
   if($res===false) {
@@ -380,6 +379,7 @@ function SuccessMsg() {
 	i_c_pharmacotherapy=document.getElementById("C_pharmacotherapy") ;
 	i_c_test           =document.getElementById("C_test"           ) ;
 	i_c_treatment      =document.getElementById("C_treatment"      ) ;
+	i_c_unregistered   =document.getElementById("C_unregistered"   ) ;
 
 			            i_c_exercise.length++ ;
 	i_c_exercise       .options[i_c_exercise.length   -1].text ='' ;
@@ -402,6 +402,9 @@ function SuccessMsg() {
 			            i_c_treatment.length++ ;
 	i_c_treatment      .options[i_c_treatment.length-1].text ='' ;
 	i_c_treatment      .options[i_c_treatment.length-1].value='0' ;
+			            i_c_unregistered.length++ ;
+	i_c_unregistered   .options[i_c_unregistered.length-1].text ='' ;
+	i_c_unregistered   .options[i_c_unregistered.length-1].value='0' ;
 
 <?php
             ProcessDB() ;
@@ -495,6 +498,9 @@ function SuccessMsg() {
      var  i_upp_new ;
      var  num_new ;
 
+
+     if(p_id=='0')  p_category='unregistered' ;
+
        num_new=parseInt(i_count.value)+1 ;
                         i_count.value=num_new ;
 
@@ -570,6 +576,10 @@ function SuccessMsg() {
        i_shw_new . value  ="Подробнее" ;
        i_shw_new . id     ='Details_'+ num_new ;
        i_shw_new . onclick= function(e) {  ShowDetails(this.id) ;  }
+
+     if(p_id=='0')
+       i_shw_new . disabled= true ;
+
        i_del_new = document.createElement("input") ;
        i_del_new . type   ="button" ;
        i_del_new . value  ="Удалить" ;
@@ -870,6 +880,7 @@ function SuccessMsg() {
     <select hidden id="C_pharmacotherapy"></select>
     <select hidden id="C_test"           ></select>
     <select hidden id="C_treatment"      ></select>
+    <select hidden id="C_unregistered"   ></select>
   
   </form>
 

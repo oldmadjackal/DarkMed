@@ -74,9 +74,8 @@ function ProcessDB() {
 //--------------------------- Извлечение состава комплекса
 
                      $sql="Select e.prescription_id, r.type, e.remark".
-			  "  From sets_elements e, prescriptions_registry r".
-                          " Where e.prescription_id=r.id".
-                          "  and  e.set_id=$id_".
+			  "  From sets_elements e left outer join prescriptions_registry r on e.prescription_id=r.id".
+                          " Where e.set_id=$id_".
                           " Order by e.order_num" ;
      $res=$db->query($sql) ;
   if($res===false) {
@@ -91,8 +90,9 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-       echo "   a_type  ['".$fields[0]."']='".$fields[1]."' ;	\n" ;
-       echo "   a_remark['".$fields[0]."']='".$fields[2]."' ;	\n" ;
+       echo "   a_id    ['".$i."']='".$fields[0]."' ;	\n" ;
+       echo "   a_type  ['".$i."']='".$fields[1]."' ;	\n" ;
+       echo "   a_remark['".$i."']='".$fields[2]."' ;	\n" ;
      }
   }
 
@@ -148,6 +148,7 @@ function SuccessMsg() {
     var  i_name ;
     var  i_description ;
     var  i_error ;
+    var  a_id ;
     var  a_type ;
     var  a_remark ;
 
@@ -160,6 +161,7 @@ function SuccessMsg() {
        i_description=document.getElementById("Description") ;
        i_error      =document.getElementById("Error") ;
 
+       a_id    =new Array() ;
        a_type  =new Array() ;
        a_remark=new Array() ;
 
@@ -184,9 +186,9 @@ function SuccessMsg() {
   function AppendSet()
   {
 
-     for(id in a_type) {
-       parent.frames['section'].AddListRow(id, a_type[id], a_remark[id]) ;
-                       }  
+     for(i in a_id) {
+          parent.frames['section'].AddListRow(a_id[i], a_type[i], a_remark[i]) ;
+                    }  
   } 
 
 <?php

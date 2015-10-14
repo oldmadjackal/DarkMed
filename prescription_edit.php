@@ -178,8 +178,9 @@ function ProcessDB() {
 //--------------------------- Извлечение списка типов назначений
 
                      $sql="Select code, name".
-			  "  From `ref_prescriptions_types`".
-			  " Where `language`='RU'" ;
+			  "  From ref_prescriptions_types".
+			  " Where language='RU'".
+                          "  and  code<>'unregistered'" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select REF_PRESCRIPTIONS_TYPES... : ".$db->error) ;

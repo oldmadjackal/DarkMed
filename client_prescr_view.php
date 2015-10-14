@@ -263,38 +263,43 @@ function SuccessMsg() {
      var  i_shw_new ;
 
 
-       i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+	i_row_new = document.createElement("tr") ;
+	i_row_new . className = "table" ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_txt_new = document.createTextNode(p_order) ;
-       i_col_new . appendChild(i_txt_new) ;
-       i_row_new . appendChild(i_col_new) ;
+	i_col_new = document.createElement("td") ;
+	i_col_new . className = "table" ;
+	i_txt_new = document.createTextNode(p_order) ;
+	i_col_new . appendChild(i_txt_new) ;
+	i_row_new . appendChild(i_col_new) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_txt_new = document.createTextNode(p_name) ;
-       i_col_new . appendChild(i_txt_new) ;
-       i_row_new . appendChild(i_col_new) ;
+	i_col_new = document.createElement("td") ;
+	i_col_new . className = "table" ;
+  if(p_id!="0")
+	i_txt_new = document.createTextNode(p_name) ;
+  else	i_txt_new = document.createTextNode(p_remark) ;
+	i_col_new . appendChild(i_txt_new) ;
+	i_row_new . appendChild(i_col_new) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_txt_new = document.createTextNode(p_remark) ;
-       i_col_new . appendChild(i_txt_new) ;
-       i_row_new . appendChild(i_col_new) ;
+	i_col_new = document.createElement("td") ;
+	i_col_new . className = "table" ;
+  if(p_id!="0") {
+	i_txt_new = document.createTextNode(p_remark) ;
+	i_col_new . appendChild(i_txt_new) ;
+  }
+	i_row_new . appendChild(i_col_new) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_shw_new = document.createElement("input") ;
-       i_shw_new . type   ="button" ;
-       i_shw_new . value  ="Подробнее" ;
-       i_shw_new . id     ='Details_'+ p_order ;
-       i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
-       i_col_new . appendChild(i_shw_new) ;
-       i_row_new . appendChild(i_col_new) ;
+	i_col_new = document.createElement("td") ;
+	i_col_new . className = "table" ;
+	i_shw_new = document.createElement("input") ;
+	i_shw_new . type   ="button" ;
+	i_shw_new . value  ="Подробнее" ;
+	i_shw_new . id     ='Details_'+ p_order ;
+	i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
+  if(p_id!="0")
+	i_col_new . appendChild(i_shw_new) ;
+	i_row_new . appendChild(i_col_new) ;
 
-       i_set     . appendChild(i_row_new) ;
+	i_set     . appendChild(i_row_new) ;
 
     return ;         
   } 

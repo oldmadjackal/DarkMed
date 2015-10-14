@@ -79,11 +79,9 @@ function ProcessDB() {
           $put_id_=$db->real_escape_string($put_id) ;
 
                      $sql="Select e.prescription_id, t.name, r.name, e.remark".
-			  "  From sets_elements e, prescriptions_registry r, ref_prescriptions_types t".
-                          " Where e.prescription_id=r.id".
-			  "  and  t.code=r.type".
-			  "  and  t.`language`='RU'".
-                          "  and  e.set_id=$put_id_".
+			  "  From sets_elements e left outer join prescriptions_registry r on e.prescription_id=r.id".
+                          "       left outer join ref_prescriptions_types t on t.code=r.type and t.language='RU'".
+                          " Where e.set_id=$put_id_".
                           " Order by e.order_num" ;
      $res=$db->query($sql) ;
   if($res===false) {
@@ -206,6 +204,7 @@ function SuccessMsg() {
      var  i_shw_new ;
      var  num_new ;
 
+
        num_new=parseInt(i_count.value)+1 ;
                         i_count.value=num_new ;
 
@@ -221,8 +220,10 @@ function SuccessMsg() {
 
        i_col_new = document.createElement("td") ;
        i_col_new . className = "table" ;
+  if(p_id!='0') {
        i_txt_new = document.createTextNode(p_id) ;
        i_col_new . appendChild(i_txt_new) ;
+                }
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
@@ -233,24 +234,30 @@ function SuccessMsg() {
 
        i_col_new = document.createElement("td") ;
        i_col_new . className = "table" ;
+  if(p_id!='0')
        i_txt_new = document.createTextNode(p_name) ;
+  else i_txt_new = document.createTextNode(p_remark) ;
        i_col_new . appendChild(i_txt_new) ;
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
        i_col_new . className = "table" ;
+  if(p_id!='0') {
        i_txt_new = document.createTextNode(p_remark) ;
        i_col_new . appendChild(i_txt_new) ;
+                }
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
        i_col_new . className = "table" ;
+  if(p_id!='0') {
        i_shw_new = document.createElement("input") ;
        i_shw_new . type   ="button" ;
        i_shw_new . value  ="Подробнее" ;
        i_shw_new . id     ='Details_'+ num_new ;
        i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
        i_col_new . appendChild(i_shw_new) ;
+                }
        i_row_new . appendChild(i_col_new) ;
 
        i_set     . appendChild(i_row_new) ;

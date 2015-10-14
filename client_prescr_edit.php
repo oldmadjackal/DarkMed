@@ -202,6 +202,8 @@ function ProcessDB() {
   {
      $db->close() ;
 
+      echo     "       page_key     ='' ;	\n" ;
+      echo     "        msg_key     ='' ;	\n" ;
       echo     "  i_count  .value   ='0' ;	\n" ;
       echo     "  i_update .value   ='insert' ;	\n" ;
       echo     "  i_publish.disabled= true ;	\n" ;
@@ -595,6 +597,7 @@ function SuccessMsg() {
 	i_c_pharmacotherapy=document.getElementById("C_pharmacotherapy") ;
 	i_c_test           =document.getElementById("C_test"           ) ;
 	i_c_treatment      =document.getElementById("C_treatment"      ) ;
+	i_c_unregistered   =document.getElementById("C_unregistered"   ) ;
 
 			            i_c_exercise.length++ ;
 	i_c_exercise       .options[i_c_exercise.length   -1].text ='' ;
@@ -617,6 +620,9 @@ function SuccessMsg() {
 			            i_c_treatment.length++ ;
 	i_c_treatment      .options[i_c_treatment.length-1].text ='' ;
 	i_c_treatment      .options[i_c_treatment.length-1].value='0' ;
+			            i_c_unregistered.length++ ;
+	i_c_unregistered   .options[i_c_unregistered.length-1].text ='' ;
+	i_c_unregistered   .options[i_c_unregistered.length-1].value='0' ;
 
        i_title.focus() ;
 
@@ -655,7 +661,10 @@ function SuccessMsg() {
 
     }
 
+    if(msg_key!="")
+    {
        msg_key=Crypto_decode(msg_key, password) ;
+    }
 
          return true ;
   }
@@ -797,6 +806,8 @@ function SuccessMsg() {
      var  i_upp_new ;
      var  num_new ;
 
+     if(p_id=='0')  p_category='unregistered' ;
+
      if(p_category=="UNKNOWN") {
 		p_category=a_prescriptions[p_id] ;
      }
@@ -882,6 +893,10 @@ function SuccessMsg() {
        i_shw_new . value  ="Подробнее" ;
        i_shw_new . id     ='Details_'+ num_new ;
        i_shw_new . onclick= function(e) {  ShowDetails(this.id) ;  }
+
+     if(p_id=='0')
+       i_shw_new . disabled= true ;
+
        i_del_new = document.createElement("input") ;
        i_del_new . type   ="button" ;
        i_del_new . value  ="Удалить" ;
@@ -1227,6 +1242,7 @@ function SuccessMsg() {
     <select hidden id="C_pharmacotherapy"></select>
     <select hidden id="C_test"           ></select>
     <select hidden id="C_treatment"      ></select>
+    <select hidden id="C_unregistered"   ></select>
 
   </form>
 

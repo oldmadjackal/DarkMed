@@ -36,8 +36,8 @@ function RegistryDB() {
 
 //--------------------------- Вывод данных на экран
 
-    echo     "   v_login.value=\"" .$login   ."\" ;\n" ;
-    echo     "v_password.value=\"" .$password."\" ;\n" ;
+    echo     "   v_login.value='" .$login   ."' ;	\n" ;
+    echo     "v_password.value='" .$password."' ;	\n" ;
 
 //--------------------------- Подключение БД
 
@@ -51,7 +51,8 @@ function RegistryDB() {
    $login   =$db->real_escape_string($login   ) ;
    $password=$db->real_escape_string($password) ;
 
-     $res=$db->query("Select * from `users` Where `Login`='$login' and `Password`='$password'") ;
+                     $sql="Select * from users Where Login='$login' and Password='$password'" ;
+     $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select... : ".$db->error) ;
                      $db->close() ;
@@ -72,14 +73,27 @@ function RegistryDB() {
 
            $session=GetRandomString(16) ;
 
-     $res=$db->query("Insert into `sessions`(`Login`, `Session`) values('$login','$session')") ;
+                     $sql="Insert into sessions(Login, Session) values('$login','$session')" ;
+     $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Insert SESSION... : ".$db->error) ;
                      $db->close() ;
          ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных") ;
                          return ;
   }
+
+     $db->commit() ;
+
         FileLog("", "Session record successfully inserted") ;
+
+//--------------------------- Удаление старых сессий
+
+                     $sql="Delete from sessions where started<Date_Sub(Now(), interval 24 hour)" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Insert DELETE... : ".$db->error) ;
+          InfoMsg("Ошибка на сервере. <br>Детали: ошибка очистки таблицы сессий") ;
+  }
 
 //--------------------------- Завершение
 
@@ -96,8 +110,17 @@ function RegistryDB() {
 
 function ErrorMsg($text) {
 
-    echo  "error.style.color=\"red\" ;      \n" ;
-    echo  "error.innerHTML  =\"".$text."\" ;\n" ;
+    echo  "error.style.color='red' ;		\n" ;
+    echo  "error.innerHTML  ='".$text."' ;	\n" ;
+}
+
+//============================================== 
+//  Выдача сообщения об ошибке на WEB-страницу
+
+function InfoMsg($text) {
+
+    echo  "error.style.color='blue' ;		\n" ;
+    echo  "error.innerHTML  ='".$text."' ;	\n" ;
 }
 
 //============================================== 
@@ -105,10 +128,10 @@ function ErrorMsg($text) {
 
 function SuccessMsg($session) {
 
-    echo  "TransitContext(\"save\", \"session\", \"".$session."\") ; \n" ;
+    echo  "TransitContext('save', 'session', '".$session."') ;	\n" ;
 
-    echo  "error.style.color=\"green\" ;                       \n" ;
-    echo  "error.innerHTML  =\"Авторизация успешно пройдена!\" ;\n" ;
+    echo  "error.style.color='green' ;				\n" ;
+    echo  "error.innerHTML  ='Авторизация успешно пройдена!' ;	\n" ;
 }
 //============================================== 
 ?>

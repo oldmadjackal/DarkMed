@@ -40,7 +40,9 @@ function ProcessDB() {
                        $id_=$db->real_escape_string($id) ;
 
                        $sql="Select  r.user, t.name, r.name, r.reference, r.description, r.www_link".
+                            "       ,d.name_f, d.name_i, d.name_o".
                             "  From  prescriptions_registry r".
+                            "        inner join doctor_page_main d on d.owner=r.user".
                             "        inner join ref_prescriptions_types t on t.code=r.type and t.language='RU'".
                             " Where  r.id=$id_" ; 
        $res=$db->query($sql) ;
@@ -62,6 +64,7 @@ function ProcessDB() {
 	              $res->close() ;
 
                    $owner      =$fields[0] ;
+                   $owner_name =$fields[6]." ".$fields[7]." ".$fields[8] ;
                    $type       =$fields[1] ;
                    $name       =$fields[2] ;
                    $reference  =$fields[3] ;
@@ -72,13 +75,18 @@ function ProcessDB() {
 
 //--------------------------- Формирование данных страницы
 
+      echo "                  creator='".$owner      ."' ;	\n" ;
+
       echo "  i_id         .innerHTML='".$id         ."' ;	\n" ;
-      echo "  i_owner      .innerHTML='".$owner      ."' ;	\n" ;
+      echo "  i_owner      .innerHTML='".$owner_name ."' ;	\n" ;
       echo "  i_type       .innerHTML='".$type       ."' ;	\n" ;
       echo "  i_name       .innerHTML='".$name       ."' ;	\n" ;
       echo "  i_reference  .innerHTML='".$reference  ."' ;	\n" ;
       echo "  i_description.innerHTML='".$description."' ;	\n" ;
       echo "  i_www_link   .value    ='".$www_link.   "' ;	\n" ;
+
+   if($session=="") 
+      echo "  i_mailto     .disabled =true ;			\n" ;
 
 //--------------------------- Завершение
 
@@ -134,7 +142,10 @@ function SuccessMsg() {
     var  i_description ;
     var  i_www_link ;
     var  i_goto ;
+    var  i_mailto ;
     var  i_error ;
+
+    var  creator ;
 
   function FirstField() 
   {
@@ -149,6 +160,7 @@ function SuccessMsg() {
        i_description=document.getElementById("Description") ;
        i_www_link   =document.getElementById("WWW_link") ;
        i_goto       =document.getElementById("GoToLink") ;
+       i_mailto     =document.getElementById("MailTo") ;
        i_error      =document.getElementById("Error") ;
 
 <?php
@@ -170,6 +182,20 @@ function SuccessMsg() {
   function GoToView()
   {
     window.open("prescription_view.php?Id="+i_id.innerHTML) ;
+  } 
+
+  function WhoIsIt()
+  {
+    window.open("doctor_view.php"+"?Owner="+creator) ;
+  } 
+
+  function MailTo()
+  {
+    var  v_session ;
+
+	 v_session=TransitContext("restore","session","") ;
+
+	parent.frames["section"].location.assign("messages_chat_lr.php?Session="+v_session+"&Sender="+creator) ;
   } 
 
 <?php
@@ -195,11 +221,13 @@ function SuccessMsg() {
     <tbody>
     <tr class="fieldL">
       <td width="20%">
-         <b>Код: <dev id="Id"> </dev></b>
-         (<dev id="Owner"> </dev>)<br>
-         <input type="button" value="Полностью" onclick=GoToView()><br>
-         <dev id="Type"> </dev> <br>
-         <dev id="Reference"> </dev> <br>
+         <span><b>Код: <span id="Id"> </span></b></span>
+         <input type="button" value="Полностью" onclick=GoToView()>
+         <div id="Owner"> </div>
+           <input type="button" value="Кто это?" onclick=WhoIsIt()>
+           <input type="button" value="Переписка" onclick=MailTo() id="MailTo">
+         <div id="Type"> </div>
+         <div id="Reference"> </div>
       </td>
       <td width="2%">
       </td>

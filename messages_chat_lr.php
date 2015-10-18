@@ -99,6 +99,8 @@ function ProcessDB() {
   if($res->num_rows==0) 
   {
           FileLog("", "No messages detected") ;
+
+	           echo "    top_id='0' ;	\n" ;
   }
   else
   {  

@@ -34,17 +34,6 @@ function ProcessDB() {
                     ErrorMsg($error) ;
                          return ;
   }
-//--------------------------- Идентификация сессии
-
-     $user=DbCheckSession($db, $session, $options, $error) ;
-  if($user===false) {
-                    ErrorMsg($error) ;
-                         return ;
-  }
-
-          $user_ =$db->real_escape_string($user ) ;
-          $owner_=$db->real_escape_string($owner) ;
-
 //--------------------------- Извлечение списка специальностей
 
                      $sql="Select code, name".
@@ -70,6 +59,8 @@ function ProcessDB() {
      $res->close() ;
 
 //--------------------------- Извлечение данных врача
+
+          $owner_=$db->real_escape_string($owner) ;
 
                        $sql="Select name_f, name_i, name_o, speciality, remark".
                             " From  doctor_page_main".

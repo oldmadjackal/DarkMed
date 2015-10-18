@@ -37,9 +37,11 @@ function ProcessDB() {
           $get_id_=$db->real_escape_string($get_id) ;
 
                        $sql="Select  r.id, r.user, t.name, r.name, r.reference, r.description, r.www_link".
+                            "       ,d.name_f, d.name_i, d.name_o".
                             "  From  prescriptions_registry r".
+                            "        inner join doctor_page_main d on d.owner=r.user".
                             "        inner join ref_prescriptions_types t on t.code=r.type and t.language='RU'".
-                            " Where  id='$get_id_'" ; 
+                            " Where  r.id='$get_id_'" ; 
        $res=$db->query($sql) ;
     if($res===false) {
           FileLog("ERROR", "Select * from PRESCRIPTIONS_REGISTRY... : ".$db->error) ;
@@ -53,6 +55,7 @@ function ProcessDB() {
 
                    $put_id     =$fields[0] ;
                    $owner      =$fields[1] ;
+                   $owner_name =$fields[7]." ".$fields[8]." ".$fields[9]." (".$fields[1].")" ;
                    $type       =$fields[2] ;
                    $name       =$fields[3] ;
                    $reference  =$fields[4] ;
@@ -63,8 +66,10 @@ function ProcessDB() {
 
 //--------------------------- Вывод данных на страницу
 
+      echo     "                  creator='".$owner      ."' ;\n" ;
+
       echo     "  i_id         .innerHTML='".$get_id     ."' ;\n" ;
-      echo     "  i_owner      .innerHTML='".$owner      ."' ;\n" ;
+      echo     "  i_owner      .innerHTML='".$owner_name ."' ;\n" ;
       echo     "  i_name       .innerHTML='".$name       ."' ;\n" ;
       echo     "  i_type       .innerHTML='".$type       ."' ;\n" ;
       echo     "  i_reference  .innerHTML='".$reference  ."' ;\n" ;
@@ -130,6 +135,8 @@ function SuccessMsg() {
     var  i_goto ;
     var  i_error ;
 
+    var  creator ;
+
     var  a_types ;
 
 
@@ -169,6 +176,11 @@ function SuccessMsg() {
 
          return true ;
   }
+
+  function WhoIsIt()
+  {
+    window.open("doctor_view.php"+"?Owner="+creator) ;
+  } 
 
 <?php
   require("common.inc") ;
@@ -221,19 +233,21 @@ function SuccessMsg() {
     </tr>
     <tr>
       <td class="field"><b> Создано: </b></td>
-      <td> <dev id="Owner"></dev> </td>
+      <td> <span id="Owner"></span>
+           <input type="button" value="Кто это?" onclick=WhoIsIt()></td>
+      </td>
     </tr>
     <tr>
       <td class="field"><b> Категория: </b></td>
-      <td> <dev id="Type"></dev> </td>
+      <td> <div id="Type"></div> </td>
     </tr>
     <tr>
       <td class="field"><b> Название: </b></td>
-      <td> <dev id="Name"></dev> </td>
+      <td> <div id="Name"></div> </td>
     </tr>
     <tr>
       <td class="field"><b> Регистр: </b></td>
-      <td> <dev id="Reference"></dev> </td>
+      <td> <div id="Reference"></div> </td>
     </tr>
     <tr>
       <td class="field"><b> Смотреть на: </b></td>
@@ -246,7 +260,7 @@ function SuccessMsg() {
     </tr>
     <tr>
       <td class="field"><b> Описание: </b></td>
-      <td> <dev id="Description"></dev> </td>
+      <td> <div id="Description"></div> </td>
     </tr>
     </tbody>
   </table>

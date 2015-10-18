@@ -68,15 +68,26 @@ function ProcessDB() {
 
   if(strpos($options, "UserType=Doctor;")!==false)
   {
-                     $sql="Select m.id, m.sender, m.type, t.name, m.text, u.sign_p_key,".
-			  "       c.name_f, c.name_i, c.name_o, a.crypto".
-			  "  From messages m ".
-                          "       inner join ref_messages_types t on t.code=m.type and  t.language='RU' ".
-                          "       inner join users u on u.login=m.sender ".
-                          "       inner join client_page_main c on c.owner=m.sender ".
-                          "       left outer join access_list a on a.owner=c.owner and a.login=m.receiver and a.page=0 ".
-			  " Where m.receiver='$user_'".
-			  "  and  m.read is null".
+                     $sql="Select m.* from (".
+			  "Select m1.id, m1.sender, m1.type, t1.name, m1.text, u1.sign_p_key,".
+			  "       c1.name_f, c1.name_i, c1.name_o, a1.crypto".
+			  "  From messages m1 ".
+                          "       inner join ref_messages_types t1 on t1.code =m1.type and t1.language='RU' ".
+                          "       inner join users              u1 on u1.login=m1.sender ".
+                          "       inner join client_page_main   c1 on c1.owner=m1.sender ".
+                          "       left outer join access_list   a1 on a1.owner=c1.owner and a1.login=m1.receiver and a1.page=0 ".
+			  " Where m1.receiver='$user_'".
+			  "  and  m1.read is null".
+			  " union ".
+			  "Select m2.id, m2.sender, m2.type, t2.name, m2.text, u2.sign_p_key,".
+			  "       d2.name_f, d2.name_i, d2.name_o, 'nocrypt'".
+			  "  From messages m2 ".
+                          "       inner join ref_messages_types t2 on t2.code =m2.type and t2.language='RU' ".
+                          "       inner join users              u2 on u2.login=m2.sender ".
+                          "       inner join doctor_page_main   d2 on d2.owner=m2.sender ".
+			  " Where m2.receiver='$user_'".
+			  "  and  m2.read is null".
+                          ") m".
                           " Order by m.id desc" ;
   }
   else

@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_portrait ;
+
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -25,23 +27,30 @@ function ProcessDB() {
   if(!isset($session))  $session=$_POST["Session"] ;
 
                          $name_f=$_POST["Name_F"] ;
+
+  if(isset($name_f)) {
                          $name_i=$_POST["Name_I"] ;
                          $name_o=$_POST["Name_O"] ;
                          $spec_a=$_POST["Specialities"] ;
                          $remark=$_POST["Remark"] ;
+                        $page_id=$_POST["PageId"] ;
 
 			  $speciality="" ;
   if(isset($spec_a))
      foreach($spec_a as $tmp) 
        if($tmp!="Dummy")  $speciality=$speciality.$tmp."," ;
+  }
 
-   FileLog("START", "    Session:".$session) ;
-   FileLog("",      "     Name_F:".$name_f) ;
-   FileLog("",      "     Name_I:".$name_i) ;
-   FileLog("",      "     Name_O:".$name_o) ;
-   FileLog("",      " Speciality:".$speciality) ;
-   FileLog("",      "     Remark:".$remark) ;
+	FileLog("START", "    Session:".$session) ;
 
+  if(isset($name_f)) {
+	FileLog("",      "     Name_F:".$name_f) ;
+	FileLog("",      "     Name_I:".$name_i) ;
+	FileLog("",      "     Name_O:".$name_o) ;
+	FileLog("",      " Speciality:".$speciality) ;
+	FileLog("",      "     Remark:".$remark) ;
+	FileLog("",      "     PageId:".$page_id) ;
+  }
 //--------------------------- Подключение БД
 
      $db=DbConnect($error) ;
@@ -85,13 +94,94 @@ function ProcessDB() {
 
      $res->close() ;
 
+//--------------------------- Сохранение данных врача
+
+  if(isset($name_f))
+  {
+//- - - - - - - - - - - - - - Сохранение реквизитов
+          $name_f_=$db->real_escape_string($name_f) ;
+          $name_i_=$db->real_escape_string($name_i) ;
+          $name_o_=$db->real_escape_string($name_o) ;
+          $spec_  =$db->real_escape_string($speciality) ;
+          $remark_=$db->real_escape_string($remark) ;
+
+                       $sql="Update doctor_page_main".
+                            " Set   name_f    ='$name_f_'".
+                            "      ,name_i    ='$name_i_'".
+                            "      ,name_o    ='$name_o_'".
+                            "      ,speciality='$spec_'".
+                            "      ,remark    ='$remark_'".
+                            " Where owner='$user'"  ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+             FileLog("ERROR", "Update DOCTOR_PAGE_MAIN... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных") ;
+                         return ;
+    }
+//- - - - - - - - - - - - - - Сохранение файла портрета
+                     $image="PortraitFile" ;
+
+    if(isset($_FILES[$image])) {
+
+      if($_FILES[$image]["error"]==0) {
+
+           FileLog("", "Portrait file detected") ;
+
+             $pos=strpos($_FILES[$image]["type"], "/") ;
+             $ext=substr($_FILES[$image]["type"], $pos+1) ;
+            $path=PrepareImagePath("doctor", $page_id, "portrait", $ext) ;
+
+        if($path=="") {
+             FileLog("ERROR", "IMAGE Portraite path form error") ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка резервирования места для файла портрета") ;
+                         return ;
+        }
+ 
+        if(@move_uploaded_file($_FILES[$image]["tmp_name"], $path)==false) {
+             FileLog("ERROR", "IMAGE Portraite save error") ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка сохранения файла портрета") ;
+                         return ;
+        }
+
+                           $sql="Update doctor_page_main".
+                                " Set   portrait='$path'".
+                                " Where owner='$user'"  ;
+           $res=$db->query($sql) ;
+        if($res===false) {
+             FileLog("ERROR", "Update DOCTOR_PAGE_MAIN (Portrait)... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка регистрации файла портрета") ;
+                         return ;
+        }
+
+             FileLog("", "Portrait file successfully registered") ;
+      }
+      else {
+             FileLog("ERROR", "IMAGE Portraite transmit error : ".$_FILES[$image]["error"]) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка получения файла портрета") ;
+                         return ;
+      }
+    }
+//- - - - - - - - - - - - - -
+          $db->commit() ;
+
+        FileLog("", "Doctor main page saved successfully") ;
+     SuccessMsg() ;
+  }
 //--------------------------- Извлечение данных врача
 
-  if(!isset($name_f))
-  {
-       $res=$db->query("Select name_f, name_i, name_o, speciality, remark".
-                       " From `doctor_page_main`".
-                       " Where `owner`='$user_'" 
+       $res=$db->query("Select id, name_f, name_i, name_o, speciality, remark, portrait".
+                       " From  doctor_page_main".
+                       " Where owner='$user_'" 
                       ) ;
     if($res===false) {
           FileLog("ERROR", "Select DOCTOR_PAGE_MAIN... : ".$db->error) ;
@@ -103,51 +193,23 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-                   $name_f=$fields[0] ;
-                   $name_i=$fields[1] ;
-                   $name_o=$fields[2] ;
-               $speciality=$fields[3] ;
-                   $remark=$fields[4] ;
+                  $page_id=$fields[0] ;
+                   $name_f=$fields[1] ;
+                   $name_i=$fields[2] ;
+                   $name_o=$fields[3] ;
+               $speciality=$fields[4] ;
+                   $remark=$fields[5] ;
+             $glb_portrait=$fields[6] ;
 
         FileLog("", "Doctor main page presented successfully") ;
-  }
-//--------------------------- Сохранение данных врача
 
-  else
-  {
-          $name_f_=$db->real_escape_string($name_f) ;
-          $name_i_=$db->real_escape_string($name_i) ;
-          $name_o_=$db->real_escape_string($name_o) ;
-          $spec_  =$db->real_escape_string($speciality) ;
-          $remark_=$db->real_escape_string($remark) ;
-
-       $res=$db->query("Update `doctor_page_main`".
-                       " Set   `name_f`    ='$name_f_'".
-                       "      ,`name_i`    ='$name_i_'".
-                       "      ,`name_o`    ='$name_o_'".
-                       "      ,`speciality`='$spec_'".
-                       "      ,`remark`    ='$remark_'".
-                       " Where `owner`='$user'" 
-                      ) ;
-    if($res===false) {
-             FileLog("ERROR", "Update DOCTOR_PAGE_MAIN... : ".$db->error) ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных") ;
-                         return ;
-    }
-
-          $db->commit() ;
-
-        FileLog("", "Doctor main page saved successfully") ;
-     SuccessMsg() ;
-  }
 //--------------------------- Отображение данных на форме
 
-      echo     "  i_name_f.value=\"" .$name_f."\" ;\n" ;
-      echo     "  i_name_i.value=\"" .$name_i."\" ;\n" ;
-      echo     "  i_name_o.value=\"" .$name_o."\" ;\n" ;
-      echo     "  i_remark.value=\"" .$remark."\" ;\n" ;
+      echo     "  i_page_id.value='".$page_id."' ;	\n" ;
+      echo     "  i_name_f .value='".$name_f ."' ;	\n" ;
+      echo     "  i_name_i .value='".$name_i ."' ;	\n" ;
+      echo     "  i_name_o .value='".$name_o ."' ;	\n" ;
+      echo     "  i_remark .value='".$remark ."' ;	\n" ;
 
 		$speciality_a=explode(",", $speciality) ;	
                   $spec_first= true ;
@@ -155,15 +217,25 @@ function ProcessDB() {
 	foreach($speciality_a as $spec)
          if(strlen($spec)>1 or $spec_first)
          { 
-             echo "  AddNewSpeciality(\"" .$spec."\") ;\n" ;
+             echo "  AddNewSpeciality('" .$spec."') ;\n" ;
                   $spec_first=false ;
          }
-
 //--------------------------- Завершение
 
      $db->close() ;
 
         FileLog("STOP", "Done") ;
+}
+
+//============================================== 
+//  Отображение портрета
+
+function PortraitView() {
+
+  global  $glb_portrait ;
+
+   if($glb_portrait=="")  echo "<img src=\"images/dummy.jpg\" height=200>" ;
+   else                   echo "<img src=\"".$glb_portrait."\" height=200>" ; 
 }
 
 //============================================== 
@@ -206,11 +278,13 @@ function SuccessMsg() {
 <!--
 
     var  i_table ;
-    var  i_pages ;
+    var  i_page_id ;
     var  i_name_f ;
     var  i_name_i ;
     var  i_name_o ;
     var  i_remark ;
+    var  i_portrait ;
+    var  i_p_file ;
     var  i_error ;
     var  a_specialities ;
 
@@ -223,13 +297,15 @@ function SuccessMsg() {
     var  link_text ;
 
 
-       i_table =document.getElementById("Fields") ;
-       i_pages =document.getElementById("Pages") ;
-       i_name_f=document.getElementById("Name_F") ;
-       i_name_i=document.getElementById("Name_I") ;
-       i_name_o=document.getElementById("Name_O") ;
-       i_remark=document.getElementById("Remark") ;
-       i_error =document.getElementById("Error") ;
+       i_table   =document.getElementById("Fields") ;
+       i_page_id =document.getElementById("PageId") ;
+       i_name_f  =document.getElementById("Name_F") ;
+       i_name_i  =document.getElementById("Name_I") ;
+       i_name_o  =document.getElementById("Name_O") ;
+       i_remark  =document.getElementById("Remark") ;
+       i_portrait=document.getElementById("Portrait") ;
+       i_p_file  =document.getElementById("PortraitFile") ;
+       i_error   =document.getElementById("Error") ;
 
        i_name_f.focus() ;
 
@@ -254,6 +330,8 @@ function SuccessMsg() {
        var  nl=new RegExp("\n","g") ;
 
        i_remark.value=i_remark.value.replace(nl,"@@") ;
+
+     if(i_p_file.value=="")  i_p_file.name=i_p_file.name+"_" ;
      
        i_error.style.color="red" ;
        i_error.innerHTML  = error_text ;
@@ -326,55 +404,83 @@ function SuccessMsg() {
   </table>
 
   <br>
-  <form onsubmit="return SendFields();" method="POST">
+  <form onsubmit="return SendFields();" method="POST" enctype="multipart/form-data">
+
   <table width="100%" id="Fields">
-    <thead>
-    </thead>
-    <tbody>
-    <tr>
-      <td class="field"> </td>
-      <td> <br> <input type="submit" value="Сохранить"> </td>
-    </tr>
-    <tr>
-      <td class="field"> </td>
-      <td> <div class="error" id="Error"></div> </td>
-    </tr>
-    <tr>
-      <td class="field"> Фамилия </td>
-      <td> <input type="text" size=60 name="Name_F" id="Name_F"> </td>
-    </tr>
-    <tr>
-      <td class="field"> Имя </td>
-      <td> <input type="text" size=60 name="Name_I" id="Name_I"> </td>
-    </tr>
-    <tr>
-      <td class="field"> Отчество </td>
-      <td> <input type="text" size=60 name="Name_O" id="Name_O"> </td>
-    </tr>
-    <tr>
-      <td class="field"> <p> </p> </td>
-    </tr>
-    <tr>
-      <td class="field"> Специальность </td>
-      <td id="Specialities">
-      </td>
-    </tr>
-    <tr>
-      <td class="field"> </td>
-      <td>
-        <input type="button" value="Добавить специализацию" onclick="AddNewSpeciality('');"> 
-      </td>
-    </tr>
-    <tr>
-      <td class="field"> Примечание </td>
-      <td> 
-        <textarea cols=60 rows=7 wrap="soft" name="Remark" id="Remark"> </textarea>
-      </td>
-    </tr>
-      <td class="field"> </td>
-      <td> <br> <input type="submit" value="Сохранить"> </td>
-    </tr>
-    </tbody>
+  <thead>
+  </thead>
+  <tbody>
+  <tr>
+    <td width="70%">
+      <table id="Fields">
+        <thead>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="field"> </td>
+          <td> <br> <input type="submit" value="Сохранить"> </td>
+        </tr>
+        <tr>
+          <td class="field"> </td>
+          <td> <div class="error" id="Error"></div> </td>
+        </tr>
+        <tr>
+          <td class="field"> Фамилия </td>
+          <td> <input type="text" size=60 name="Name_F" id="Name_F"> </td>
+        </tr>
+        <tr>
+          <td class="field"> Имя </td>
+          <td> <input type="text" size=60 name="Name_I" id="Name_I"> </td>
+        </tr>
+        <tr>
+          <td class="field"> Отчество </td>
+          <td> <input type="text" size=60 name="Name_O" id="Name_O"> </td>
+        </tr>
+        <tr>
+          <td class="field"> <p> </p> </td>
+        </tr>
+        <tr>
+          <td class="field"> Специальность </td>
+          <td id="Specialities">
+          </td>
+        </tr>
+        <tr>
+          <td class="field"> </td>
+          <td>
+            <input type="button" value="Добавить специализацию" onclick="AddNewSpeciality('');"> 
+          </td>
+        </tr>
+        <tr>
+          <td class="field"> Примечание </td>
+          <td> 
+            <textarea cols=60 rows=7 wrap="soft" name="Remark" id="Remark"></textarea>
+          </td>
+        </tr>
+          <td class="field"> </td>
+          <td>
+            <br> 
+            <input type="submit" value="Сохранить"> 
+            <input type="hidden" name="PageId" id="PageId">
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </td>
+    <td width="2%">
+    </td>
+    <td width="28%">
+
+<?php
+            PortraitView() ;
+?>
+
+      <br>
+      Выбор файла портрета: 
+      <br>
+      <input type="file" name="PortraitFile" id="PortraitFile">  
+    </td>
+  </tr>
+  </tbody>
   </table>
 
   </form>

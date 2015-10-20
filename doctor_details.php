@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_portrait ;
+
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -44,13 +46,13 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение данных врача
 
-                      $doctor_=$db->real_escape_string($doctor) ;
+                 $doctor_=$db->real_escape_string($doctor) ;
 
-     $res=$db->query("Select name_f, name_i, name_o, speciality, remark, sign_p_key".
-                     " From `doctor_page_main` d, `users` u".
-                     " Where d.`owner`='$doctor_'".
-                     "  and  d.`owner`=u.login"
-                      ) ;
+                     $sql="Select name_f, name_i, name_o, speciality, remark, sign_p_key, portrait".
+                          "  From doctor_page_main d, users u".
+                          " Where d.owner='$doctor_'".
+                          "  and  d.owner=u.login" ;
+     $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select DOCTOR_PAGE_MAIN... : ".$db->error) ;
                             $db->close() ;
@@ -95,18 +97,30 @@ function ProcessDB() {
 
 //--------------------------- Формирование данных страницы
 
-      echo     "  i_name      .innerHTML=\"".$fields[0] ." ".$fields[1]." ".$fields[2]."\" ;\n" ;
-      echo     "  i_speciality.innerHTML=\"".$speciality."\" ;\n" ;
-      echo     "  i_remark    .innerHTML=\"".$fields[4] ."\" ;\n" ;
+      echo     "  i_name      .innerHTML='".$fields[0] ." ".$fields[1]." ".$fields[2]."' ;\n" ;
+      echo     "  i_speciality.innerHTML='".$speciality."' ;\n" ;
+      echo     "  i_remark    .innerHTML='".$fields[4] ."' ;\n" ;
 
-      echo     "  i_login     .value    =\"".$doctor    ."\" ;\n" ;
-      echo     "  i_sign_key  .value    =\"".$fields[5] ."\" ;\n" ;
+      echo     "  i_login     .value    ='".$doctor    ."' ;\n" ;
+      echo     "  i_sign_key  .value    ='".$fields[5] ."' ;\n" ;
+
+                           $glb_portrait=$fields[6] ;
 
 //--------------------------- Завершение
 
      $db->close() ;
 
         FileLog("STOP", "Done") ;
+}
+
+//============================================== 
+//  Отображение портрета
+
+function PortraitView() {
+
+  global  $glb_portrait ;
+
+   if($glb_portrait!="")  echo "<img src=\"pictures/".$glb_portrait."\" height=100>" ; 
 }
 
 //============================================== 
@@ -173,6 +187,8 @@ function SuccessMsg() {
          return true ;
   }
 
+
+
 <?php
   require("common.inc") ;
 ?>
@@ -207,6 +223,9 @@ function SuccessMsg() {
       <td width="5%">
       </td>
       <td width="20%">
+<?php
+            PortraitView() ;
+?>
       </td>
     </tr>
     </tbody>

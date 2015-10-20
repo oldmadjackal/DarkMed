@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_portrait ;
+
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -37,8 +39,8 @@ function ProcessDB() {
 //--------------------------- Извлечение списка специальностей
 
                      $sql="Select code, name".
-			  "  From `ref_doctor_specialities`".
-			  " Where `language`='RU'" ;
+			  "  From ref_doctor_specialities".
+			  " Where language='RU'" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select REF_DOCTOR_SPECIALITIES... : ".$db->error) ;
@@ -62,7 +64,7 @@ function ProcessDB() {
 
           $owner_=$db->real_escape_string($owner) ;
 
-                       $sql="Select name_f, name_i, name_o, speciality, remark".
+                       $sql="Select name_f, name_i, name_o, speciality, remark, portrait".
                             " From  doctor_page_main".
                             " Where owner='$owner_'" ; 
        $res=$db->query($sql) ;
@@ -79,6 +81,8 @@ function ProcessDB() {
                  $name_fio=$fields[0]." ".$fields[1]." ".$fields[2] ;
                $speciality=$fields[3] ;
                    $remark=$fields[4] ;
+
+             $glb_portrait=$fields[5] ;
 
         FileLog("", "Doctor main page presented successfully") ;
 
@@ -98,6 +102,16 @@ function ProcessDB() {
      $db->close() ;
 
         FileLog("STOP", "Done") ;
+}
+
+//============================================== 
+//  Отображение портрета
+
+function PortraitView() {
+
+  global  $glb_portrait ;
+
+   if($glb_portrait!="")  echo "<img src=\"pictures/".$glb_portrait."\" height=200>" ; 
 }
 
 //============================================== 
@@ -233,32 +247,49 @@ function SuccessMsg() {
   </table>
 
   <br>
-  <form onsubmit="return SendFields();" method="POST">
-  <table width="100%" id="Fields">
-    <thead>
-    </thead>
-    <tbody>
-    <tr>
-      <td class="field"> </td>
-      <td> <div class="error" id="Error"></div> </td>
-    </tr>
-    <tr>
-      <td class="field"> ФИО: </td>
-      <td> <dev id="Name_FIO"></dev></td>
-    </tr>
-    <tr>
-      <td class="field"> Специальность: </td>
-      <td id="Specialities">
-      </td>
-    </tr>
-    <tr>
-      <td class="field"> Примечание: </td>
-      <td> <dev id="Remark"></dev></td>
-    </tr>
-    </tbody>
-  </table>
 
-  </form>
+  <table width="100%" id="Fields">
+  <thead>
+  </thead>
+  <tbody>
+  <tr>
+    <td width="78%">
+      <table id="Fields">
+        <thead>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="field"> </td>
+          <td> <div class="error" id="Error"></div> </td>
+        </tr>
+        <tr>
+          <td class="field"><b>ФИО:</b></td>
+          <td> <div id="Name_FIO"></div></td>
+        </tr>
+        <tr>
+          <td class="field"><b>Специальность:</b></td>
+          <td id="Specialities">
+          </td>
+        </tr>
+        <tr>
+          <td class="field"><b>Примечание:</b></td>
+          <td> <div id="Remark"></div></td>
+        </tr>
+        </tbody>
+      </table>
+    </td>
+    <td width="2%">
+    </td>
+    <td width="20%">
+
+<?php
+            PortraitView() ;
+?>
+
+    </td>
+  </tr>
+  </tbody>
+  </table>
 
 </div>
 

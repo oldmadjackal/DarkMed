@@ -96,6 +96,30 @@ function GetRandomString($length)
     return $result;
 }
 //============================================== 
+//  Формирование пути для файла изображения
+
+function PrepareImagePath($section, $object, $element, $ext) 
+{
+             $path ="pictures" ;
+             $path.="/".$section ;
+
+   if(is_dir($path)==false) {
+              $status=mkdir($path, 0700) ;
+           if($status==false)  return("") ;
+                            }
+
+             $path.="/".$object ;
+
+   if(is_dir($path)==false) {
+              $status=mkdir($path, 0700) ;
+           if($status==false)  return("") ;
+                            }
+
+             $path.="/".$element."_".time().".".$ext ;
+
+  return($path) ;
+}
+//============================================== 
 //  Присоединение к Базе данных
 
 function DbConnect(&$error) 

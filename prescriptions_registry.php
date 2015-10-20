@@ -50,8 +50,6 @@ function ProcessDB() {
     }
   }
 
-       $user_=$db->real_escape_string($user ) ;
-
   if(strpos($options, "UserType=Doctor;")!==false)  $read_only=false ;
   else                                              $read_only=true ;
 

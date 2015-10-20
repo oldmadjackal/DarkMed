@@ -120,7 +120,7 @@ function PortraitView() {
 
   global  $glb_portrait ;
 
-   if($glb_portrait!="")  echo "<img src=\"pictures/".$glb_portrait."\" height=100>" ; 
+   if($glb_portrait!="")  echo "<img src=\"".$glb_portrait."\" height=100>" ; 
 }
 
 //============================================== 

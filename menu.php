@@ -39,6 +39,39 @@ header("Content-type: text/html; charset=windows-1251") ;
      } 
 
   }
+
+  function ShowClient() 
+  {
+    var  i_elem ;
+
+       i_elem       =document.getElementById("ClientCard") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("DoctorCard") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("DoctorList") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("Messages") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("PrescriptionsSets") ;
+       i_elem.hidden= true ;
+  }
+
+  function ShowDoctor() 
+  {
+    var  i_elem ;
+
+       i_elem       =document.getElementById("ClientCard") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("DoctorCard") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("DoctorList") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("Messages") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("PrescriptionsSets") ;
+       i_elem.hidden= false ;
+  }
+
 //-->
 </script>
 
@@ -57,22 +90,26 @@ header("Content-type: text/html; charset=windows-1251") ;
   <ul class="menu">
     <li><a href="registry.php"                        target="section">Регистрация</a></li> 
     <li><a href="logon.php"                           target="section">Авторизация</a></li> 
-    <li><a href="javascript:
+    <li hidden id="ClientCard">
+        <a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('client_card.php'+'?Session='+v_session) ; "
          target="section">Карта пациента</a></li> 
-    <li><a href="javascript:
+    <li hidden id="DoctorCard">
+        <a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('doctor_card.php'+'?Session='+v_session) ; "
          target="section">Формуляр врача</a></li> 
-    <li><a href="javascript:
+    <li hidden id="DoctorList">
+        <a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('doctor_clients.php'+'?Session='+v_session) ; "
          target="section">Пациенты врача</a></li> 
-    <li><a href="javascript:
+    <li hidden id="Messages">
+        <a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('messages.php'+'?Session='+v_session) ; "
@@ -81,7 +118,8 @@ header("Content-type: text/html; charset=windows-1251") ;
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                                 parent.frames['section'].location.assign('prescriptions_registry.php'+'?Session='+v_session) ; "
          target="section">Общий регистр назначений</a></li> 
-    <li><a href="javascript:
+    <li hidden id="PrescriptionsSets">
+        <a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('sets_registry.php'+'?Session='+v_session) ; "

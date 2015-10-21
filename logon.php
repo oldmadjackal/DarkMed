@@ -80,7 +80,7 @@ function RegistryDB() {
      $pos=strpos($options, $key) ;
   if($pos!==false) {
         $end=strpos($options, ";", $pos) ;
-     if($end!==false)  $user_type=substr($options, $pos+strlen($key), $end-$pos-strlen($key)-1) ;
+     if($end!==false)  $user_type=substr($options, $pos+strlen($key), $end-$pos-strlen($key)) ;
                    }
 
 //--------------------------- Регистрация сессии
@@ -132,6 +132,11 @@ function RegistryDB() {
 
                     $res->free() ;
   }
+
+//--------------------------- Изменение конфигурации главного меню
+
+   if($user_type=="Doctor")  echo  "parent.frames['menu'].ShowDoctor() ; " ;
+   else                      echo  "parent.frames['menu'].ShowClient() ; " ;
 
 //--------------------------- Завершение
 

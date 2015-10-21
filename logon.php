@@ -290,7 +290,10 @@ function SuccessMsg($session) {
        i_col_new = document.createElement("td") ;
        i_col_new . className = "fieldL" ;
        i_lnk_new = document.createElement("a") ;
-       i_lnk_new . href="javascript: window.open('releases/"+p_link+"') ;" ;
+       i_lnk_new . href="#" ;
+       i_lnk_new . onclick= function(e) {
+					   window.open("releases/"+p_link) ;
+					} ;
        i_txt_new = document.createTextNode(p_name) ;
        i_lnk_new . appendChild(i_txt_new) ;
        i_col_new . appendChild(i_lnk_new) ;

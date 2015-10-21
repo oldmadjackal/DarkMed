@@ -14,6 +14,8 @@ function ReadConfig()
   global  $glb_cfg_errors ;
 
 
+                   $date=date("Y_m_d") ;
+
      $file=fopen("config/config.cfg", "r") ;
   if($file===false)  return false ;
 
@@ -26,13 +28,13 @@ function ReadConfig()
         $key  =trim($words[0]) ;
         $value=trim($words[1]) ;
 
-     if($key=="debug"   )  $glb_cfg_debug   =$value ;
-     if($key=="db_host" )  $glb_cfg_db_host =$value ;
-     if($key=="db_user" )  $glb_cfg_db_user =$value ;
-     if($key=="db_pswd" )  $glb_cfg_db_pswd =$value ;
-     if($key=="db_name" )  $glb_cfg_db_name =$value ;
-     if($key=="log_file")  $glb_cfg_log_file=$value ;
-     if($key=="errors"  )  $glb_cfg_errors  =$value ;
+     if($key=="debug"   )  $glb_cfg_debug   = $value ;
+     if($key=="db_host" )  $glb_cfg_db_host = $value ;
+     if($key=="db_user" )  $glb_cfg_db_user = $value ;
+     if($key=="db_pswd" )  $glb_cfg_db_pswd = $value ;
+     if($key=="db_name" )  $glb_cfg_db_name = $value ;
+     if($key=="log_file")  $glb_cfg_log_file=str_replace("#DATE#", $date, $value) ;
+     if($key=="errors"  )  $glb_cfg_errors  =str_replace("#DATE#", $date, $value) ;
    } 
 
     error_reporting( E_ALL) ;

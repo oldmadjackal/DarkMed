@@ -151,6 +151,12 @@ if(strpos($type, "Doctor")!==false)
                          return ;
   }
 }
+//--------------------------- Сброс контекста авторизации
+
+   echo  "parent.frames['menu'].ShowAnonimous() ;	" ;
+   echo  "TransitContext('save', 'password', '') ;	" ;
+   echo  "TransitContext('save', 'session', '') ;	" ;
+
 //--------------------------- Завершение
 
      $db->commit();

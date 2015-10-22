@@ -72,6 +72,22 @@ header("Content-type: text/html; charset=windows-1251") ;
        i_elem.hidden= false ;
   }
 
+  function ShowAnonimous() 
+  {
+    var  i_elem ;
+
+       i_elem       =document.getElementById("ClientCard") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("DoctorCard") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("DoctorList") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("Messages") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("PrescriptionsSets") ;
+       i_elem.hidden= true ;
+  }
+
 //-->
 </script>
 

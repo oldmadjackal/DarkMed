@@ -363,7 +363,7 @@ function SuccessMsg($session) {
     </tr>
     <tr>
       <td class="field"> Пароль </td>
-      <td> <input type="text" size=20 name="Password" id="Password"> </td>
+      <td> <input type="password" size=20 name="Password" id="Password"> </td>
     </tr>
     <tr>
       <td class="field"> </td>

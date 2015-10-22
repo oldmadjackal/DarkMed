@@ -183,10 +183,17 @@ function SuccessMsg() {
 <?php
             ProcessDB() ;
 ?>
+       var  nl=new RegExp("@@","g") ;
+
+       i_remark.innerHTML=i_remark.innerHTML.replace(nl,"<br>") ;
 
          return true ;
   }
 
+  function WhoIsIt()
+  {
+    window.open("doctor_view.php"+"?Owner="+i_login.value) ;
+  } 
 
 
 <?php
@@ -211,16 +218,18 @@ function SuccessMsg() {
     </thead>
     <tbody>
     <tr class="fieldL">
-      <td width="35%">
-         <b><dev id="Name"> </dev></b> 
-         <p id="Speciality"> </p>
+      <td width="30%">
+        <b><dev id="Name"> </dev></b> 
+        <br>
+        <input type="button" value=" то это?" onclick=WhoIsIt()>
+        <p id="Speciality"> </p>
       </td>
-      <td width="5%">
+      <td width="3%">
       </td>
-      <td width="35%">
+      <td width="45%">
          <i><div id="Remark"></div></i>
       </td>
-      <td width="5%">
+      <td width="2%">
       </td>
       <td width="20%">
 <?php

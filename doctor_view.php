@@ -178,7 +178,7 @@ function SuccessMsg() {
 ?>
        var  nl=new RegExp("@@","g") ;
 
-       i_remark.innerHTML=i_remark.innerHTML.replace(nl,"\n") ;
+       i_remark.innerHTML=i_remark.innerHTML.replace(nl,"<br>") ;
 
          return true ;
   }

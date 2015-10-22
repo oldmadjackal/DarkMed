@@ -82,7 +82,8 @@ function ProcessDB() {
 
                      $sql="Select owner, name_f, name_i, name_o, speciality".
 			  "  From doctor_page_main".
-			  "  Order by name_f, name_i, name_o" ;
+                          " Where confirmed='Y'".
+			  " Order by name_f, name_i, name_o" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select DOCTOR_PAGE_MAIN... : ".$db->error) ;

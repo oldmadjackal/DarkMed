@@ -53,6 +53,27 @@ function ProcessDB() {
   if(strpos($options, "UserType=Doctor;")!==false)  $read_only=false ;
   else                                              $read_only=true ;
 
+//------------------------ Проверка "подтвержденности" врача
+
+  if($read_only==false) {
+
+                $user_=$db->real_escape_string($user) ;
+
+       $res=$db->query("Select confirmed". 
+                       "  from doctor_page_main".
+                       " Where owner='$user_'".
+                       "  and  confirmed='Y'") ;
+    if($res===false) {
+            FileLog("ERROR", "DB query(Select CONFIRMED...) : ".$db->error) ;
+                              $db->close() ;
+              $error="Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка идентификации прав доктора" ;
+                           return(false) ;
+    }
+
+    if($res->num_rows==0)  $read_only=true ;
+
+               $res->close() ;
+  }
 //--------------------------- Формирование списка назначений
 
                      $sql="Select id, t.name, p.name".

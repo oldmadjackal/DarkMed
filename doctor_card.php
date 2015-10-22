@@ -105,12 +105,16 @@ function ProcessDB() {
           $spec_  =$db->real_escape_string($speciality) ;
           $remark_=$db->real_escape_string($remark) ;
 
+                                    $confirmed='N' ;
+    if($name_f!="" && $name_i!="")  $confirmed='Y' ;
+
                        $sql="Update doctor_page_main".
                             " Set   name_f    ='$name_f_'".
                             "      ,name_i    ='$name_i_'".
                             "      ,name_o    ='$name_o_'".
                             "      ,speciality='$spec_'".
                             "      ,remark    ='$remark_'".
+                            "      ,confirmed =if(confirmed!='D','$confirmed',confirmed)".
                             " Where owner='$user'"  ;
        $res=$db->query($sql) ;
     if($res===false) {

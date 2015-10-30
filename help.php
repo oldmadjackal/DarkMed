@@ -30,7 +30,7 @@ function RegistryDB() {
 
                      $sql="Select id, date(created), title, notes".
                           "  From releases".
-                          " Order by created" ;
+                          " Order by created desc" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select RELEASES... : ".$db->error) ;

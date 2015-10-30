@@ -481,7 +481,7 @@ function SuccessMsg() {
       <br>
       Выбор файла портрета: 
       <br>
-      <input type="file" name="PortraitFile" id="PortraitFile">  
+      <input type="file" accept="image/*" name="PortraitFile" id="PortraitFile">  
     </td>
   </tr>
   </tbody>

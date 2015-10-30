@@ -167,11 +167,11 @@ function SuccessMsg() {
             ProcessDB() ;
 ?>
 
-                text=i_www_link.value ;
-                 pos=text.indexOf("://") ;
-    if(pos>=0)  text=text.substr(pos+3) ;
-                 pos=text.indexOf("/") ;
-    if(pos>=0)  text=text.substr(0, pos) ;
+                      text=i_www_link.value ;
+                       pos=text.indexOf("://") ;
+    if($pos!==false)  text=text.substr(pos+3) ;
+                       pos=text.indexOf("/") ;
+    if($pos!==false)  text=text.substr(0, pos) ;
 
     if(i_www_link.value!='')  i_goto.innerHTML='Смотреть на '+text ;
     else                      i_goto.hidden   = true ;

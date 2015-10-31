@@ -173,6 +173,8 @@ function SuccessMsg() {
 
   function FirstField() 
   {
+    var  nl=new RegExp("@@","g") ;
+
        i_name      =document.getElementById("Name") ;
        i_speciality=document.getElementById("Speciality") ;
        i_remark    =document.getElementById("Remark") ;
@@ -183,7 +185,6 @@ function SuccessMsg() {
 <?php
             ProcessDB() ;
 ?>
-       var  nl=new RegExp("@@","g") ;
 
        i_remark.innerHTML=i_remark.innerHTML.replace(nl,"<br>") ;
 

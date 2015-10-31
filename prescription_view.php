@@ -262,8 +262,6 @@ function SuccessMsg() {
             ProcessDB() ;
 ?>
 
-       i_description.innerHTML=i_description.innerHTML.replace(nl,"\n") ;
-
                 text=i_www_link.value ;
                  pos=text.indexOf("://") ;
     if(pos>=0)  text=text.substr(pos+3) ;
@@ -272,6 +270,8 @@ function SuccessMsg() {
 
     if(i_www_link.value!='')  i_goto.innerHTML=text ;
     else                      i_goto.hidden   =true ;
+
+       i_description.innerHTML=i_description.innerHTML.replace(nl,"<br>") ;
 
          return true ;
   }

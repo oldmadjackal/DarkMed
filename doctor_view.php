@@ -166,6 +166,7 @@ function SuccessMsg() {
     var  i_text_new ;
     var  link_key ;
     var  link_text ;
+    var  nl=new RegExp("@@","g") ;
 
 
        i_name_fio=document.getElementById("Name_FIO") ;
@@ -176,7 +177,6 @@ function SuccessMsg() {
 <?php
             ProcessDB() ;
 ?>
-       var  nl=new RegExp("@@","g") ;
 
        i_remark.innerHTML=i_remark.innerHTML.replace(nl,"<br>") ;
 

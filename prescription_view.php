@@ -149,7 +149,7 @@ function ShowExtensions() {
        echo  "    </td>						\n" ;
        echo  "    <td class='table'>				\n" ;
        echo  "      <div>					\n" ;
-       echo  htmlspecialchars(stripslashes($sys_ext_remark[$i])) ;
+       echo  htmlspecialchars(stripslashes($sys_ext_remark[$i]), ENT_COMPAT, "windows-1251") ;
        echo  "      </div>					\n" ;
        echo  "    <br>						\n" ;
 

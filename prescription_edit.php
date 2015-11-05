@@ -282,7 +282,7 @@ function ProcessDB() {
 				   imagecopyresampled($image_o, $image_i, 0, 0, 0, 0, 
 							 $w_image_o, $h_image_o, $w_image_i, $h_image_i) ;
 
-            $spath=PrepareImagePath("prescriptions_registry", $put_id, "image_short", $ext) ;
+            $spath=PrepareImagePath("prescriptions_registry", $put_id, "Image_short", $ext) ;
 
                 if($fmt=="image/png"         )  imagepng ($image_o, $spath) ; 
            else if($fmt=="image/gif"         )  imagegif ($image_o, $spath) ; 
@@ -444,7 +444,8 @@ function ProcessDB() {
 
 //--------------------------- Извлечение дополнительных блоков
 
-      echo     "  i_count.value='0' ;	\n" ;
+      echo     "  i_count    .value='0' ;	\n" ;
+      echo     "  i_new_order.value='0' ;	\n" ;
 
                      $sql="Select e.id".
                           "      ,CONCAT_WS(' ', d.name_f, d.name_i, d.name_o), e.user".
@@ -534,7 +535,7 @@ function ShowExtensions() {
        echo  "    </td>										\n" ;
        echo  "    <td class='table'>								\n" ;
        echo  "      <div id='Remark_".$row."'>							\n" ;
-       echo  htmlspecialchars(stripslashes($sys_ext_remark[$i])) ;
+       echo  htmlspecialchars(stripslashes($sys_ext_remark[$i]), ENT_COMPAT, "windows-1251") ;
        echo  "      </div>									\n" ;
        echo  "    <br>										\n" ;
 

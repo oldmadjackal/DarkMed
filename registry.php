@@ -22,6 +22,8 @@ function RegistryDB() {
 //--------------------------- Извлечение и анализ параметров
 
    $login   =$_POST["Login"   ] ;
+
+  if(isset($login)) {
    $password=$_POST["Password"] ;
    $email   =$_POST["Email"] ;
    $type_a  =$_POST["Type"] ;
@@ -31,7 +33,9 @@ function RegistryDB() {
    $crypto  =$_POST["Crypto"] ;
    $check   =$_POST["Check"] ;
 
+                              $type="" ;
      foreach($type_a as $tmp) $type=$type.$tmp."," ;
+  }
 
      $completeness=0 ;
    
@@ -41,6 +45,7 @@ function RegistryDB() {
   if(isset($type    ))  $completeness++ ;
 
   if($completeness==0)  return ;
+
 
   if(!isset($check)             || 
      substr($check,1,5)=="Check"  ) 
@@ -53,7 +58,7 @@ function RegistryDB() {
   FileLog("START", "Login:".$login." Password:".$password." Email:".$email." Type:".$type) ;
 
                                         echo  "   i_login.value=\"" .$login   ."\" ;\n" ;
-//                                      echo  "i_password.value=\"" .$password."\" ;\n" ;
+                                        echo  "i_password.value=\"" .$password."\" ;\n" ;
                                         echo  "   i_email.value=\"" .$email   ."\" ;\n" ;
 
   if(strpos($type, "Client" )!==false)  echo  "i_type_cln.checked=true ;\n" ;

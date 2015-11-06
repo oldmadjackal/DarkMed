@@ -91,11 +91,11 @@ function ProcessDB() {
       echo     "  i_name_fio.innerHTML='".$name_fio."' ;	\n" ;
       echo     "  i_remark  .innerHTML='".$remark  ."' ;	\n" ;
 
-		$speciality_a=explode(",", $speciality) ;	
+		$speciality_a=explode(",", $speciality) ;
 
-	foreach($speciality_a as $spec)
+	foreach($speciality_a as $spec)     
         { 
-             echo "  AddNewSpeciality(\"" .$spec_list[$spec]."\") ;\n" ;
+          if($spec!="")  echo "  AddNewSpeciality('".$spec_list[$spec]."') ;\n" ;
         }
 //--------------------------- Завершение
 

@@ -151,6 +151,7 @@ function ProcessDB() {
        echo "    link_key      ='".$fields[0]."' ;			\n" ;
        echo "    link_key      =Crypto_decode(link_key, password) ;	\n" ;
        echo " a_pages_keys['0']=link_key ;				\n" ;
+       echo " a_files_keys['0']='' ;					\n" ;
 
        echo "    sender_key    ='".$fields[1]."' ;			\n" ;
        echo "    sender_key    =Crypto_decode(sender_key, password) ;	\n" ;
@@ -163,7 +164,7 @@ function ProcessDB() {
 
 //--------------------------- Формирование списка страниц пациента
 
-                     $sql="Select p.page, p.title, a.crypto".
+                     $sql="Select p.page, p.title, a.crypto, a.ext_key".
 			  "  From client_pages p, access_list a".
 			  " Where p.owner='$user_'".
 			  "  and  p.page>0".
@@ -187,14 +188,17 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-		$link_href="Client_page?Session=".$session."&Page=".$fields[0] ;
+		$link_href="Client_page.php?Session=".$session."&Page=".$fields[0] ;
 
        echo "    link_key     ='".$fields[2]."' ;			\n" ;
        echo "    link_key     =Crypto_decode(link_key, password) ;	\n" ;
        echo "    link_text    ='".$fields[1]."' ;			\n" ;
        echo "    link_text    =Crypto_decode(link_text, link_key) ;	\n" ;
+       echo "    file_key     ='".$fields[3]."' ;			\n" ;
+       echo "    file_key     =Crypto_decode(file_key, password) ;	\n" ;
        echo "  AddNewPage(link_text, '".$fields[0]."') ;		\n" ;
        echo "    a_pages_keys['".$fields[0]."']=link_key ;		\n" ;
+       echo "    a_files_keys['".$fields[0]."']=file_key ;		\n" ;
      }
   }
 
@@ -263,6 +267,7 @@ function SuccessMsg() {
     var  sender_key ;
     var  msg_key ;
     var  a_pages_keys ;
+    var  a_files_keys ;
     var  a_specialities ;
     var  a_doctors ;
 
@@ -280,6 +285,7 @@ function SuccessMsg() {
 
 	a_specialities=new Array() ; 
  	  a_pages_keys=new Array() ;
+ 	  a_files_keys=new Array() ;
              a_doctors=new Array() ;
 
 <?php
@@ -303,7 +309,7 @@ function SuccessMsg() {
     {
 	  i_page=document.getElementById("Page_"+page) ;
        if(i_page.checked) { 
-          i_letter.value=i_letter.value+page+":"+a_pages_keys[page]+";" ;
+          i_letter.value=i_letter.value+page+":"+a_pages_keys[page]+":"+a_files_keys[page]+";" ;
               error_text=   "" ;
                           }
     }

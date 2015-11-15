@@ -10,8 +10,13 @@ function ReadConfig()
   global  $glb_cfg_db_user ;
   global  $glb_cfg_db_pswd ;
   global  $glb_cfg_db_name ;
+  global  $glb_cfg_encrypt_file ;
+  global  $glb_cfg_decrypt_file ;
+  global  $glb_cfg_delete_file ;
   global  $glb_cfg_log_file ;
   global  $glb_cfg_errors ;
+  global  $glb_cfg_images ;
+  global  $glb_cfg_temporary ;
 
 
                    $date=date("Y_m_d") ;
@@ -28,13 +33,18 @@ function ReadConfig()
         $key  =trim($words[0]) ;
         $value=trim($words[1]) ;
 
-     if($key=="debug"   )  $glb_cfg_debug   = $value ;
-     if($key=="db_host" )  $glb_cfg_db_host = $value ;
-     if($key=="db_user" )  $glb_cfg_db_user = $value ;
-     if($key=="db_pswd" )  $glb_cfg_db_pswd = $value ;
-     if($key=="db_name" )  $glb_cfg_db_name = $value ;
-     if($key=="log_file")  $glb_cfg_log_file=str_replace("#DATE#", $date, $value) ;
-     if($key=="errors"  )  $glb_cfg_errors  =str_replace("#DATE#", $date, $value) ;
+     if($key=="debug"       )  $glb_cfg_debug       = $value ;
+     if($key=="db_host"     )  $glb_cfg_db_host     = $value ;
+     if($key=="db_user"     )  $glb_cfg_db_user     = $value ;
+     if($key=="db_pswd"     )  $glb_cfg_db_pswd     = $value ;
+     if($key=="db_name"     )  $glb_cfg_db_name     = $value ;
+     if($key=="encrypt_file")  $glb_cfg_encrypt_file= $value ;
+     if($key=="decrypt_file")  $glb_cfg_decrypt_file= $value ;
+     if($key=="delete_file" )  $glb_cfg_delete_file = $value ;
+     if($key=="images"      )  $glb_cfg_images      = $value ;
+     if($key=="temporary"   )  $glb_cfg_temporary   = $value ;
+     if($key=="log_file"    )  $glb_cfg_log_file    =str_replace("#DATE#", $date, $value) ;
+     if($key=="errors"      )  $glb_cfg_errors      =str_replace("#DATE#", $date, $value) ;
    } 
 
     error_reporting( E_ALL) ;
@@ -62,7 +72,7 @@ function FileLog($category, $text)
   global  $glb_script ;
   global  $glb_cfg_log_file ;
 
-          $timestamp=date("Y-m-d h:i:s")."  " ;
+          $timestamp=date("Y-m-d H:i:s")."  " ;
           $script   =substr($glb_script."                    ", 0, 25)."  " ;
           $port_id  =substr($_SERVER["REMOTE_PORT"]."      ", 0, 6)."  " ;
           $mark     =substr($category."       ", 0, 7)."  " ;
@@ -102,7 +112,10 @@ function GetRandomString($length)
 
 function PrepareImagePath($section, $object, $element, $ext) 
 {
-             $path ="pictures" ;
+  global  $glb_cfg_images ;
+
+
+             $path =$glb_cfg_images ;
              $path.="/".$section ;
 
    if(is_dir($path)==false) {
@@ -118,6 +131,53 @@ function PrepareImagePath($section, $object, $element, $ext)
                             }
 
              $path.="/".$element."_".time().".".$ext ;
+
+  return($path) ;
+}
+//============================================== 
+//  Формирование пути временного раздела
+
+function PrepareTmpFolder($session)
+{
+  global  $glb_cfg_temporary ;
+
+
+             $path =$glb_cfg_temporary ;
+             $path.="/".$session ;
+
+   if(is_dir($path)==false) {
+              $status=mkdir($path, 0700) ;
+           if($status==false)  return("") ;
+                            }
+
+  return($path) ;
+}
+//============================================== 
+//  Очистка и удаление временного раздела
+
+function RemoveTmpFolder($session)
+{
+  global  $glb_cfg_temporary ;
+
+
+             $path =$glb_cfg_temporary ;
+             $path.="/".$session ;
+
+   if(is_dir($path)!==false)
+   {
+
+       $folder=opendir($path) ;
+
+        while($file=readdir($folder))
+	{
+              $file=$path."/".$file ;
+           if(is_file($file))  DeleteFile($file) ;
+	}	
+
+              closedir($folder) ;
+
+                 rmdir($path) ;
+   }
 
   return($path) ;
 }
@@ -186,6 +246,68 @@ function DbCheckSession($db, $session, &$options, &$error)
       $options=$fields[1] ;
 
   return($user) ;
+}
+
+//============================================== 
+//  Шифрование файла
+
+function EncryptFile($path, $password)
+{
+  global  $glb_cfg_encrypt_file ;
+
+    $path_e =$path.".a" ;
+    $command=$glb_cfg_encrypt_file ;
+    $command=str_replace("#PASSWORD#", $password, $command) ;
+    $command=str_replace("#IN#",       $path,     $command) ;
+    $command=str_replace("#OUT#",      $path_e,   $command) ;
+
+     $result=system($command) ;
+  if($result===false)  return(false) ;
+
+  return($path_e) ;
+}
+
+//============================================== 
+//  Дешифрование файла
+
+function DecryptFile($path, $password)
+{
+  global  $glb_cfg_decrypt_file ;
+
+    $path_d =substr($path, 0, -2) ;
+    $command=$glb_cfg_decrypt_file ;
+    $command=str_replace("#PASSWORD#", $password, $command) ;
+    $command=str_replace("#IN#",       $path,     $command) ;
+    $command=str_replace("#OUT#",      $path_d,   $command) ;
+
+     $result=system($command) ;
+  if($result===false)  return(false) ;
+
+  return($path_d) ;
+}
+
+//============================================== 
+//  Удаление файла
+
+function DeleteFile($path)
+{
+  global  $glb_cfg_delete_file ;
+
+  if(       $glb_cfg_delete_file            == ""  ||
+     strpos($glb_cfg_delete_file, "<none>")!==false  )
+  {
+       		unlink($path) ;
+  }
+  else
+  { 
+       $command=$glb_cfg_delete_file ;
+       $command=str_replace("#PATH#", $path, $command) ;
+
+       $result=system($command) ;
+    if($result===false)  return(false) ;
+  }
+
+  return(true) ;
 }
 
 //============================================== 

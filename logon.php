@@ -319,7 +319,7 @@ function SuccessMsg($session) {
 
 	 v_session=TransitContext("restore","session","") ;
 
-	parent.frames["details"].location.assign("z_release_markread?Session="+v_session+
+	parent.frames["details"].location.assign("z_release_markread.php?Session="+v_session+
                                                                    "&Release="+p_id) ;
   }
 

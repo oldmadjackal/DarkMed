@@ -229,7 +229,7 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-		$link_href="client_prescr_view?Session=".$session."&Owner=".$user."&Page=".$fields[0] ;
+		$link_href="client_prescr_view.php?Session=".$session."&Owner=".$user."&Page=".$fields[0] ;
 
        echo     "         link_key     =\"".$fields[2]."\" ;			\n" ;
        echo     "         link_key     =Crypto_decode(link_key, password) ;	\n" ;

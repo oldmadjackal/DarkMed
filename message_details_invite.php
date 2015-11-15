@@ -157,20 +157,22 @@ function ProcessDB() {
 //- - - - - - - - - - - - - - ѕеребор страниц, по которым предоставлен доступ
 	$words=explode(" ", $details) ;
 
-    for($i=0 ; $i<count($words) ; $i=$i+2)
+    for($i=0 ; $i<count($words) ; $i=$i+3)
     {
        if($words[$i]=="")  break ;
 
-          $page   =$words[$i  ] ;
-          $key    =$words[$i+1] ;
-          $page_  =$db->real_escape_string($page) ;
-          $key_   =$db->real_escape_string($key) ;
+          $page  =$words[$i  ] ;
+          $key_1 =$words[$i+1] ;
+          $key_2 =$words[$i+2] ;
+          $page_ =$db->real_escape_string($page) ;
+          $key_1_=$db->real_escape_string($key_1) ;
+          $key_2_=$db->real_escape_string($key_2) ;
 //- - - - - - - - - - - - - - ѕроверка повторного задани€ доступа
                        $sql="Select page ".
-                            "from  `access_list` ".
-                            "where `Owner`='$owner_'".
-                            " and  `Login`='$user_'".
-                            " and  `Page` ='$page_'" ;
+                            "from   access_list ".
+                            "where  Owner='$owner_'".
+                            " and   Login='$user_'".
+                            " and   Page ='$page_'" ;
         $res=$db->query($sql) ;
      if($res===false) {
           FileLog("ERROR", "Select ACCESS_LIST... : ".$db->error) ;
@@ -185,10 +187,10 @@ function ProcessDB() {
      }
 			      $res->free() ;
 //- - - - - - - - - - - - - - —оздание записи о доступе
-                       $sql="Insert into `access_list`".
-                            "(`Owner`, `Login`, `Page`,  `Crypto`) ".
+                       $sql="Insert into access_list".
+                            "(owner, login, page, crypto, ext_key) ".
                             "values".
-                            "('$owner_','$user_','$page_','$key_')" ;
+                            "('$owner_','$user_','$page_','$key_1_','$key_2_')" ;
         $res=$db->query($sql) ;
      if($res===false) {
                FileLog("ERROR", "Insert ACCESS_LIST... : ".$db->error) ;
@@ -205,10 +207,10 @@ function ProcessDB() {
     do
     {
 //- - - - - - - - - - - - - - ѕроверка наличи€ страницы заметок о клиенте
-                       $sql="Select `Client` ".
-                            "from  `doctor_notes` ".
-                            "where `Owner` ='$user_'".
-                            " and  `Client`='$owner_'" ;
+                        $sql="Select client ".
+                             "from   doctor_notes ".
+                             "where  owner ='$user_'".
+                             " and   client='$owner_'" ;
         $res=$db->query($sql) ;
      if($res===false) {
           FileLog("ERROR", "Select DOCTOR_NOTES... : ".$db->error) ;
@@ -303,6 +305,7 @@ function SuccessMsg() {
     var  password ;
     var  message_id ;
     var  a_pages_keys ;
+    var  a_files_keys ;
 
   function FirstField() 
   {
@@ -328,6 +331,7 @@ function SuccessMsg() {
        password=TransitContext("restore", "password", "") ;
 
         a_pages_keys=new Array() ;
+        a_files_keys=new Array() ;
 
 <?php
             ProcessDB() ;
@@ -341,6 +345,7 @@ function SuccessMsg() {
       {
                       words_2    =words_1[i].split(':') ;
          a_pages_keys[words_2[0]]=words_2[1] ;
+         a_files_keys[words_2[0]]=words_2[2] ;
       }
     }
 
@@ -378,6 +383,8 @@ function SuccessMsg() {
     {
         details=details+elem+" " ;
 	details=details+Crypto_encode(a_pages_keys[elem], password) ;
+        details=details+" " ;
+	details=details+Crypto_encode(a_files_keys[elem], password) ;
         details=details+" " ;
     }
 

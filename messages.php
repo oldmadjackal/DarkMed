@@ -334,7 +334,7 @@ function SuccessMsg() {
 
 	 v_session=TransitContext("restore","session","") ;
 
-	parent.frames["details"].location.assign("z_message_markread?Session="+v_session+
+	parent.frames["details"].location.assign("z_message_markread.php?Session="+v_session+
                                                                    "&Message="+p_id) ;
   }
 

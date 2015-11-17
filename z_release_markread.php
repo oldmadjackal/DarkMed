@@ -31,6 +31,7 @@ function ProcessDB() {
 
      $db=DbConnect($error) ;
   if($db===false) {
+                       $db->close() ;
                     ErrorMsg($error) ;
                          return ;
   }

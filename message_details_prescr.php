@@ -34,6 +34,7 @@ function ProcessDB() {
   FileLog("",      "    Check  :".$check  ) ;
 
 //--------------------------- Подключение БД
+
      $db=DbConnect($error) ;
   if($db===false) {
                     ErrorMsg($error) ;
@@ -43,6 +44,7 @@ function ProcessDB() {
 
      $user=DbCheckSession($db, $session, $options, $error) ;
   if($user===false) {
+                       $db->close() ;
                     ErrorMsg($error) ;
                          return ;
   }

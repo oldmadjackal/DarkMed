@@ -49,16 +49,22 @@ function RegistryDB() {
                     ErrorMsg($error) ;
                          return ;
   }
+//--------------------------- Идентификация сессии
+
+     $user=DbCheckSession($db, $session, $options, $error) ;
+  if($user===false)  $user="Unknown" ;
+
 //--------------------------- Регистрация сообщения
 
     $session =$db->real_escape_string($session) ;
+    $user    =$db->real_escape_string($user) ;
     $form    =$db->real_escape_string($form) ;
     $category=$db->real_escape_string($category) ;
     $message =$db->real_escape_string($message) ;
 
                        $sql="Insert into ".
-			    " callback_msg(  session,    form,    category,    message, status)".
-                            "       Values('$session', '$form', '$category', '$message', 'NEW')" ;
+			    " callback_msg(  session,    user,    form,    category,    message, status)".
+                            "       Values('$session', '$user', '$form', '$category', '$message', 'NEW')" ;
        $res=$db->query($sql) ;
     if($res===false) {
           FileLog("ERROR", "Insert CALLBACK_MSG... : ".$db->error) ;

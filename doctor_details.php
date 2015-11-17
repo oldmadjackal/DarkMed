@@ -41,6 +41,7 @@ function ProcessDB() {
 
      $user=DbCheckSession($db, $session, $options, $error) ;
   if($user===false) {
+                       $db->close() ;
                     ErrorMsg($error) ;
                          return ;
   }

@@ -234,7 +234,6 @@ function DbCheckSession($db, $session, &$options, &$error)
                          return(false) ;
   }
   if($res->num_rows==0) {
-                            $db->close() ;
           FileLog("CANCEL", "Unknown session detected") ;
             $error="Сессия устарела. Повторите авторизацию." ;
                          return(false) ;

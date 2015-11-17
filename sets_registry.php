@@ -45,6 +45,7 @@ function ProcessDB() {
                     FileLog("", "User Options:".$options) ;
 
     if($user===false) {
+                       $db->close() ;
                     ErrorMsg($error) ;
                          return ;
     }

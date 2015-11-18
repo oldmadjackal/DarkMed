@@ -297,6 +297,10 @@ function ProcessDB() {
 
       }
 //- - - - - - - - - - - - - -
+               $cur_folder=getcwd() ;
+
+	$path =substr($path,  strlen($cur_folder)+1) ;
+	$spath=substr($spath, strlen($cur_folder)+1) ;
     }    
 //- - - - - - - - - - - - - - Сохранение данных блока
           $new_order_ =$db->real_escape_string($new_order) ;

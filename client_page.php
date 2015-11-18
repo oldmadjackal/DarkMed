@@ -957,11 +957,14 @@ function SuccessMsg() {
      }
    }
 
-     if(error_text!="")
-     {
        i_error.style.color="red" ;
        i_error.innerHTML  = error_text ;
-        return false ;
+
+     if(error_text!="") {
+          i_new=document.getElementById("ErrorExt") ;
+       if(i_new!=null) {  i_new.style.color="red" ;
+			  i_new.innerHTML  = error_text ;  }
+                              return false ;
      }
 
      if(page_key=="")

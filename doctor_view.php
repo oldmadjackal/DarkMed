@@ -11,7 +11,13 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
-  global  $glb_portrait ;
+  global  $sys_portrait ;
+  global  $sys_ext_count  ;
+  global  $sys_ext_type   ;
+  global  $sys_ext_remark ;
+  global  $sys_ext_file   ;
+  global  $sys_ext_sfile  ;
+  global  $sys_ext_link   ;
 
 //--------------------------- Считывание конфигурации
 
@@ -64,7 +70,7 @@ function ProcessDB() {
 
           $owner_=$db->real_escape_string($owner) ;
 
-                       $sql="Select name_f, name_i, name_o, speciality, remark, portrait".
+                       $sql="Select id, name_f, name_i, name_o, speciality, remark, portrait".
                             " From  doctor_page_main".
                             " Where owner='$owner_'" ; 
        $res=$db->query($sql) ;
@@ -78,13 +84,46 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-                 $name_fio=$fields[0]." ".$fields[1]." ".$fields[2] ;
-               $speciality=$fields[3] ;
-                   $remark=$fields[4] ;
+                  $page_id=$fields[0] ;
+                 $name_fio=$fields[1]." ".$fields[2]." ".$fields[3] ;
+               $speciality=$fields[4] ;
+                   $remark=$fields[5] ;
 
-             $glb_portrait=$fields[5] ;
+             $sys_portrait=$fields[6] ;
 
         FileLog("", "Doctor main page presented successfully") ;
+
+//--------------------------- Извлечение дополнительных блоков
+
+                     $sql="Select e.type, e.remark, e.file, e.short_file, e.www_link".
+			  "  From doctor_page_ext e".
+			  " Where e.page_id=$page_id".
+                          " Order by e.order_num" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select DOCTOR_PAGE_EXT... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка извлечения расширенного описания") ;
+                         return ;
+  }
+  else
+  {  
+          $sys_ext_count=$res->num_rows ;
+
+     for($i=0 ; $i<$res->num_rows ; $i++)
+     {
+	      $fields=$res->fetch_row() ;
+
+          $sys_ext_type  [$i]=$fields[0] ;
+          $sys_ext_remark[$i]=$fields[1] ;
+          $sys_ext_file  [$i]=$fields[2] ;
+          $sys_ext_sfile [$i]=$fields[3] ;
+          $sys_ext_link  [$i]=$fields[4] ;
+     }
+
+  }
+
+     $res->close() ;
 
 //--------------------------- Отображение данных на форме
 
@@ -109,9 +148,67 @@ function ProcessDB() {
 
 function PortraitView() {
 
-  global  $glb_portrait ;
+  global  $sys_portrait ;
 
-   if($glb_portrait!="")  echo "<img src=\"".$glb_portrait."\" height=200>" ; 
+   if($sys_portrait!="")  echo "<img src=\"".$sys_portrait."\" height=200>" ; 
+}
+
+//============================================== 
+//  Отображение дополнительных блоков описания
+
+function ShowExtensions() {
+
+  global  $sys_ext_count  ;
+  global  $sys_ext_type   ;
+  global  $sys_ext_remark ;
+  global  $sys_ext_file   ;
+  global  $sys_ext_sfile  ;
+  global  $sys_ext_link   ;
+
+
+  for($i=0 ; $i<$sys_ext_count ; $i++)
+  {
+       echo  "  <tr class='table'>			\n" ;
+       echo  "    <td  width='5%'></td>			\n" ;
+       echo  "    <td  class='table' width='5%'>	\n" ;
+
+    if($sys_ext_type[$i]=="Image") {
+       echo "<div class='fieldC'>					\n" ; 
+       echo "<img src='".$sys_ext_sfile[$i]."' height=200		\n" ;
+       echo " onclick=\"window.open('".$sys_ext_file[$i]."')\" ;	\n" ;
+       echo ">								\n" ; 
+       echo "</div>							\n" ; 
+       echo "<br>							\n" ;
+    }
+
+       echo  "    </td>						\n" ;
+       echo  "    <td class='table'>				\n" ;
+       echo  "      <div>					\n" ;
+       echo  htmlspecialchars(stripslashes($sys_ext_remark[$i]), ENT_COMPAT, "windows-1251") ;
+       echo  "      </div>					\n" ;
+       echo  "    <br>						\n" ;
+
+    if($sys_ext_type[$i]=="File") {
+       echo  "  <a href='".$sys_ext_file[$i]."'>Ссылка на файл</a>	\n" ; 
+    }
+
+    if($sys_ext_type[$i]=="Link") {
+
+                        $name=$sys_ext_link[$i] ;
+                         $pos= strpos($name, "://") ;
+      if($pos!==false)  $name= substr($name, $pos+3) ;
+                         $pos= strpos($name, "/") ;
+      if($pos!==false)  $name= substr($name, 0, $pos) ;
+
+       echo  "  <a href='#' onclick=window.open('".$sys_ext_link[$i]."')>".$name."</a>	\n" ; 
+       echo  "  <br>									\n" ;
+    }
+
+       echo  "    </td>				\n" ;
+       echo  "    <td  width='5%'></td>		\n" ;
+       echo  "  </tr>				\n" ;
+  }
+
 }
 
 //============================================== 
@@ -289,6 +386,18 @@ function SuccessMsg() {
     </td>
   </tr>
   </tbody>
+  </table>
+
+  <table width="100%">
+    <thead>
+    </thead>
+    <tbody  id="Extensions">
+
+<?php
+            ShowExtensions() ;
+?>
+
+    </tbody>
   </table>
 
 </div>

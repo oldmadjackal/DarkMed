@@ -211,7 +211,7 @@ function ProcessDB() {
     if(isset($_FILES[$image])) {
 
          $path_1=LoadFile($image, $new_file_1, "doctor", $user_, "Cert1", 
-                             "create_short_image+relative_path", &$spath_1, &$error) ;
+                             "create_short_image+relative_path", $spath_1, $error) ;
       if($path_1===false) {
 
              FileLog("ERROR", "IMAGE/FILE 1 : ".$error) ;
@@ -230,7 +230,7 @@ function ProcessDB() {
     if(isset($_FILES[$image])) {
 
          $path_2=LoadFile($image, $new_file_2, "doctor", $user_, "Cert2", 
-                             "create_short_image+relative_path", &$spath_2, &$error) ;
+                             "create_short_image+relative_path", $spath_2, $error) ;
       if($path_2===false) {
 
              FileLog("ERROR", "IMAGE/FILE 2 : ".$error) ;

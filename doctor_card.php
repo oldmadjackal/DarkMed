@@ -1272,7 +1272,7 @@ function SuccessMsg() {
     window.open(document.getElementById(p_link).value) ;
   } 
 
-  function Certificates() 
+  function EditCertificates() 
   {
     var  v_session ;
 
@@ -1427,7 +1427,7 @@ function SuccessMsg() {
   </div>
 
   <div class="fieldC">
-    <input type="button" value="Редактирование списка квалификационных документов" onclick=Certificates()>
+    <input type="button" value="Редактирование списка квалификационных документов" onclick=EditCertificates()>
   </div>
   <br>
 

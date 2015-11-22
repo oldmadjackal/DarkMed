@@ -310,4 +310,101 @@ function DeleteFile($path)
 }
 
 //============================================== 
+//  Загрузка файла
+
+function LoadFile($image, $file_name, $data_segment, $data_elem, $data_type, $options, &$spath, &$error)
+{
+//--------------------------- Сохранение файла
+
+  if($_FILES[$image]["error"]==0) 
+  {
+
+        FileLog("", "Image/attachment file detected") ;
+
+        $pos=strpos($file_name, ".") ;
+     if($pos===false)  $ext="" ;
+     else              $ext=substr($file_name, $pos+1) ;
+
+        $path=PrepareImagePath($data_segment, $data_elem, $data_type, $ext) ;
+     if($path=="") {
+                      $error="Path form error" ;
+                         return(false) ;
+     }
+ 
+     if(move_uploaded_file($_FILES[$image]["tmp_name"], $path)==false) {
+                      $error="File save error" ;
+                         return(false) ;
+     }
+  }
+  else
+  {
+                      $error="Transmit error : ".$_FILES[$image]["error"] ;
+                         return(false) ;
+  }
+//--------------------------- Создание уменьшенной копии картинки
+
+  if(strpos($options, "create_short_image")!==false)
+  {
+
+            $spath=$path ;
+    do 
+    {
+               $fmt=strtolower($_FILES[$image]["type"]) ;
+            if($fmt=="image/png"         )  $image_i=imagecreatefrompng ($path) ; 
+       else if($fmt=="image/gif"         )  $image_i=imagecreatefromgif ($path) ; 
+       else if($fmt=="image/jpeg"        )  $image_i=imagecreatefromjpeg($path) ; 
+       else if($fmt=="image/vnd.wap.wbmp")  $image_i=imagecreatefromwbmp($path) ; 
+       else        break ;
+
+       if(!$image_i) {
+	                FileLog("ERROR", "Image file read error: ".$path) ;
+					break ;
+       }
+		 
+                      $w_image_i=imagesx($image_i) ;
+                      $h_image_i=imagesy($image_i) ;
+
+        if($h_image_i<200) {
+                                      imagedestroy($image_i) ;
+	                FileLog("INFO", "Image to small for reduce") ;
+					break ;
+        }
+
+                      $h_image_o= 200 ;
+                      $w_image_o=$w_image_i*$h_image_o/$h_image_i ;
+		 	$image_o=imagecreatetruecolor($w_image_o, $h_image_o) ;
+				   imagecopyresampled($image_o, $image_i, 0, 0, 0, 0, 
+							 $w_image_o, $h_image_o, $w_image_i, $h_image_i) ;
+
+             $spath=PrepareImagePath($data_segment, $data_elem, $data_type."_short", $ext) ;
+
+            if($fmt=="image/png"         )  imagepng ($image_o, $spath) ; 
+       else if($fmt=="image/gif"         )  imagegif ($image_o, $spath) ; 
+       else if($fmt=="image/jpeg"        )  imagejpeg($image_o, $spath) ; 
+       else if($fmt=="image/vnd.wap.wbmp")  imagewbmp($image_o, $spath) ; 
+
+                                         imagedestroy($image_o) ;
+                                         imagedestroy($image_i) ;
+
+    } while(false) ;           
+
+  }
+//--------------------------- Построение относительных путей
+
+  if(strpos($options, "relative_path")!==false)
+  {
+
+	   $cur_folder=getcwd() ;
+
+		$path =substr($path,  strlen($cur_folder)+1) ;
+
+    if(strpos($options, "create_short_image")!==false)
+		$spath=substr($spath, strlen($cur_folder)+1) ;
+  }
+//---------------------------
+
+  return($path) ;
+}
+
+//============================================== 
 ?>

@@ -394,7 +394,7 @@ function SuccessMsg() {
     <tr>
       <td class="field"> Тип учетной записи</td>
       <td>
-        <div> <input type="radio" name="Type[]" value="Client"  id="TypeClient" >Клиент    </div>
+        <div> <input type="radio" name="Type[]" value="Client"  id="TypeClient" >Пациент   </div>
         <div> <input type="radio" name="Type[]" value="Doctor"  id="TypeDoctor" >Врач      </div>
         <div> <input type="radio" name="Type[]" value="Trainer" id="TypeTrainer">Тренер, массажист </div>
       </td>

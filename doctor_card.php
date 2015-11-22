@@ -11,7 +11,7 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
-  global  $sys_portrait ;
+  global  $sys_portrait   ;
   global  $sys_ext_count  ;
   global  $sys_ext_id     ;
   global  $sys_ext_type   ;
@@ -19,6 +19,19 @@ function ProcessDB() {
   global  $sys_ext_file   ;
   global  $sys_ext_sfile  ;
   global  $sys_ext_link   ;
+
+  global  $sys_doc_count      ;
+  global  $sys_doc_id         ;
+  global  $sys_doc_kind       ;
+  global  $sys_doc_issuer     ;
+  global  $sys_doc_requicites ;
+  global  $sys_doc_issue_date ;
+  global  $sys_doc_desc       ;
+  global  $sys_doc_www_link   ;
+  global  $sys_doc_image_1    ;
+  global  $sys_doc_image_1_s  ;
+  global  $sys_doc_image_2    ;
+  global  $sys_doc_image_2_s  ;
 
 //--------------------------- Считывание конфигурации
 
@@ -488,6 +501,47 @@ function ProcessDB() {
 
      $res->close() ;
 
+//--------------------------- Извлечение списка документов
+
+                     $sql="Select id".
+			  "      ,ifnull(k.name,c.kind), ifnull(i.name,c.issuer), requicites, issue_date, `desc`, www_link".
+                          "      ,image_1, image_1_s, image_2, image_2_s".
+			  "  From doctor_certificates c left outer join ref_cert_kinds   k on c.kind  =k.code and k.language='RU'".
+			  "                             left outer join ref_cert_issuers i on c.issuer=i.code and i.language='RU'".
+			  " Where owner='$user_'".
+                          " Order by order_num" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select DOCTOR_CERTIFICATES... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка извлечения документов") ;
+                         return ;
+  }
+  else
+  {  
+          $sys_doc_count=$res->num_rows ;
+
+     for($i=0 ; $i<$res->num_rows ; $i++)
+     {
+	      $fields=$res->fetch_row() ;
+
+          $sys_doc_id        [$i]= $fields[ 0] ;
+          $sys_doc_kind      [$i]= $fields[ 1] ;
+          $sys_doc_issuer    [$i]= $fields[ 2] ;
+          $sys_doc_requicites[$i]= $fields[ 3] ;
+          $sys_doc_issue_date[$i]= $fields[ 4] ;
+          $sys_doc_desc      [$i]= $fields[ 5] ;
+          $sys_doc_www_link  [$i]= $fields[ 6] ;
+          $sys_doc_image_1   [$i]= $fields[ 7] ;
+          $sys_doc_image_1_s [$i]= $fields[ 8] ;
+          $sys_doc_image_2   [$i]= $fields[ 9] ;
+          $sys_doc_image_2_s [$i]= $fields[10] ;
+     }
+
+  }
+
+     $res->close() ;
+
 //--------------------------- Отображение данных на форме
 
       echo     "  i_page_id.value='".$page_id."' ;	\n" ;
@@ -583,6 +637,91 @@ function ShowExtensions() {
 }
 
 //============================================== 
+//  Отображение квалификационных документов
+
+function ShowCertificates() {
+
+  global  $sys_doc_count      ;
+  global  $sys_doc_id         ;
+  global  $sys_doc_kind       ;
+  global  $sys_doc_issuer     ;
+  global  $sys_doc_requicites ;
+  global  $sys_doc_issue_date ;
+  global  $sys_doc_desc       ;
+  global  $sys_doc_www_link   ;
+  global  $sys_doc_image_1    ;
+  global  $sys_doc_image_1_s  ;
+  global  $sys_doc_image_2    ;
+  global  $sys_doc_image_2_s  ;
+
+
+  for($i=0 ; $i<$sys_doc_count ; $i++)
+  {
+        $row=$i ;
+
+       echo  "  <tr class='table' id='Row_".$row."'>			\n" ;
+       echo  "    <td  class='table'>					\n" ;
+
+    if($sys_doc_image_1_s[$i]!="" ||
+       $sys_doc_image_2_s[$i]!=""   )
+    {
+       echo "<div class='fieldC'>					\n" ; 
+
+      if($sys_doc_image_1_s[$i]!="") {
+        echo "<img src='".$sys_doc_image_1_s[$i]."' height=200		\n" ;
+        echo " onclick=\"window.open('".$sys_doc_image_1[$i]."')\" ;	\n" ;
+        echo ">								\n" ; 
+      }
+      if($sys_doc_image_2_s[$i]!="") {
+        echo "<img src='".$sys_doc_image_2_s[$i]."' height=200		\n" ;
+        echo " onclick=\"window.open('".$sys_doc_image_2[$i]."')\" ;	\n" ;
+        echo ">								\n" ; 
+      }
+
+       echo "</div>							\n" ; 
+       echo "<br>							\n" ;
+    }
+
+       echo  "      <input type='hidden' id='Order_".$row."' value='".$row."'>			\n" ;
+       echo  "      <input type='hidden' id='Ext_"  .$row."' value='".$sys_doc_id[$i]."'>	\n" ;
+       echo  "    </td>										\n" ;
+       echo  "    <td class='table'>								\n" ;
+       echo  "      <div id='Kind_".$row."'><b>							\n" ;
+       echo  htmlspecialchars(stripslashes($sys_doc_kind[$i]), ENT_COMPAT, "windows-1251") ;
+       echo  "      </b></div>									\n" ;
+       echo  "      <div id='Issuer_".$row."'>							\n" ;
+       echo  htmlspecialchars(stripslashes($sys_doc_issuer[$i]), ENT_COMPAT, "windows-1251") ;
+       echo  "      </div>									\n" ;
+       echo  "      <div>									\n" ;
+       echo  "      <span id='Requicites_".$row."'>".$sys_doc_requicites[$i]."</span>		\n" ;
+       echo  "      от <span id='IssueDate_".$row."'>".$sys_doc_issue_date[$i]."</span>		\n" ;
+       echo  "      </div>									\n" ;
+       echo  "      <div id='Desc_".$row."'>							\n" ;
+       echo  htmlspecialchars(stripslashes($sys_doc_desc[$i]), ENT_COMPAT, "windows-1251") ;
+       echo  "      </div>									\n" ;
+
+    if($sys_doc_www_link[$i]!="")
+    {
+                        $name=$sys_doc_www_link[$i] ;
+                         $pos= strpos($name, "://") ;
+      if($pos!==false)  $name= substr($name, $pos+3) ;
+                         $pos= strpos($name, "/") ;
+      if($pos!==false)  $name= substr($name, 0, $pos) ;
+
+       echo  "      <div> Контрольная ссылка -							\n" ;
+       echo  "      <a href='#' onclick=window.open('".$sys_doc_www_link[$i]."')>".$name."</a>	\n" ; 
+       echo  "      <br>									\n" ;
+       echo  "      </div>									\n" ;
+    }
+
+       echo  "    </td>						\n" ;
+       echo  "  </tr>						\n" ;
+
+  }
+
+}
+
+//============================================== 
 //  Отображение портрета
 
 function PortraitView() {
@@ -598,8 +737,8 @@ function PortraitView() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;		" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	" ;
     echo  "return ;" ;
 }
 
@@ -608,8 +747,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;" ;
+    echo  "i_error.style.color='green' ;			" ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ;	" ;
 }
 //============================================== 
 ?>
@@ -1133,6 +1272,15 @@ function SuccessMsg() {
     window.open(document.getElementById(p_link).value) ;
   } 
 
+  function Certificates() 
+  {
+    var  v_session ;
+
+         v_session=TransitContext("restore","session","") ;
+
+        location.assign("doctor_cert.php"+"?Session="+v_session) ;
+  } 
+
 <?php
   require("common.inc") ;
 ?>
@@ -1274,7 +1422,29 @@ function SuccessMsg() {
   </div>
   <br>
 
+  <div class="fieldC">
+    <b>Квалификационные документы</b>
+  </div>
+
+  <div class="fieldC">
+    <input type="button" value="Редактирование списка квалификационных документов" onclick=Certificates()>
+  </div>
+  <br>
+
   </form>
+
+  <table width="100%">
+    <thead>
+    </thead>
+    <tbody  id="Certificates">
+
+<?php
+            ShowCertificates() ;
+?>
+
+    </tbody>
+  </table>
+  <br>
 
 </div>
 

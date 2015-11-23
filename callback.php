@@ -221,7 +221,7 @@ function SuccessMsg() {
   </div>
 
   <br>
-  <textarea cols=60 rows=7 wrap="soft" name="Message" id="Message"> </textarea>
+  <textarea cols=60 rows=7 maxlength=1000 wrap="soft" name="Message" id="Message"> </textarea>
 
   <br>
   <br>

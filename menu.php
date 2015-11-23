@@ -143,7 +143,11 @@ header("Content-type: text/html; charset=windows-1251") ;
     <br>
     <li><a href="help.php" target="section">Как пользоваться порталом?</a></li> 
     <br>
-    <li><a href="callback_list.php" target="section">Сообщения пользователей</a></li> 
+    <li><a href="javascript:
+                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
+                                parent.frames['section'].location.assign('callback_list.php'+'?Session='+v_session) ; "
+         target="section">Сообщения пользователей</a></li> 
+
   </ul>
 
   <table width="100%" id="Fields">

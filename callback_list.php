@@ -35,7 +35,10 @@ function ProcessDB() {
   }
 //--------------------------- Идентификация сессии
 
-  if(isset($session)) {
+      $options="" ;
+
+  if(isset($session) && $session!="")
+  {
 
        $user=DbCheckSession($db, $session, $options, $error) ;
     if($user===false) {
@@ -46,9 +49,14 @@ function ProcessDB() {
 
        $user_=$db->real_escape_string($user ) ;
   }
+//--------------------------- Анализ прав пользователя
+
+                                           $readonly=false ;
+  if(strpos($options, "Support")===false)  $readonly=true ;
+       
 //--------------------------- Формирование списка сообщений
 
-                     $sql="Select created, category, message, status, remark".
+                     $sql="Select id, created, category, message, status, remark".
 			  "  From callback_msg".
 			  " Order by created desc" ;
      $res=$db->query($sql) ;
@@ -68,7 +76,10 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-       echo "  AddNewMessage('$fields[0]','$fields[1]','$fields[2]','$fields[3]','$fields[4]') ;	\n" ;
+          if($readonly)  $id=   0 ;
+          else           $id=$fields[0] ;
+
+       echo "  AddNewMessage($id,'$fields[1]','$fields[2]','$fields[3]','$fields[4]','$fields[5]') ;	\n" ;
      }
   }
 
@@ -141,11 +152,12 @@ function SuccessMsg() {
          return true ;
   } 
 
-  function AddNewMessage(p_created, p_category, p_message, p_status, p_remark)
+  function AddNewMessage(p_id, p_created, p_category, p_message, p_status, p_remark)
   {
      var  i_row_new ;
      var  i_col_new ;
      var  i_txt_new ;
+     var  i_shw_new ;
      var  nl=new RegExp("@@","g") ;
 
 
@@ -165,8 +177,8 @@ function SuccessMsg() {
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_txt_new = document.createTextNode(p_message) ;
        i_col_new . className = "table" ;
+       i_txt_new = document.createTextNode(p_message) ;
        i_col_new . appendChild(i_txt_new) ;
        i_col_new . innerHTML=i_col_new.innerHTML.replace(nl,"<br>") ;
        i_row_new . appendChild(i_col_new) ;
@@ -175,12 +187,33 @@ function SuccessMsg() {
        i_txt_new = document.createTextNode(p_status) ;
        i_col_new . className = "table" ;
        i_col_new . appendChild(i_txt_new) ;
+       i_txt_new = document.createElement("br") ;
+       i_col_new . appendChild(i_txt_new) ;
+
+    if(p_id>0) 
+    {
+       i_shw_new = document.createElement("input") ;
+       i_shw_new . type   ="button" ;
+       i_shw_new . value  ="Ответить" ;
+       i_shw_new . id     ="Reply_"+p_id ;
+       i_shw_new . onclick= function(e) {
+					    var  v_session ;
+					    var  v_form ;
+						 v_session=TransitContext("restore","session","") ;
+									                 v_form="callback_details.php" ;
+						parent.frames["details"].location.assign(v_form+
+                                                                                         "?Session="+v_session+
+                                                                                         "&Message="+p_id) ;
+					} ;
+       i_col_new . appendChild(i_shw_new) ;
+    }
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_txt_new = document.createTextNode(p_remark) ;
        i_col_new . className = "table" ;
+       i_txt_new = document.createTextNode(p_remark) ;
        i_col_new . appendChild(i_txt_new) ;
+       i_col_new . innerHTML=i_col_new.innerHTML.replace(nl,"<br>") ;
        i_row_new . appendChild(i_col_new) ;
 
        i_messages.appendChild(i_row_new) ;

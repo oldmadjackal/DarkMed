@@ -118,6 +118,9 @@
                       overflow : scroll          ; 
               background-color : silver          ; 
             }   
+    .G_bttn {            color : green           ;
+              background-color : #BBFFBB         ; 
+            }   
     .v-line {          border : groove ; 
             }   
   ul.menu   {

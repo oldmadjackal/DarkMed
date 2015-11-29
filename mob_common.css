@@ -118,8 +118,14 @@
                       overflow : scroll          ; 
               background-color : silver          ; 
             }   
+    .B_bttn {            color : blue            ;
+              background-color : #BBBBFF         ; 
+            }   
     .G_bttn {            color : green           ;
               background-color : #BBFFBB         ; 
+            }   
+    .R_bttn {            color : red             ;
+              background-color : #FFBBBB         ; 
             }   
     .v-line {          border : groove ; 
             }   

@@ -41,6 +41,13 @@
                   padding-left : 1ex             ; 
                  padding-right : 1ex             ; 
             }
+    .tableB  {
+                    text-align : center          ;
+                vertical-align : middle          ;
+                        border : 1px solid black ; 
+                  padding-left : 1ex             ; 
+                 padding-right : 1ex             ; 
+            }
     .chat_s {
                     text-align : left            ;
                 vertical-align : top             ;

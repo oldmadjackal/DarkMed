@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Pagess_access.php" ;
+   $glb_script="Pages_access.php" ;
 
   require("stdlib.php") ;
 
@@ -67,7 +67,7 @@ function ProcessDB() {
   }
   else
   {  
-       echo "   a_specialities['Dummy']=\"\" ;\n" ;
+       echo "   a_specialities['Dummy']='' ;\n" ;
 
      for($i=0 ; $i<$res->num_rows ; $i++)
      {
@@ -500,7 +500,7 @@ function SuccessMsg() {
     <tr>
       <td class="fieldC">
         Сопроводительный техт <br>
-        <textarea cols=100 rows=3 wrap="soft" name="Invite" id="Invite"> </textarea>
+        <textarea cols=100 rows=3 wrap="soft" name="Invite" id="Invite"></textarea>
       </td>
     </tr>
     <tr>

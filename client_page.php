@@ -739,8 +739,8 @@ function ShowExtensions() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      \n" ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;\n" ;
+    echo  "i_error.style.color='red' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
     echo  "return ;\n" ;
 }
 
@@ -758,8 +758,8 @@ function InfoMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    \n" ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;\n" ;
+    echo  "i_error.style.color='green' ;			\n" ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ;	\n" ;
 }
 //============================================== 
 ?>
@@ -1431,7 +1431,6 @@ function SuccessMsg() {
     </tbody>
   </table>
 
-  <div hight=20%><br></div>
   <form onsubmit="return SendFields();" method="POST"  enctype="multipart/form-data" id="Form">
 
   <ul class="menu" id="PageControl">

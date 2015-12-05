@@ -217,12 +217,14 @@ function ProcessDB() {
 
           $page_   =$db->real_escape_string($page ) ;
 
+  if(isset($update)) 
+  {
           $crypto_ =$db->real_escape_string($crypto) ;
           $check_  =$db->real_escape_string($check ) ;
           $title_  =$db->real_escape_string($title ) ;
           $remark_ =$db->real_escape_string($remark) ;
           $publish_=$db->real_escape_string($publish) ;
-
+  }
 //--------------------------- Первое сохранение новой страницы
 
   if(isset($update)         && 
@@ -426,8 +428,6 @@ function ProcessDB() {
 //--------------------------- Извлечение списка назначений
 
       echo     "  i_count.value='0'	;\n" ;
-
-          $put_id_=$db->real_escape_string($put_id) ;
 
                      $sql="Select prescription_id, remark".
 			  "  From prescriptions_pages".

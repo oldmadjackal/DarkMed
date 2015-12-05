@@ -375,7 +375,7 @@ function SuccessMsg() {
   <br>
   <form onsubmit="return SendFields();" method="POST">
   <p class="error" id="Error"></p>
-  <table class="table" width="100%">
+  <table width="100%">
     <thead>
     </thead>
     <tbody id="Messages">

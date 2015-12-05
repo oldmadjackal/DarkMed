@@ -82,7 +82,6 @@ function RegistryDB() {
         $end=strpos($options, ";", $pos) ;
      if($end!==false)  $user_type=substr($options, $pos+strlen($key), $end-$pos-strlen($key)) ;
                    }
-
 //--------------------------- Регистрация сессии
 
            $session=GetRandomString(16) ;
@@ -108,6 +107,9 @@ function RegistryDB() {
           FileLog("ERROR", "Insert DELETE... : ".$db->error) ;
           InfoMsg("Ошибка на сервере. <br>Детали: ошибка очистки таблицы сессий") ;
   }
+
+     SuccessMsg($session) ;
+
 //--------------------------- Запрос списка непрочитанных релизов
 
                      $sql="Select id, date(created), title, notes, user".
@@ -133,17 +135,53 @@ function RegistryDB() {
                     $res->free() ;
   }
 
+//--------------------------- Запрос наличия непрочитанных сообщений
+
+                    $msg_flag="0" ;
+
+                     $sql="Select count(*)".
+                          "  From messages".
+                          " Where receiver='$login'".
+                          "  and  `read` is null" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select MESSAGES... : ".$db->error) ;
+          InfoMsg("Ошибка на сервере. <br>Детали: ошибка опеделения наличия непрочитанных сообщений") ;
+  }
+  else {
+	      $fields=$res->fetch_row() ;
+
+                $msg_flag=$fields[0] ;
+           
+                    $res->free() ;
+  }
 //--------------------------- Изменение конфигурации главного меню
 
    if($user_type=="Doctor")  echo  "parent.frames['menu'].ShowDoctor() ; " ;
    else                      echo  "parent.frames['menu'].ShowClient() ; " ;
 
+//--------------------------- Автоматический переход на формы
+
+          FileLog("DEBUG", "msg_flag<".$msg_flag.">") ;
+
+   if($msg_flag=="0")
+   {
+      if($user_type=="Doctor")
+      {
+      }
+      else
+      {
+          echo  "  location.assign('client_card.php'+'?Session=".$session."') ;	\n" ;
+      }
+   }
+   else
+   {
+          echo  "  location.assign('messages.php'+'?Session=".$session."') ;	\n" ;
+   }
 //--------------------------- Завершение
 
      $db->commit() ;
      $db->close() ;
-
-     SuccessMsg($session) ;
 
         FileLog("STOP", "Done") ;
 }

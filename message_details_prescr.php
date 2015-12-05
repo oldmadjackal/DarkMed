@@ -123,7 +123,6 @@ function ProcessDB() {
 
   if(isset($details)) 
   {
-        $owner_=$db->real_escape_string($owner) ;
         $check_=$db->real_escape_string($check) ;
 //- - - - - - - - - - - - - - ѕеребор страниц, по которым предоставлен доступ
 	$words=explode(" ", $details) ;

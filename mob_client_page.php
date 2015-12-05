@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Client_page.php" ;
+   $glb_script="Mob_Client_page.php" ;
 
   require("stdlib.php") ;
 
@@ -51,7 +51,6 @@ function ProcessDB() {
                           $delete=$_POST["Delete"] ;
                          $reorder=$_POST["ReOrder"] ;
   }
-
                          $new_order  =$_POST["OrderNew"] ;
                          $ext_edit   =$_POST["ExtEdit"] ;
 
@@ -61,7 +60,8 @@ function ProcessDB() {
   if( isset($new_order) ||
       isset($ext_edit )   )
   {
-                               $new_type  =$_POST["TypeNew"] ;
+//                             $new_type  =$_POST["TypeNew"] ;
+                               $new_type  =       "Image" ;
                                $new_remark=$_POST["RemarkNew"] ;
 
     if($new_type=="Image" or
@@ -129,7 +129,10 @@ function ProcessDB() {
   {
      $db->close() ;
 
-      echo     "  i_update.value='insert' ;\n" ;
+      echo     "  i_update.value='insert' ;	\n" ;
+      echo     "    EditTitle() ;		\n" ;
+
+      InfoMsg("Добавление картинок станет доступно после первого сохранения") ;
 
       FileLog("",     "New page template sent") ;     
       FileLog("STOP", "Done") ;     
@@ -258,11 +261,11 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение ключа страницы
 
-                       $sql="Select  crypto, ext_key ".
-                            "  From `access_list` ".
-                            " Where `owner`='$owner_' ".
-                            "  and  `login`='$user_' ".
-                            "  and  `page` =$page_" ;
+                       $sql="Select crypto, ext_key ".
+                            "  From access_list ".
+                            " Where owner='$owner_' ".
+                            "  and  login='$user_' ".
+                            "  and  page = $page_" ;
        $res=$db->query($sql) ;
     if($res===false) {
           FileLog("ERROR", "DB query(Select ACCESS_LIST...) : ".$db->error) ;
@@ -590,8 +593,7 @@ function ProcessDB() {
 
 	          $db->commit() ;
 
-     if(isset($ext_edit))   echo  "  document.getElementById('LiftUp_".$new_order."').focus() ;	\n" ;
-     else                   echo  "  document.getElementById('ExtensionType').focus() ;		\n" ;
+      echo  "  document.getElementById('AddExtension').focus() ;	\n" ;
 
         FileLog("", "Page extension added successfully") ;
   }
@@ -606,8 +608,8 @@ function ProcessDB() {
                          return ;
      }
 
-      echo     "  i_count    .value='0' ;	\n" ;
-      echo     "  i_new_order.value='0' ;	\n" ;
+      echo     "  i_count.value='0' ;	\n" ;
+      echo     "      order_new='0' ;	\n" ;
 
                      $sql="Select e.id, e.type, e.remark, e.file, e.short_file, e.www_link".
 			  "  From client_pages_ext e".
@@ -660,8 +662,8 @@ function ProcessDB() {
           $sys_ext_link  [$i]= $fields[5] ;
      }
 
-      echo     "  i_count    .value=".$res->num_rows." ;	\n" ;
-      echo     "  i_new_order.value=".$res->num_rows." ;	\n" ;
+      echo     "  i_count.value=".$res->num_rows." ;	\n" ;
+      echo     "      order_new=".$res->num_rows." ;	\n" ;
   }
 
      $res->close() ;
@@ -691,14 +693,14 @@ function ShowExtensions() {
   {
         $row=$i ;
 
-       echo  "  <tr class='table' id='Row_".$row."'>				\n" ;
-       echo  "    <td  class='table' width='10%'>				\n" ;
+       echo  "  <tr class='table' id='Row_".$row."'>						\n" ;
+       echo  "    <td  class='table' width='10%'>						\n" ;
 
     if($sys_ext_type[$i]=="Image") {
        echo "<div class='fieldC'>						\n" ;
        echo "<img src='".$sys_ext_sfile[$i]."' height=200 id='Image_".$row."'>	\n" ;
        echo "</div>								\n" ;
-       echo "<br>								\n" ;
+//     echo "<br>								\n" ;
     }
        echo  "      <input type='hidden' id='Order_".$row."' value='".$row."'>			\n" ;
        echo  "      <input type='hidden' id='Ext_"  .$row."' value='".$sys_ext_id[$i]."'>	\n" ;
@@ -710,6 +712,7 @@ function ShowExtensions() {
 
     if($sys_ext_type[$i]=="File") {
        echo  "  <a href='#' id='File_".$row."'>Ссылка на файл</a>	\n" ; 
+       echo  "  <br>											\n" ;
     }
 
     if($sys_ext_type[$i]=="Link") {
@@ -717,16 +720,14 @@ function ShowExtensions() {
        echo  "  <br>											\n" ;
     }
 
-       echo  "    </td>						\n" ;
-       echo  "    <td class='table'>				\n" ;
-
     if($sys_read_only==false) {
-       echo  "      <input type='button' value='Вверх'         id='LiftUp_".$row."' onclick=LiftUpRow('".$row."')>	\n" ;
-       echo  "      <br>												\n" ;
-       echo  "      <input type='button' value='Редактировать' id='Edit_".$row."'   onclick=EditRow('".$row."')>	\n" ;
-       echo  "      <br>												\n" ;
-       echo  "      <input type='button' value='Удалить'       id='Delete_".$row."' onclick=DeleteRow('".$row."')>	\n" ;
+
+       echo  "      <br><div class='fieldC'>											\n" ;
+       echo  "      <input hidden class='B_bttn' type='button' value='Вверх'   id='LiftUp_".$row."' onclick=LiftUpRow('".$row."')>	\n" ;
+       echo  "      <input hidden class='R_bttn' type='button' value='Удалить' id='Delete_".$row."' onclick=DeleteRow('".$row."')>	\n" ;
+       echo  "      </div>													\n" ;
     }
+
        echo  "    </td>						\n" ;
        echo  "  </tr>						\n" ;
 
@@ -739,8 +740,8 @@ function ShowExtensions() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color='red' ;		\n" ;
-    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
+    echo  "i_error.style.color=\"red\" ;      \n" ;
+    echo  "i_error.innerHTML  =\"".$text."\" ;\n" ;
     echo  "return ;\n" ;
 }
 
@@ -772,11 +773,11 @@ function SuccessMsg() {
 
 <head>
 
-<title>DarkMed Client Card</title>
+<title>DarkMed-Mobile Client Page</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("mob_common.css")
 </style>
 
 <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
@@ -790,12 +791,23 @@ function SuccessMsg() {
     var  i_ext_key ;
     var  i_file_key ;
     var  i_title ;
+    var  i_title_mark ;
+    var  i_title_view ;
     var  i_remark ;
+    var  i_remark_mark ;
+    var  i_remark_view ;
+    var  i_save1_btn ;
+    var  i_save2_btn ;
+    var  i_edit_btn ;
+    var  i_add_btn ;
     var  i_ext_type ;
     var  i_count ;
-    var  i_new_order ;
     var  i_delete ;
     var  i_reorder ;
+    var  i_order_new ;
+    var  i_file_new ;
+    var  i_file_btn ;
+    var  i_remark_new ;
     var  i_update ;
     var  i_error ;
     var  session ;
@@ -803,6 +815,7 @@ function SuccessMsg() {
     var  page_key ;
     var  ext_key ;
     var  check_key ;
+    var  order_new ;
 
   function FirstField() 
   {
@@ -811,23 +824,31 @@ function SuccessMsg() {
     var  text ;
 
 
-	i_table    =document.getElementById("Fields") ;
-	i_page     =document.getElementById("Page") ;
-	i_check    =document.getElementById("Check") ;
-	i_crypto   =document.getElementById("Crypto") ;
-	i_ext_key  =document.getElementById("ExtKey") ;
-	i_file_key =document.getElementById("FileKey") ;
-	i_title    =document.getElementById("Title") ;
-	i_remark   =document.getElementById("Remark") ;
-	i_ext_type =document.getElementById("ExtensionType") ;
-	i_count    =document.getElementById("Count") ;
-	i_new_order=document.getElementById("NewOrder") ;
-	i_delete   =document.getElementById("Delete") ;
-	i_reorder  =document.getElementById("ReOrder") ;
-	i_update   =document.getElementById("Update") ;
-	i_error    =document.getElementById("Error") ;
-
-	i_title.focus() ;
+	i_table      =document.getElementById("Fields") ;
+	i_page       =document.getElementById("Page") ;
+	i_check      =document.getElementById("Check") ;
+	i_crypto     =document.getElementById("Crypto") ;
+	i_ext_key    =document.getElementById("ExtKey") ;
+	i_file_key   =document.getElementById("FileKey") ;
+	i_title      =document.getElementById("Title") ;
+	i_title_mark =document.getElementById("TitleMark") ;
+	i_title_view =document.getElementById("TitleView") ;
+	i_remark     =document.getElementById("Remark") ;
+	i_remark_mark=document.getElementById("RemarkMark") ;
+	i_remark_view=document.getElementById("RemarkView") ;
+	i_save1_btn  =document.getElementById("Save1") ;
+	i_save2_btn  =document.getElementById("Save2") ;
+	i_edit_btn   =document.getElementById("Edit") ;
+	i_add_btn    =document.getElementById("AddExtension") ;
+	i_count      =document.getElementById("Count") ;
+	i_delete     =document.getElementById("Delete") ;
+	i_reorder    =document.getElementById("ReOrder") ;
+	i_order_new  =document.getElementById("OrderNew") ;
+	i_file_new   =document.getElementById("FileNew") ;
+	i_file_btn   =document.getElementById("FileBtn") ;
+	i_remark_new =document.getElementById("RemarkNew") ;
+	i_update     =document.getElementById("Update") ;
+	i_error      =document.getElementById("Error") ;
 
            page_key="" ;
             ext_key="" ;
@@ -863,8 +884,12 @@ function SuccessMsg() {
          return true ;
      }
 
-       i_title .value=Crypto_decode(i_title .value, page_key) ;
-       i_remark.value=Crypto_decode(i_remark.value, page_key) ;
+       i_title      .value    =Crypto_decode(i_title .value, page_key) ;
+       i_title_view .innerHTML=i_title.value ;
+       i_remark     .value    =Crypto_decode(i_remark.value, page_key) ;
+       i_remark_view.innerHTML=i_remark.value ;
+
+     if(i_title.value=="")  EditTitle() ;
 
       for(i=0 ; i<i_count.value ; i++) {
            i_ext          =document.getElementById("Remark_"+i) ;
@@ -898,26 +923,9 @@ function SuccessMsg() {
     }
 
 	 v_session=TransitContext("restore","session","") ;
-	parent.frames["processor"].location.assign("z_clear_tmp.php?Session="+v_session) ;
+	parent.frames["details"].location.replace("mob_client_page_footer.php?Session="+v_session) ;
 
          return true ;
-  }
-
-  function SetReadOnly() 
-  {
-    var  i_form ;
-    var  i_pctrl ;
-
-       i_form  =document.getElementById("Form") ;
-       i_pctrl =document.getElementById("PageControl") ;
-       i_form  .removeChild(i_pctrl) ;
-
-       i_title   .readOnly=true ;
-       i_remark  .readOnly=true ;
-       i_ext_type.disabled=true ;
-
-       document.getElementById("Save1"       ).disabled=true ;
-       document.getElementById("AddExtension").disabled=true ;
   }
 
   function SendFields() 
@@ -939,22 +947,11 @@ function SuccessMsg() {
              error_text=error_text+"<br>Не задано поле 'Заголовок'" ;
      }
 
-      i_new=document.getElementById("ExtEdit") ;
-   if(i_new==null)
+      i_new=document.getElementById("OrderNew") ;
+   if(i_new.value!="")
    {
-        i_ext_type=document.getElementById("TypeNew") ;
-     if(i_ext_type!=null) {
-
-       if(i_ext_type.value=='Image') {
-            i_new=document.getElementById("FileNew") ;
-         if(i_new.value=="")    error_text="Не выбран файла изображения" ;
-                                     }
-
-       if(i_ext_type.value=='File') {
-            i_new=document.getElementById("FileNew") ;
-         if(i_new.value=="")    error_text="Не выбран прикрепляемый файл" ;
-                                    }
-     }
+        i_new=document.getElementById("FileNew") ;
+     if(i_new.value=="")    error_text="Не выбран файла изображения" ;
    }
 
        i_error.style.color="red" ;
@@ -995,8 +992,8 @@ function SuccessMsg() {
 
      if(error_text!="")  return false ;
 
-        i_title .value=Crypto_encode(i_title .value, page_key) ;
-        i_remark.value=Crypto_encode(i_remark.value, page_key) ;
+        i_title  .value=Crypto_encode(i_title .value, page_key) ;
+        i_remark .value=Crypto_encode(i_remark.value, page_key) ;
 
         i_new=document.getElementById("RemarkNew") ;
      if(i_new!=null) 
@@ -1030,307 +1027,60 @@ function SuccessMsg() {
                          return true ;
   } 
 
-  function NewPage() 
+  function EditTitle()
   {
-    var  v_session ;
+        i_edit_btn   .hidden=true ;
+        i_add_btn    .hidden=true ;
+        i_save1_btn  .hidden=false ;
+        i_save2_btn  .hidden=false ;
 
-         v_session=TransitContext("restore","session","") ;
+	i_title_view .hidden=true ;
+	i_title      .hidden=false ;
+	i_title_mark .hidden=false ;
 
-        location.assign("client_page.php"+"?Session="+v_session+"&NewPage=1") ;
-  } 
+	i_remark_view.hidden=true ;
+	i_remark     .hidden=false ;
+	i_remark_mark.hidden=false ;
 
-  function MainPage() 
-  {
-    var  v_session ;
-
-         v_session=TransitContext("restore","session","") ;
-
-        location.assign("client_card.php"+"?Session="+v_session) ;
-  } 
+	i_title.focus() ;
+  }
 
   function AddNewExtension()
   {
-     var  ext_type ;
-     var  i_set ;
-     var  i_row_new ;
-     var  i_col_new ;
-     var  i_fld_new ;
-     var  i_txt_new ;
-     var  i_shw_new ;
-     var  i_del_new ;
-     var  i_add_new ;
-     var  i_elm ;
+        i_edit_btn  .hidden  =true ;
+        i_add_btn   .hidden  =true ;
+        i_save1_btn .hidden  =false ;
+        i_save2_btn .hidden  =false ;
 
+	i_order_new .disabled=false ;
+	i_order_new .value   =order_new ;
 
-         ext_type=i_ext_type.value ;
+	i_file_btn  .hidden  =false ;
+	i_remark_new.hidden  =false ;
 
-       i_set     = document.getElementById("Extensions") ;
+	i_remark_new.focus() ;
+  }
 
-       i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
-       i_row_new . id        = "ExtensionNew" ;
-
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_row_new . appendChild(i_col_new) ;
-
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id        ='OrderNew' ;
-       i_fld_new . name      ='OrderNew' ;
-       i_fld_new . type      ="hidden" ;
-       i_fld_new . value     =i_new_order.value ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id        ='TypeNew' ;
-       i_fld_new . name      ='TypeNew' ;
-       i_fld_new . type      ="hidden" ;
-       i_fld_new . value     = ext_type ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("div") ;
-       i_fld_new . id        ='ErrorExt' ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("textarea") ;
-       i_fld_new . id        ='RemarkNew' ;
-       i_fld_new . name      ='RemarkNew' ;
-       i_fld_new . cols      = 60 ;
-       i_fld_new . rows      =  7 ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-
-     if(ext_type=="Image") {
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='FileNew' ;
-       i_fld_new . name     ='FileNew' ;
-       i_fld_new . type     ="file" ;
-       i_fld_new . accept   ="image/*" ;
-       i_col_new . appendChild(i_fld_new) ;
-     }
-     if(ext_type=="File") {
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='FileNew' ;
-       i_fld_new . name     ='FileNew' ;
-       i_fld_new . type     ="file" ;
-       i_col_new . appendChild(i_fld_new) ;
-     }
-     if(ext_type=="Link") {
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='LinkNew' ;
-       i_fld_new . name     ='LinkNew' ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . maxlength=510 ;
-       i_fld_new . size     = 50 ;
-       i_shw_new = document.createElement("input") ;
-       i_shw_new . type    ="button" ;
-       i_shw_new . value   ="Проверить" ;
-       i_shw_new . onclick = function(e) {  GoToLink('LinkNew') ;  }
-       i_col_new . appendChild(i_fld_new) ;
-       i_col_new . appendChild(i_shw_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-     }
-
-       i_row_new . appendChild(i_col_new) ;
-
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_add_new = document.createElement("input") ;
-       i_add_new . type   ="submit" ;
-       i_add_new . value  ="Сохранить" ;
-       i_col_new . appendChild(i_add_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_del_new = document.createElement("input") ;
-       i_del_new . type   ="button" ;
-       i_del_new . value  ="Удалить" ;
-       i_del_new . onclick= function(e) {  DeleteNew() ;  }
-       i_col_new . appendChild(i_del_new) ;
-       i_row_new . appendChild(i_col_new) ;
-
-       i_set     . appendChild(i_row_new) ;
-
-       document.getElementById("AddExtension" ).disabled=true ;
-       document.getElementById("ExtensionType").disabled=true ;
-
-    for(row=0 ; row<i_count.value ; row++) {
-	 i_elm=document.getElementById("Delete_"+row) ;
-      if(i_elm!=null)  i_elm.disabled=true ;
-	 i_elm=document.getElementById("Edit_"+row) ;
-      if(i_elm!=null)  i_elm.disabled=true ;
-    }
-
-       document.getElementById("RemarkNew").focus() ;
-
-    return ;         
-  } 
-
-  function DeleteNew()
+  function ShowExtActions(p_flag)
   {
-    var  i_set  ;
-    var  i_row  ;
-    var  i_elm  ;
+    var  i_liftup ;
+    var  i_delete ;
 
-	i_set=document.getElementById("Extensions") ;
-	i_row=document.getElementById("ExtensionNew") ;
-
-        i_set.removeChild(i_row) ;
-
-       document.getElementById("AddExtension" ).disabled=false ;
-       document.getElementById("ExtensionType").disabled=false ;
 
     for(row=0 ; row<i_count.value ; row++) {
-	 i_elm=document.getElementById("LiftUp_"+row) ;
-      if(i_elm!=null)  i_elm.disabled=false ;
-	 i_elm=document.getElementById("Delete_"+row) ;
-      if(i_elm!=null)  i_elm.disabled=false ;
-	 i_elm=document.getElementById("Edit_"+row) ;
-      if(i_elm!=null)  i_elm.disabled=false ;
+
+	i_liftup=document.getElementById("LiftUp_"+row) ;
+	i_delete=document.getElementById("Delete_"+row) ;
+
+	if(i_liftup!=null)  i_liftup.hidden=!p_flag ;
+	if(i_delete!=null)  i_delete.hidden=!p_flag ;
     }
 
-     return ;
-  } 
-
-  function EditRow(p_row)
-  {
-     var  ext_type ;
-     var  i_set ;
-     var  i_row_old ;
-     var  i_row_new ;
-     var  i_col_new ;
-     var  i_fld_new ;
-     var  i_txt_new ;
-     var  i_shw_new ;
-     var  i_del_new ;
-     var  i_add_new ;
-     var  i_elm ;
-
-
-        ext_type = document.getElementById("Type_"+p_row).value ;
-
-       i_set     = document.getElementById("Extensions") ;
-       i_row_old = document.getElementById("Row_"+p_row) ;
-
-       i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
-       i_row_new . id        = "ExtensionNew" ;
-
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_txt_new = document.createTextNode("Редактирование предыдущей записи") ;
-       i_col_new . appendChild(i_txt_new) ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id        ='ExtEdit' ;
-       i_fld_new . name      ='ExtEdit' ;
-       i_fld_new . type      ="hidden" ;
-       i_fld_new . value     =document.getElementById("Ext_"+p_row).value ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id        ='OrderNew' ;
-       i_fld_new . name      ='OrderNew' ;
-       i_fld_new . type      ="hidden" ;
-       i_fld_new . value     =document.getElementById("Order_"+p_row).value ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id        ='TypeNew' ;
-       i_fld_new . name      ='TypeNew' ;
-       i_fld_new . type      ="hidden" ;
-       i_fld_new . value     = ext_type ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_row_new . appendChild(i_col_new) ;
-
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("div") ;
-       i_fld_new . id        ='ErrorExt' ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("textarea") ;
-       i_fld_new . id        ='RemarkNew' ;
-       i_fld_new . name      ='RemarkNew' ;
-       i_fld_new . cols      = 60 ;
-       i_fld_new . rows      =  7 ;
-       i_fld_new . value     = document.getElementById("Remark_"+p_row).innerHTML.trim() ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_row_new . appendChild(i_col_new) ;
-
-     if(ext_type=="Image") {
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='FileNew' ;
-       i_fld_new . name     ='FileNew' ;
-       i_fld_new . type     ="file" ;
-       i_fld_new . accept   ="image/*" ;
-       i_col_new . appendChild(i_fld_new) ;
-     }
-     if(ext_type=="File") {
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='FileNew' ;
-       i_fld_new . name     ='FileNew' ;
-       i_fld_new . type     ="file" ;
-       i_col_new . appendChild(i_fld_new) ;
-     }
-     if(ext_type=="Link") {
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='LinkNew' ;
-       i_fld_new . name     ='LinkNew' ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . maxlength=510 ;
-       i_fld_new . size     = 50 ;
-       i_shw_new = document.createElement("input") ;
-       i_shw_new . type    ="button" ;
-       i_shw_new . value   ="Проверить" ;
-       i_shw_new . onclick = function(e) {  GoToLink('LinkNew') ;  }
-       i_col_new . appendChild(i_fld_new) ;
-       i_col_new . appendChild(i_shw_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-     }
-
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_add_new = document.createElement("input") ;
-       i_add_new . type   ="submit" ;
-       i_add_new . value  ="Сохранить" ;
-       i_col_new . appendChild(i_add_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_del_new = document.createElement("input") ;
-       i_del_new . type   ="button" ;
-       i_del_new . value  ="Отменить" ;
-       i_del_new . onclick= function(e) {  DeleteNew() ;  }
-       i_col_new . appendChild(i_del_new) ;
-       i_row_new . appendChild(i_col_new) ;
-
-    if(i_row_old.nextSibling!=null)
-          i_set.insertBefore(i_row_new, i_row_old.nextSibling) ;
-    else  i_set.appnedChild (i_row_new) ;
-
-       document.getElementById("AddExtension" ).disabled=true ;
-       document.getElementById("ExtensionType").disabled=true ;
-
-    for(row=0 ; row<i_count.value ; row++) {
-	 i_elm=document.getElementById("LiftUp_"+row) ;
-      if(i_elm!=null)  i_elm.disabled=true ;
-	 i_elm=document.getElementById("Delete_"+row) ;
-      if(i_elm!=null)  i_elm.disabled=true ;
-	 i_elm=document.getElementById("Edit_"+row) ;
-      if(i_elm!=null)  i_elm.disabled=true ;
-    }
-
-       document.getElementById("RemarkNew").focus() ;
-
-    return ;         
-  } 
+        i_edit_btn .hidden= p_flag ;
+        i_add_btn  .hidden= p_flag ;
+        i_save1_btn.hidden=!p_flag ;
+        i_save2_btn.hidden=!p_flag ;
+  }
 
   function DeleteRow(p_row)
   {
@@ -1354,10 +1104,8 @@ function SuccessMsg() {
        if(parseInt(i_elm.value)>order)  i_elm.value=parseInt(i_elm.value)-1 ;
     }
 
-        i_new_order.value=parseInt(i_new_order.value)-1 ;
-
      return ;
-  } 
+  }
 
   function LiftUpRow(p_row)
   {
@@ -1397,6 +1145,11 @@ function SuccessMsg() {
     window.open(document.getElementById(p_link).value) ;
   } 
 
+  function FileBrowse() 
+  {
+     document.getElementById("FileNew").click() ;
+  }
+
 
 <?php
   require("common.inc") ;
@@ -1422,10 +1175,7 @@ function SuccessMsg() {
     <tr>
       <td width="10%"> 
         <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
-      </td> 
-      <td class="title"> 
-        <b>ДОПОЛНИТЕЛЬНЫЙ РАЗДЕЛ ПАЦИЕНТА</b>
+        <input type="button" hidden value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
     </tr>
     </tbody>
@@ -1433,35 +1183,35 @@ function SuccessMsg() {
 
   <form onsubmit="return SendFields();" method="POST"  enctype="multipart/form-data" id="Form">
 
-  <ul class="menu" id="PageControl">
-    <li><a href="#" onclick=NewPage()  target="_self">Создать новый раздел</a></li> 
-    <li><a href="#" onclick=MainPage() target="_self">Вернуться в карточку пациента</a></li> 
-  </ul>
-
   <table width="100%" id="Fields">
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="field"> </td>
-      <td> <br> <input type="submit" value="Сохранить" id="Save1"> </td>
-    </tr>
-    <tr>
-      <td class="field"> </td>
       <td> <div class="error" id="Error"></div> </td>
     </tr>
     <tr>
-      <td class="field"> Заголовок </td>
-      <td> <input type="text" size=60 name="Title" id="Title"> </td>
-    </tr>
-    <tr>
-      <td class="field"> Примечание </td>
-      <td> 
-        <textarea cols=60 rows=7 wrap="soft" name="Remark" id="Remark"></textarea>
+      <td class="fieldC">
+        <b><div class="fieldC" id="TitleView"></div></b>
+        <div hidden id="TitleMark">Заголовок</div>
+        <input hidden type="text" size=32 maxlength=60 name="Title" id="Title">
       </td>
     </tr>
     <tr>
-      <td class="field"> </td>
+      <td class="fieldC">
+        <span id="RemarkView"></span>
+        <div hidden id="RemarkMark">Пояснение</div>
+        <textarea hidden cols=32 rows=7 wrap="soft" name="Remark" id="Remark"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td class="fieldC">
+        <br>
+        <input type="submit" value="Сохранить" class="G_bttn" hidden id="Save1"> 
+        <input type="button" value="Редактировать титул" onclick=EditTitle() id="Edit"> 
+      </td>
+    </tr>
+    <tr>
       <td>
         <input type="hidden" name="Page"    id="Page"> 
         <input type="hidden" name="Check"   id="Check"> 
@@ -1474,6 +1224,7 @@ function SuccessMsg() {
     </tbody>
   </table>
 
+  <br>
   <table width="100%">
     <thead>
     </thead>
@@ -1486,22 +1237,23 @@ function SuccessMsg() {
     </tbody>
   </table>
 
-  <br>
   <div class="fieldC">
-    <select name="ExtensionType" id="ExtensionType"> 
-      <option value="Image">Картинка с пояснением</option>
-      <option value="Link">Ссылка с пояснением</option>
-      <option value="File">Файл с пояснением</option>
-      <option value="Text">Текстовой блок</option>
-    </select> 
-    <input type="button" value="Добавить" onclick=AddNewExtension() id="AddExtension">
+    <br>
+    <input type="submit" value="Сохранить" class="G_bttn" hidden id="Save2"> 
+    <input type="button" value="Добавить изображение" onclick=AddNewExtension() id="AddExtension">
+    <div class="error" id="ErrorExt"></div>
+    <br>
+    <input type="button" value="Выбрать файл изображения" hidden onclick=FileBrowse() id="FileBtn">
+    <input type="file" accept="image/*" hidden name="FileNew" id="FileNew">
+    <br>
+    <br>
+    <textarea hidden cols=32 rows=5 wrap="soft" placeholder="-- Введите примечание --" name="RemarkNew" id="RemarkNew"></textarea>
     <input type="hidden" name="Count" id="Count">
-    <input type="hidden" name="NewOrder" id="NewOrder">
+    <input type="hidden" disabled name="OrderNew" id="OrderNew">
     <input type="hidden" name="FileName" id="FileName">
     <input type="hidden" name="ReOrder" id="ReOrder">
     <input type="hidden" name="Delete" id="Delete">
   </div>
-  <br>
   <br>
 
   </form>

@@ -388,6 +388,8 @@ function ProcessDB() {
                    $description='' ;
                    $www_link   ='' ;
 
+          $get_id_=$db->real_escape_string($put_id) ;
+
         FileLog("", "New prescription generated successfully") ;
   }
 //--------------------------- Извлечение данных для отображения

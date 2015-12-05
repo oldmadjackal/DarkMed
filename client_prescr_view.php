@@ -99,8 +99,6 @@ function ProcessDB() {
 
 //--------------------------- Извлечение списка назначений
 
-          $put_id_=$db->real_escape_string($put_id) ;
-
                      $sql="Select prescription_id, name, remark".
 			  "  From prescriptions_pages".
                           " Where owner='$owner_'".

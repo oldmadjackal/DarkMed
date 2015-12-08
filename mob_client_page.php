@@ -230,6 +230,9 @@ function ProcessDB() {
 //- - - - - - - - - - - - - -
         FileLog("", "User ".$owner." additional page ".$page_." successfully created") ;
   }
+
+             echo     "   i_page.value='".$page_."' ;	\n" ;
+
 //--------------------------- Сохранение данных страницы
 //
 //  Сохранение допускается только для владельца страницы
@@ -253,8 +256,6 @@ function ProcessDB() {
     }
 
           $db->commit() ;
-
-             echo     "   i_page.value='".$page_."' ;	\n" ;
 
         FileLog("", "User ".$owner." additional page ".$page_." saved successfully") ;
      SuccessMsg() ;
@@ -800,7 +801,7 @@ function SuccessMsg() {
     var  i_save2_btn ;
     var  i_edit_btn ;
     var  i_add_btn ;
-    var  i_ext_type ;
+    var  i_send_bth ;
     var  i_count ;
     var  i_delete ;
     var  i_reorder ;
@@ -840,6 +841,7 @@ function SuccessMsg() {
 	i_save2_btn  =document.getElementById("Save2") ;
 	i_edit_btn   =document.getElementById("Edit") ;
 	i_add_btn    =document.getElementById("AddExtension") ;
+	i_send_btn   =document.getElementById("SendInvitation") ;
 	i_count      =document.getElementById("Count") ;
 	i_delete     =document.getElementById("Delete") ;
 	i_reorder    =document.getElementById("ReOrder") ;
@@ -1031,6 +1033,7 @@ function SuccessMsg() {
   {
         i_edit_btn   .hidden=true ;
         i_add_btn    .hidden=true ;
+        i_send_btn   .hidden=true ;
         i_save1_btn  .hidden=false ;
         i_save2_btn  .hidden=false ;
 
@@ -1049,6 +1052,7 @@ function SuccessMsg() {
   {
         i_edit_btn  .hidden  =true ;
         i_add_btn   .hidden  =true ;
+        i_send_btn  .hidden  =true ;
         i_save1_btn .hidden  =false ;
         i_save2_btn .hidden  =false ;
 
@@ -1150,6 +1154,11 @@ function SuccessMsg() {
      document.getElementById("FileNew").click() ;
   }
 
+  function  PageInvite()
+  {
+     location.assign('mob_page_invite.php'+'?Session='+session+'&Page='+i_page.value) ;
+  }
+
 
 <?php
   require("common.inc") ;
@@ -1209,6 +1218,12 @@ function SuccessMsg() {
         <br>
         <input type="submit" value="Сохранить" class="G_bttn" hidden id="Save1"> 
         <input type="button" value="Редактировать титул" onclick=EditTitle() id="Edit"> 
+      </td>
+    </tr>
+    <tr>
+      <td class="fieldC">
+        <br>
+        <input type="button" value="Направить приглашение" class="B_bttn" onclick=PageInvite() id="SendInvitation"> 
       </td>
     </tr>
     <tr>

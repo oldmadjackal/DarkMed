@@ -58,9 +58,10 @@ function ProcessDB() {
                          $user="" ;
   }
 
-                                                    $sys_user_type="Client" ;
-  if(       $options=="Anonimous"                )  $sys_user_type="Anonimous" ;
-  if(strpos($options, "UserType=Doctor;")!==false)  $sys_user_type="Doctor" ;
+                                                      $sys_user_type="Client" ;
+  if(       $options=="Anonimous"                  )  $sys_user_type="Anonimous" ;
+  if(strpos($options, "UserType=Doctor;"  )!==false)  $sys_user_type="Doctor" ;
+  if(strpos($options, "UserType=Executor;")!==false)  $sys_user_type="Executor" ;
 
 //--------------------------- Формирование списка специальностей
 
@@ -196,8 +197,9 @@ function ShowDoctors() {
        echo  "    </td>										\n" ;
        echo  "    <td class='tableB' width='10%'>						\n" ;
 
-    if($sys_user_type=="Client" ||
-       $sys_user_type=="Doctor"   )
+    if($sys_user_type=="Client"  ||
+       $sys_user_type=="Doctor"  ||
+       $sys_user_type=="Executor"  )
     {
        echo  "      <input type='button' value='Переписка' onclick=GoToMail('".$user."')>	\n" ;
        echo  "      <br>									\n" ;

@@ -68,7 +68,8 @@ function ProcessDB() {
 
 //--------------------------- Формирование списка сообщений
 
-  if(strpos($options, "UserType=Doctor;")!==false)
+  if(strpos($options, "UserType=Doctor;"  )!==false ||
+     strpos($options, "UserType=Executor;")!==false   )
   {
                      $sql="Select m.* from (".
 			  "Select m1.id, m1.sender, m1.type, t1.name, m1.text, u1.sign_p_key,".

@@ -61,9 +61,9 @@ function RegistryDB() {
                                         echo  "i_password.value=\"" .$password."\" ;\n" ;
                                         echo  "   i_email.value=\"" .$email   ."\" ;\n" ;
 
-  if(strpos($type, "Client" )!==false)  echo  "i_type_cln.checked=true ;\n" ;
-  if(strpos($type, "Doctor" )!==false)  echo  "i_type_dct.checked=true ;\n" ;
-  if(strpos($type, "Trainer")!==false)  echo  "i_type_trn.checked=true ;\n" ;
+  if(strpos($type, "Client"  )!==false)  echo  "i_type_cln.checked=true ;\n" ;
+  if(strpos($type, "Doctor"  )!==false)  echo  "i_type_dct.checked=true ;\n" ;
+  if(strpos($type, "Executor")!==false)  echo  "i_type_exe.checked=true ;\n" ;
 
   if($completeness<4) {
                         FileLog("CANCEL", "NonComplete data") ;
@@ -106,8 +106,9 @@ function RegistryDB() {
   }
 //--------------------------- Создание учетной записи пользователя
 
-                                      $options="" ;
-  if(strpos($type, "Doctor")!==false) $options="UserType=Doctor;" ;
+                                        $options="" ;
+  if(strpos($type, "Doctor"  )!==false) $options="UserType=Doctor;" ;
+  if(strpos($type, "Executor")!==false) $options="UserType=Executor;" ;
 
      $res=$db->query("Insert into `users`(Login, Password, Email, Sign_p_key, Sign_s_key, Msg_key, Options)".
                                  " values('$login','$password','$email','$p_key','$s_key','$msg_key','$options')") ;
@@ -142,9 +143,10 @@ if(strpos($type, "Client")!==false)
                          return ;
   }
 }
-//--------------------------- Для пользователя типа DOCTOR
+//--------------------------- Для пользователя типа DOCTOR, EXECUTOR
 
-if(strpos($type, "Doctor")!==false)
+if(strpos($type, "Doctor"  )!==false ||
+   strpos($type, "Executor")!==false   )
 {
 //- - - - - - - - - - - - - - Создание главной страницы
      $res=$db->query("Insert into `doctor_page_main`(`Owner`) values('$login')") ;
@@ -219,7 +221,7 @@ function SuccessMsg() {
     var  i_email ;
     var  i_type_cln ;
     var  i_type_dct ;
-    var  i_type_trn ;
+    var  i_type_exe ;
     var  i_crypto ;
     var  i_check ;
     var  i_s_key ;
@@ -235,7 +237,7 @@ function SuccessMsg() {
        i_email   =document.getElementById("Email") ;
        i_type_cln=document.getElementById("TypeClient") ;
        i_type_dct=document.getElementById("TypeDoctor") ;
-       i_type_trn=document.getElementById("TypeTrainer") ;
+       i_type_exe=document.getElementById("TypeExecutor") ;
        i_crypto  =document.getElementById("Crypto") ;
        i_check   =document.getElementById("Check") ;
        i_s_key   =document.getElementById("Sign_secret") ;
@@ -287,9 +289,9 @@ function SuccessMsg() {
 
      if(i_type_cln.checked==false &&
         i_type_dct.checked==false &&
-        i_type_trn.checked==false   ) {
+        i_type_exe.checked==false   ) {
        i_table.rows[4].cells[0].style.color="red"   ;
-             error_text=error_text+"<br>Должен быть выбран хотя бы один из возможных типов записи" ;
+             error_text=error_text+"<br>Должена быть выбрана категория пользователя" ;
      } 
 
 	       TransitContext("save", "password", i_password.value) ;
@@ -394,9 +396,9 @@ function SuccessMsg() {
     <tr>
       <td class="field"> Тип учетной записи</td>
       <td>
-        <div> <input type="radio" name="Type[]" value="Client"  id="TypeClient" >Пациент   </div>
-        <div> <input type="radio" name="Type[]" value="Doctor"  id="TypeDoctor" >Врач      </div>
-        <div> <input type="radio" name="Type[]" value="Trainer" id="TypeTrainer">Тренер, массажист </div>
+        <div> <input type="radio" name="Type[]" value="Client"   id="TypeClient"  >Пациент   </div>
+        <div> <input type="radio" name="Type[]" value="Doctor"   id="TypeDoctor"  >Врач      </div>
+        <div> <input type="radio" name="Type[]" value="Executor" id="TypeExecutor">Специалист: тренер, массажист, медсестра </div>
       </td>
     </tr>
     <tr>

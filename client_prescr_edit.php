@@ -115,6 +115,31 @@ function ProcessDB() {
           $owner_=$db->real_escape_string($owner) ;
           $user_ =$db->real_escape_string($user ) ;
 
+//--------------------------- Извлечение данных страницы
+
+          $page_=$db->real_escape_string($page) ;
+
+                       $sql="Select creator".
+                            "  From client_pages".
+                            " Where `owner`='$owner_'".
+                            "  and  `page` = $page_" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+          FileLog("ERROR", "DB query(Select CLIENT_PAGES(CREATOR)) : ".$db->error) ;
+                            $db->rollback();
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка извлечения создателя страницы") ;
+                         return ;
+    }
+
+	      $fields=$res->fetch_row() ;
+	              $res->close() ;
+
+  if($fields[0]!=$user) {
+                       $db->close() ;
+                    ErrorMsg("Редактировать страницу назначений может только ее создатель") ;
+                         return ;
+  }
 //--------------------------- Извлечение списка типов назначений
 
                      $sql="Select code, name".
@@ -403,7 +428,7 @@ function ProcessDB() {
 //--------------------------- Извлечение данных страницы
 
                        $sql="Select `check`, title, remark, published".
-                            "  From `client_pages`".
+                            "  From client_pages".
                             " Where `owner`='$owner_'".
                             "  and  `page` = $page_" ;
        $res=$db->query($sql) ;

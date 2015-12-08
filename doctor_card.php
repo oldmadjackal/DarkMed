@@ -1308,7 +1308,7 @@ function SuccessMsg() {
         <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
       <td class="title"> 
-        <b>тнплскъп бпювю</b>
+        <b>кхвмши тнплскъп</b>
       </td> 
     </tr>
     </tbody>

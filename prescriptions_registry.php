@@ -51,8 +51,9 @@ function ProcessDB() {
     }
   }
 
-  if(strpos($options, "UserType=Doctor;")!==false)  $read_only=false ;
-  else                                              $read_only=true ;
+       if(strpos($options, "UserType=Doctor;"  )!==false)  $read_only=false ;
+  else if(strpos($options, "UserType=Executor;")!==false)  $read_only=false ;
+  else                                                     $read_only=true ;
 
 //------------------------ Проверка "подтвержденности" врача
 

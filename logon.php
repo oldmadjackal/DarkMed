@@ -72,7 +72,7 @@ function RegistryDB() {
 
                     $res->free() ;
 
-//--------------------------- Выделение аттрибутов пользователя
+//--------------------------- Выделение атрибутов пользователя
 
      $user_type="Unknown" ;
            $key="UserType=" ;
@@ -157,8 +157,9 @@ function RegistryDB() {
   }
 //--------------------------- Изменение конфигурации главного меню
 
-   if($user_type=="Doctor")  echo  "parent.frames['menu'].ShowDoctor() ; " ;
-   else                      echo  "parent.frames['menu'].ShowClient() ; " ;
+        if($user_type=="Doctor"  )  echo  "parent.frames['menu'].ShowDoctor() ; " ;
+   else if($user_type=="Executor")  echo  "parent.frames['menu'].ShowExecutor() ; " ;
+   else                             echo  "parent.frames['menu'].ShowClient() ; " ;
 
 //--------------------------- Автоматический переход на формы
 
@@ -166,7 +167,8 @@ function RegistryDB() {
 
    if($msg_flag=="0")
    {
-      if($user_type=="Doctor")
+      if($user_type=="Doctor"  ||
+         $user_type=="Executor"  )
       {
       }
       else

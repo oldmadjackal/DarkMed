@@ -61,7 +61,9 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-      echo     "   main_key=\"" .$fields[0]."\" ;\n" ;
+      echo     "   user    ='" .$user."' ;	\n" ;
+      echo     "   user_opt='" .$options."' ;	\n" ;
+      echo     "   main_key='" .$fields[0]."' ;	\n" ;
 
 //--------------------------- Формирование списка пациентов
 
@@ -102,7 +104,7 @@ function ProcessDB() {
 
 //--------------------------- Формирование списка страниц пациентов
 
-                     $sql="Select a.owner, a.page, p.type, a.crypto, p.title".
+                     $sql="Select a.owner, a.page, p.type, a.crypto, p.title, p.creator".
 			  "  From             access_list  a".
                           "   left outer join client_pages p on a.owner=p.owner and a.page=p.page ".
 			  " Where  a.owner <> a.login".
@@ -125,19 +127,20 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-	       echo     "               client =\"".$fields[0]."\" ;	\n" ;
-	       echo     "               page   =\"".$fields[1]."\" ;	\n" ;
-	       echo     "               page   =page+\":\"+client ;	\n" ;
+	       echo     "                 client ='".$fields[0]."' ;	\n" ;
+	       echo     "                 page   ='".$fields[1]."' ;	\n" ;
+	       echo     "                 page   =page+':'+client ;	\n" ;
         if($fields[2]==""      ||
            $fields[2]=="client"  )
         {
-	       echo     "  a_page_key  [page]  =\"".$fields[3]."\" ;	\n" ;
-	       echo     "  a_page_title[page]  =\"".$fields[4]."\" ;	\n" ;
+	       echo     "  a_page_key    [page]  ='".$fields[3]."' ;	\n" ;
+	       echo     "  a_page_title  [page]  ='".$fields[4]."' ;	\n" ;
         }
         if($fields[2]=="prescription")
         {
-	       echo     "  a_prsc_key  [page]  =\"".$fields[3]."\" ;	\n" ;
-	       echo     "  a_prsc_title[page]  =\"".$fields[4]."\" ;	\n" ;
+	       echo     "  a_prsc_key    [page]  ='".$fields[3]."' ;	\n" ;
+	       echo     "  a_prsc_title  [page]  ='".$fields[4]."' ;	\n" ;
+	       echo     "  a_prsc_creator[page]  ='".$fields[5]."' ;	\n" ;
         }
      }
   }
@@ -195,6 +198,8 @@ function SuccessMsg() {
     var  i_error ;
     var  password ;
     var  page_key ;
+    var  user ;
+    var  user_opt ;
     var  a_client_key ;
     var  a_client_f ;
     var  a_client_i ;
@@ -205,6 +210,7 @@ function SuccessMsg() {
     var  a_page_title ;
     var  a_prsc_key ;
     var  a_prsc_title ;
+    var  a_prsc_creator ;
 
     var  client_prv ;
 
@@ -219,17 +225,18 @@ function SuccessMsg() {
 
        password=TransitContext("restore", "password", "") ;
 
-             a_client_key =new Array() ;
-             a_client_f   =new Array() ;
-             a_client_i   =new Array() ;
-             a_client_o   =new Array() ;
-             a_client_cat =new Array() ;
-             a_client_desc=new Array() ;
+             a_client_key  =new Array() ;
+             a_client_f    =new Array() ;
+             a_client_i    =new Array() ;
+             a_client_o    =new Array() ;
+             a_client_cat  =new Array() ;
+             a_client_desc =new Array() ;
 
-             a_page_key   =new Array() ;
-             a_page_title =new Array() ;
-             a_prsc_key   =new Array() ;
-             a_prsc_title =new Array() ;
+             a_page_key    =new Array() ;
+             a_page_title  =new Array() ;
+             a_prsc_key    =new Array() ;
+             a_prsc_title  =new Array() ;
+             a_prsc_creator=new Array() ;
 
                client_prv ="NONE" ;
 
@@ -404,38 +411,43 @@ function SuccessMsg() {
       }
     }
 
-       i_client  .appendChild(i_list_new) ;
+	i_client  .appendChild(i_list_new) ;
 
-       i_client        =document.getElementById(p_client+"_actions") ;
-       i_devv_new      =document.createElement("dev") ;
-       i_devv_new.id   =p_client+"_category" ;
-       i_client  .appendChild(i_devv_new) ;
+	i_client        =document.getElementById(p_client+"_actions") ;
+	i_devv_new      =document.createElement("dev") ;
+	i_devv_new.id   =p_client+"_category" ;
+	i_client  .appendChild(i_devv_new) ;
 
-       i_list_new      =document.createElement("ul") ;
-       i_list_new.id   =p_client+"_prescriptions" ;
-       i_list_new.class="level2" ;
+	i_list_new      =document.createElement("ul") ;
+	i_list_new.id   =p_client+"_prescriptions" ;
+	i_list_new.class="level2" ;
 
-	  i_link_new        =document.createElement("a") ;
-          i_link_new.id     =p_client+"_add_prescription" ;
-          i_link_new.href   ="client_prescr_edit.php?Session="+v_session+"&Owner="+p_client+"&NewPage=1" ;
-          i_text_new        =document.createTextNode("Новое назначение") ;
-          i_link_new.appendChild(i_text_new) ;
+    if(user_opt.indexOf("UserType=Doctor;")>=0)
+    {
+	i_link_new        =document.createElement("a") ;
+	i_link_new.id     =p_client+"_add_prescription" ;
+	i_link_new.href   ="client_prescr_edit.php?Session="+v_session+"&Owner="+p_client+"&NewPage=1" ;
+	i_text_new        =document.createTextNode("Новое назначение") ;
+	i_link_new.appendChild(i_text_new) ;
+	i_roww_new        =document.createElement("li") ;
+	i_roww_new.appendChild(i_link_new) ;
+	i_list_new.appendChild(i_roww_new) ;
+    }
 
-	  i_roww_new        =document.createElement("li") ;
-          i_roww_new.appendChild(i_link_new) ;
-          i_list_new.appendChild(i_roww_new) ;
-
-	  i_roww_new        =document.createElement("br") ;
-          i_list_new.appendChild(i_roww_new) ;
+	i_roww_new        =document.createElement("br") ;
+	i_list_new.appendChild(i_roww_new) ;
 
     for(var elem in a_prsc_title)
     {
          words=elem.split(':') ;
       if(words[1]==p_client)
       {
+        if(user==a_prsc_creator[elem])  url="client_prescr_edit.php" ;
+        else                            url="client_prescr_view.php" ;
+
 	  i_link_new        =document.createElement("a") ;
           i_link_new.id     =elem ;
-          i_link_new.href   ="client_prescr_edit.php?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
+          i_link_new.href   =url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
           i_text_new        =document.createTextNode(a_prsc_title[elem]) ;
           i_link_new.appendChild(i_text_new) ;
 
@@ -447,7 +459,6 @@ function SuccessMsg() {
     }
 
        i_client  .appendChild(i_list_new) ;
-
 
      parent.frames["details"].location.assign("doctor_notes.php"+
                                               "?Session="+v_session+

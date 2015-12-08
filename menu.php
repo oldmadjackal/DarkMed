@@ -72,6 +72,22 @@ header("Content-type: text/html; charset=windows-1251") ;
        i_elem.hidden= false ;
   }
 
+  function ShowExecutor() 
+  {
+    var  i_elem ;
+
+       i_elem       =document.getElementById("ClientCard") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("DoctorCard") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("ClientsList") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("Messages") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("PrescriptionsSets") ;
+       i_elem.hidden= true ;
+  }
+
   function ShowAnonimous() 
   {
     var  i_elem ;
@@ -117,13 +133,13 @@ header("Content-type: text/html; charset=windows-1251") ;
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('doctor_card.php'+'?Session='+v_session) ; "
-         target="section">‘ормул€р врача</a></li> 
+         target="section">Ћичный формул€р</a></li> 
     <li hidden id="ClientsList">
         <a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('doctor_clients.php'+'?Session='+v_session) ; "
-         target="section">ѕациенты врача</a></li> 
+         target="section">ѕациенты</a></li> 
     <li><a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                                 parent.frames['section'].location.assign('doctors_list.php'+'?Session='+v_session) ; "

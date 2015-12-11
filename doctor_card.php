@@ -57,6 +57,7 @@ function ProcessDB() {
                           $count=$_POST["Count"] ;
                          $delete=$_POST["Delete"] ;
                         $reorder=$_POST["ReOrder"] ;
+                         $p_name=$_POST["PortraitName"] ;
 
 			  $speciality="" ;
   if(isset($spec_a))
@@ -83,18 +84,19 @@ function ProcessDB() {
   }
 
 
-	FileLog("START", "    Session:".$session) ;
+	FileLog("START", "      Session:".$session) ;
 
   if(isset($name_f)) {
-	FileLog("",      "     Name_F:".$name_f) ;
-	FileLog("",      "     Name_I:".$name_i) ;
-	FileLog("",      "     Name_O:".$name_o) ;
-	FileLog("",      " Speciality:".$speciality) ;
-	FileLog("",      "     Remark:".$remark) ;
-	FileLog("",      "     PageId:".$page_id) ;
-        FileLog("",      "      Count:".$count) ;
-        FileLog("",      "     Delete:".$delete) ;
-        FileLog("",      "    ReOrder:".$reorder) ;
+	FileLog("",      "       Name_F:".$name_f) ;
+	FileLog("",      "       Name_I:".$name_i) ;
+	FileLog("",      "       Name_O:".$name_o) ;
+	FileLog("",      "   Speciality:".$speciality) ;
+	FileLog("",      "       Remark:".$remark) ;
+        FileLog("",      " PortraitName:".$p_name) ;
+	FileLog("",      "       PageId:".$page_id) ;
+        FileLog("",      "        Count:".$count) ;
+        FileLog("",      "       Delete:".$delete) ;
+        FileLog("",      "      ReOrder:".$reorder) ;
   }
 
   if( isset($new_order))
@@ -186,29 +188,16 @@ function ProcessDB() {
 
     if(isset($_FILES[$image])) {
 
-      if($_FILES[$image]["error"]==0) {
+         $path=LoadFile($image, $p_name, "doctor", $page_id, "portrait", 
+                             "relative_path", $spath, $error) ;
+      if($path===false) {
 
-           FileLog("", "Portrait file detected") ;
-
-             $pos=strpos($_FILES[$image]["type"], "/") ;
-             $ext=substr($_FILES[$image]["type"], $pos+1) ;
-            $path=PrepareImagePath("doctor", $page_id, "portrait", $ext) ;
-
-        if($path=="") {
-             FileLog("ERROR", "IMAGE Portraite path form error") ;
+             FileLog("ERROR", "IMAGE/FILE : ".$error) ;
                      $db->rollback();
                      $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка резервирования места для файла портрета") ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ".$error) ;
                          return ;
-        }
- 
-        if(@move_uploaded_file($_FILES[$image]["tmp_name"], $path)==false) {
-             FileLog("ERROR", "IMAGE Portraite save error") ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка сохранения файла портрета") ;
-                         return ;
-        }
+      }
 
                            $sql="Update doctor_page_main".
                                 " Set   portrait='$path'".
@@ -216,21 +205,13 @@ function ProcessDB() {
            $res=$db->query($sql) ;
         if($res===false) {
              FileLog("ERROR", "Update DOCTOR_PAGE_MAIN (Portrait)... : ".$db->error) ;
-                     $db->rollback();
+                     $db->rollback() ;
                      $db->close() ;
             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка регистрации файла портрета") ;
                          return ;
         }
 
              FileLog("", "Portrait file successfully registered") ;
-      }
-      else {
-             FileLog("ERROR", "IMAGE Portraite transmit error : ".$_FILES[$image]["error"]) ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка получения файла портрета") ;
-                         return ;
-      }
     }
 //- - - - - - - - - - - - - -
           $db->commit() ;
@@ -326,95 +307,27 @@ function ProcessDB() {
     if($new_file!="")
     if(isset($_FILES[$image])) {
 
-      if($_FILES[$image]["error"]==0) {
-
            FileLog("", "Image/attachment file detected") ;
 
-             $pos=strpos($new_file, ".") ;
-          if($pos===false)  $ext="" ;
-          else              $ext=substr($new_file, $pos+1) ;
+        if($new_type=="Image") {  $file_type="Image" ;
+                                    $actions="create_short_image:relative_path" ;
+                               }
+        else                   {  $file_type="Document" ;
+                                    $actions="relative_path" ;
+                               }
 
-        if($new_type=="Image")
-              $path=PrepareImagePath("doctor", $page_id, "Image",    $ext) ;
-        else  $path=PrepareImagePath("doctor", $page_id, "Document", $ext) ;
+         $path=LoadFile($image, $new_file, "doctor", $page_id, $file_type, 
+                             $actions, $spath, $error) ;
+      if($path===false) {
 
-        if($path=="") {
-             FileLog("ERROR", "IMAGE/FILE path form error") ;
+             FileLog("ERROR", "IMAGE/FILE : ".$error) ;
                      $db->rollback();
                      $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка резервирования места для файла") ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ".$error) ;
                          return ;
-        }
- 
-        if(@move_uploaded_file($_FILES[$image]["tmp_name"], $path)==false) {
-             FileLog("ERROR", "IMAGE/FILE save error") ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка сохранения файла") ;
-                         return ;
-        }
+      }
 
              FileLog("", "Image/attachment file successfully registered") ;
-      }
-      else {
-             FileLog("ERROR", "IMAGE/FILE transmit error : ".$_FILES[$image]["error"]) ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка получения файла") ;
-                         return ;
-      }
-//- - - - - - - - - - - - - - Создание уменьшенной копии картинки
-            $spath=$path ;
-
-      if($new_type=="Image") {
-
-        do 
-        {
-                   $fmt=strtolower($_FILES[$image]["type"]) ;
-                if($fmt=="image/png"         )  $image_i=imagecreatefrompng ($path) ; 
-           else if($fmt=="image/gif"         )  $image_i=imagecreatefromgif ($path) ; 
-           else if($fmt=="image/jpeg"        )  $image_i=imagecreatefromjpeg($path) ; 
-           else if($fmt=="image/vnd.wap.wbmp")  $image_i=imagecreatefromwbmp($path) ; 
-           else        break ;
-
-                if(!$image_i) {
-	             FileLog("ERROR", "Image file read error: ".$path) ;
-					break ;
-                }
-		 
-                      $w_image_i=imagesx($image_i) ;
-                      $h_image_i=imagesy($image_i) ;
-
-                if($h_image_i<200) {
-                                      imagedestroy($image_i) ;
-	             FileLog("ERROR", "Image to small for reduce") ;
-					break ;
-                }
-
-                      $h_image_o= 200 ;
-                      $w_image_o=$w_image_i*$h_image_o/$h_image_i ;
-		 	$image_o=imagecreatetruecolor($w_image_o, $h_image_o) ;
-				   imagecopyresampled($image_o, $image_i, 0, 0, 0, 0, 
-							 $w_image_o, $h_image_o, $w_image_i, $h_image_i) ;
-
-            $spath=PrepareImagePath("doctor", $page_id, "Image_short", $ext) ;
-
-                if($fmt=="image/png"         )  imagepng ($image_o, $spath) ; 
-           else if($fmt=="image/gif"         )  imagegif ($image_o, $spath) ; 
-           else if($fmt=="image/jpeg"        )  imagejpeg($image_o, $spath) ; 
-           else if($fmt=="image/vnd.wap.wbmp")  imagewbmp($image_o, $spath) ; 
-
-                                             imagedestroy($image_o) ;
-                                             imagedestroy($image_i) ;
-
-        } while(false) ;           
-
-      }
-//- - - - - - - - - - - - - - Построение относительных путей
-               $cur_folder=getcwd() ;
-
-	$path =substr($path,  strlen($cur_folder)+1) ;
-	$spath=substr($spath, strlen($cur_folder)+1) ;
     }
 //- - - - - - - - - - - - - - Сохранение данных блока
           $new_order_ =$db->real_escape_string($new_order) ;
@@ -779,6 +692,7 @@ function SuccessMsg() {
     var  i_remark ;
     var  i_portrait ;
     var  i_p_file ;
+    var  i_p_name ;
     var  i_ext_type ;
     var  i_count ;
     var  i_new_order ;
@@ -804,6 +718,7 @@ function SuccessMsg() {
 	i_remark   =document.getElementById("Remark") ;
 	i_portrait =document.getElementById("Portrait") ;
 	i_p_file   =document.getElementById("PortraitFile") ;
+	i_p_name   =document.getElementById("PortraitName") ;
 	i_ext_type =document.getElementById("ExtensionType") ;
 	i_count    =document.getElementById("Count") ;
 	i_new_order=document.getElementById("NewOrder") ;
@@ -863,8 +778,13 @@ function SuccessMsg() {
                               return false ;
      }
 
-
      if(i_p_file.value=="")  i_p_file.name=i_p_file.name+"_" ;
+
+           file_name=i_p_file.value ;
+                 pos=file_name.lastIndexOf('\\') ;
+             if(pos>=0)  file_name=file_name.substr(pos+1) ;
+
+       i_p_name.value=file_name ;
 
        i_remark.value=i_remark.value.replace(nl,"@@") ;
 
@@ -1388,6 +1308,7 @@ function SuccessMsg() {
       Выбор файла портрета: 
       <br>
       <input type="file" accept="image/*" name="PortraitFile" id="PortraitFile">  
+      <input type="hidden" name="PortraitName" id="PortraitName">
     </td>
   </tr>
   </tbody>

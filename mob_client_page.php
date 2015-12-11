@@ -413,114 +413,53 @@ function ProcessDB() {
     if($new_file!="")
     if(isset($_FILES[$image])) {
 
-      if($_FILES[$image]["error"]==0) {
-
            FileLog("", "Image/attachment file detected") ;
 
-             $pos=strpos($new_file, ".") ;
-          if($pos===false)  $ext="" ;
-          else              $ext=substr($new_file, $pos+1) ;
+        if($new_type=="Image") {  $file_type="Image" ;
+                                    $actions="create_short_image" ;
+                               }
+        else                   {  $file_type="Document" ;
+                                    $actions="" ;
+                               }
 
-        if($new_type=="Image")
-              $path_i=PrepareImagePath("client_page", $page_id, "Image",    $ext) ;
-        else  $path_i=PrepareImagePath("client_page", $page_id, "Document", $ext) ;
+         $path_i=LoadFile($image, $new_file, "client_page", $page_id, $file_type, 
+                             $actions, $spath_i, $error) ;
+      if($path_i===false) {
 
-        if($path_i=="") {
-             FileLog("ERROR", "IMAGE/FILE path form error") ;
+             FileLog("ERROR", "IMAGE/FILE : ".$error) ;
                      $db->rollback();
                      $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка резервирования места для файла") ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ".$error) ;
                          return ;
-        }
- 
-        if(@move_uploaded_file($_FILES[$image]["tmp_name"], $path_i)==false) {
-             FileLog("ERROR", "IMAGE/FILE save error") ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка сохранения файла") ;
-                         return ;
-        }
+      }
 
 	   $path  =EncryptFile($path_i, $filekey) ;
         if($path===false) {
-             FileLog("ERROR", "IMAGE/FILE encrypt error") ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка шифрования файла") ;
-                         return ;
-        }
-
-             FileLog("", "Image/attachment file successfully registered") ;
-      }
-      else {
-             FileLog("ERROR", "IMAGE/FILE transmit error : ".$_FILES[$image]["error"]) ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка получения файла") ;
-                         return ;
-      }
-
-//- - - - - - - - - - - - - - Создание уменьшенной копии картинки
-            $spath=$path ;
-
-      if($new_type=="Image") {
-
-        do 
-        {
-                   $fmt=strtolower($_FILES[$image]["type"]) ;
-                if($fmt=="image/png"         )  $image_i=imagecreatefrompng ($path_i) ; 
-           else if($fmt=="image/gif"         )  $image_i=imagecreatefromgif ($path_i) ; 
-           else if($fmt=="image/jpeg"        )  $image_i=imagecreatefromjpeg($path_i) ; 
-           else if($fmt=="image/vnd.wap.wbmp")  $image_i=imagecreatefromwbmp($path_i) ; 
-           else        break ;
-
-                if(!$image_i) {
-	             FileLog("ERROR", "Image file read error: ".$path_i) ;
-					break ;
-                }
-		 
-                      $w_image_i=imagesx($image_i) ;
-                      $h_image_i=imagesy($image_i) ;
-
-                if($h_image_i<200) {
-                                      imagedestroy($image_i) ;
-	             FileLog("ERROR", "Image to small for reduce") ;
-					break ;
-                }
-
-                      $h_image_o= 200 ;
-                      $w_image_o=$w_image_i*$h_image_o/$h_image_i ;
-		 	$image_o=imagecreatetruecolor($w_image_o, $h_image_o) ;
-				   imagecopyresampled($image_o, $image_i, 0, 0, 0, 0, 
-							 $w_image_o, $h_image_o, $w_image_i, $h_image_i) ;
-
-            $spath_i=PrepareImagePath("client_page", $page_id, "Image_short", $ext) ;
-
-                if($fmt=="image/png"         )  imagepng ($image_o, $spath_i) ; 
-           else if($fmt=="image/gif"         )  imagegif ($image_o, $spath_i) ; 
-           else if($fmt=="image/jpeg"        )  imagejpeg($image_o, $spath_i) ; 
-           else if($fmt=="image/vnd.wap.wbmp")  imagewbmp($image_o, $spath_i) ; 
-
-                                             imagedestroy($image_o) ;
-                                             imagedestroy($image_i) ;
-
-	     $spath  =EncryptFile($spath_i, $filekey) ;
-          if($spath===false) {
-               FileLog("ERROR", "IMAGE/FILE small image encrypt error") ;
+               FileLog("ERROR", "IMAGE/FILE encrypt error") ;
                        $db->rollback();
                        $db->close() ;
-              ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка шифрования сокращенного файла") ;
+              ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка шифрования файла") ;
                            return ;
-          }
+        }
+
+     if($spath_i!="")
+     {
+	  $spath  =EncryptFile($spath_i, $filekey) ;
+       if($spath===false) {
+                 FileLog("ERROR", "IMAGE/FILE small image encrypt error") ;
+                         $db->rollback();
+                         $db->close() ;
+                ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка шифрования сокращенного файла") ;
+                             return ;
+       }
 
 		DeleteFile($spath_i) ;
+     }
 
-        } while(false) ;
+		DeleteFile($path_i) ;
 
-      }
-//- - - - - - - - - - - - - -
-	DeleteFile($path_i) ;
-    }    
+             FileLog("", "Image/attachment file successfully registered") ;
+    }
 //- - - - - - - - - - - - - - Сохранение данных блока
           $new_order_ =$db->real_escape_string($new_order) ;
           $new_type_  =$db->real_escape_string($new_type) ;

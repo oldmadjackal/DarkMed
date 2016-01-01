@@ -17,7 +17,7 @@ function ProcessDB() {
   global  $sys_doc_spec     ;
   global  $sys_doc_remark   ;
   global  $sys_doc_portrait ;
-  global  $sys_user_type    ;
+  global  $sys_doc_sign     ;
   global  $a_specialities   ;
 
 //--------------------------- Считывание конфигурации
@@ -65,13 +65,13 @@ function ProcessDB() {
 
      $user=DbCheckSession($db, $session, $options, $error) ;
   if($user===false) {
-                      $options="Anonimous" ;
-                         $user="" ;
+                       $db->close() ;
+                    ErrorMsg($error) ;
+                         return ;
   }
 
-                                                    $sys_user_type="Client" ;
-  if(       $options=="Anonimous"                )  $sys_user_type="Anonimous" ;
-  if(strpos($options, "UserType=Doctor;")!==false)  $sys_user_type="Doctor" ;
+          $page_=$db->real_escape_string($page) ;
+          $user_=$db->real_escape_string($user) ;
 
 //--------------------------- Сохранение данных о сообщении
 
@@ -84,13 +84,13 @@ function ProcessDB() {
 
                        $sql="Insert into messages(Receiver,Sender,Type,Text,Details,Copy)".
                             " values('$receiver','$user','CLIENT_ACCESS_INVITE','$invite','$letter','$incopy')" ;
-//       $res=$db->query($sql) ;
+       $res=$db->query($sql) ;
     if($res===false) {
              FileLog("ERROR", "Insert MESSAGES... : ".$db->error) ;
                      $db->rollback();
                      $db->close() ;
             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных 3") ;
-//                         return ;
+                         return ;
     }
 
           $db->commit() ;
@@ -119,7 +119,7 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-               $a_specialities[   $fields[0]   ]=   $fields[1] ;
+               $a_specialities[$fields[0]]=$fields[1] ;
      }
   }
 
@@ -127,12 +127,10 @@ function ProcessDB() {
 
 //--------------------------- Извлечение данных врачей
 
-           $user_=$db->real_escape_string($user) ;
-
-                     $sql ="Select owner, CONCAT_WS(' ', d.name_f, d.name_i, d.name_o), speciality, remark, portrait".
-                           "  From doctor_page_main d".
+                     $sql ="Select d.owner, CONCAT_WS(' ', d.name_f, d.name_i, d.name_o), d.speciality, d.remark, d.portrait, u.sign_p_key".
+                           "  From doctor_page_main d inner join users u on d.owner=u.login".
                            " Where d.confirmed='Y'" ;
-//                   $sql.="  and  d.owner in (select distinct m.receiver from messages m where m.sender='$user_')" ;
+                     $sql.="  and  d.owner in (select distinct m.receiver from messages m where m.sender='$user_')" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select DOCTOR_PAGE_MAIN... : ".$db->error) ;
@@ -154,9 +152,47 @@ function ProcessDB() {
           $sys_doc_spec    [$i]= $fields[2] ;
           $sys_doc_remark  [$i]= $fields[3] ;
           $sys_doc_portrait[$i]= $fields[4] ;
+          $sys_doc_sign    [$i]= $fields[5] ;
      }
 
      $res->close() ;
+
+//--------------------------- Извлечение ключей страницы
+
+                     $sql="Select a.crypto, a.ext_key, u.sign_s_key, u.msg_key".
+			  "  From access_list a, users u".
+			  " Where a.owner=u.login".
+			  "  and  a.owner='$user_'".
+			  "  and  a.login='$user_'".
+			  "  and  a.page = $page" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select ACCESS_LIST... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса ключа главной страницы") ;
+                         return ;
+  }
+  else
+  {      
+	      $fields=$res->fetch_row() ;
+
+       echo "    page	       ='".$page."' ;				\n" ;
+       echo "    page_key      ='".$fields[0]."' ;			\n" ;
+       echo "    page_key      =Crypto_decode(page_key, password) ;	\n" ;
+
+       echo "    file_key      ='".$fields[1]."' ;			\n" ;
+       echo "    file_key      =Crypto_decode(file_key, password) ;	\n" ;
+
+       echo "    sender_key    ='".$fields[2]."' ;			\n" ;
+       echo "    sender_key    =Crypto_decode(sender_key, password) ;	\n" ;
+
+       echo "       msg_key    ='".$fields[3]."' ;			\n" ;
+       echo "       msg_key    =Crypto_decode(msg_key, password) ;	\n" ;
+  }
+
+     $res->close() ;
+
+
 
 //--------------------------- Отображение
 
@@ -178,8 +214,8 @@ function ShowDoctors() {
   global  $sys_doc_spec     ;
   global  $sys_doc_remark   ;
   global  $sys_doc_portrait ;
+  global  $sys_doc_sign     ;
   global  $a_specialities   ;
-  global  $sys_user_type    ;
 
 
   for($i=0 ; $i<$sys_doc_count ; $i++)
@@ -202,7 +238,8 @@ function ShowDoctors() {
        echo "<img src='".$sys_doc_portrait[$i]."' height=200>					\n" ;
        echo "</div>										\n" ;
     }
-       echo  "      <input type='hidden' id='Login_"  .$row."' value='".$user."'>		\n" ;
+       echo  "      <input type='hidden' id='Login_".$row."' value='".$user."'>			\n" ;
+       echo  "      <input type='hidden' id='Sign_" .$row."' value='".$sys_doc_sign[$i]."'>	\n" ;
        echo  "    </td>										\n" ;
        echo  "    <td class='table'>								\n" ;
        echo  "      <div><b>".$sys_doc_fio[$i]."</b></div>					\n" ;
@@ -263,13 +300,28 @@ function SuccessMsg() {
 <script type="text/javascript">
 <!--
 
+    var  i_receiver ;
+    var  i_letter ;
+    var  i_incopy ;
+    var  i_invite ;
     var  i_error ;
+    var  password ;
+    var  page ;
+    var  page_key ;
+    var  file_key ;
     var  doctors_cnt ;
+    var  doctor_key ;
 
   function FirstField() 
   {
 
-	i_error=document.getElementById("Error") ;
+	i_receiver=document.getElementById("Receiver") ;
+	i_letter  =document.getElementById("Letter") ;
+	i_incopy  =document.getElementById("InCopy") ;
+	i_invite  =document.getElementById("Invite") ;
+	i_error   =document.getElementById("Error") ;
+
+       password=TransitContext("restore", "password", "") ;
 
 <?php
             ProcessDB() ;
@@ -290,6 +342,12 @@ function SuccessMsg() {
 
      if(error_text!="")  return false ;
 
+       i_letter.value=page+":"+page_key+":"+file_key+";" ;
+
+       i_incopy.value=Crypto_encode(i_invite.value, msg_key) ;
+       i_letter.value=  Sign_encode(i_letter.value, sender_key, doctor_key) ;
+       i_invite.value=  Sign_encode(i_invite.value, sender_key, doctor_key) ;
+
                          return true ;
   } 
 
@@ -297,6 +355,10 @@ function SuccessMsg() {
   {
      for(i=0 ; i<doctors_cnt ; i++)
        if(i!=p_row)  document.getElementById("Row_"+i).hidden=true ;
+       else         {
+			i_receiver.value=document.getElementById("Login_"+i).value ;
+			    doctor_key  =document.getElementById("Sign_" +i).value ;
+                    }
 
 	document.getElementById("DoctorsText").hidden=true ;
 	document.getElementById("Invitation" ).hidden=false ;     

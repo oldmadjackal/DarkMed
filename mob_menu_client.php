@@ -98,6 +98,18 @@ header("Content-type: text/html; charset=windows-1251") ;
     <tr>
       <td width="10%"> </td>
       <td>
+          <li id="Messages">
+              <a href="javascript:
+                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
+                  if(v_session=='')  parent.frames['section'].location.assign('mob_logon.php') ;
+                  else               parent.frames['section'].location.assign('mob_doctors_list.php'+'?Session='+v_session) ; "
+               target="section">ÂĞÀ×È È ÑÏÅÖÈÀËÈÑÒÛ</a></li> 
+          <br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%"> </td>
+      <td>
           <li><a href="mob_help.php" target="section">ÊÀÊ ÏÎËÜÇÎÂÀÒÜÑß?</a></li> 
           <br>
       </td>

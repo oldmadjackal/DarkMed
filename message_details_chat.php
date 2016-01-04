@@ -250,7 +250,7 @@ function SuccessMsg() {
     var  snd_s_key ;
     var  rcv_p_key ;
     var  rcv_type ;
-    var  msg_text ;
+    var  msg_key ;
 
   function FirstField() 
   {

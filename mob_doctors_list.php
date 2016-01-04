@@ -268,7 +268,7 @@ function SuccessMsg() {
             ProcessDB() ;
 ?>
 
-     parent.frames['details'].location.replace('mob_footer_menu.html') ;
+     parent.frames['details'].location.replace('mob_doctors_list_footer.php') ;
 
          return true ;
   }

@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Mob_client_prescr_footer.php" ;
+   $glb_script="Mob_doctors_list_footer.php" ;
 
   require("stdlib.php") ;
 
@@ -59,7 +59,7 @@ function SuccessMsg() {
 
 <head>
 
-<title>DarkMed-Mobile Client Prescriptions Footer</title>
+<title>DarkMed-Mobile Doctors List Footer</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
@@ -82,13 +82,13 @@ function SuccessMsg() {
          return true ;
   }
 
-  function GoToPages() 
+  function GoToList() 
   {
     var  v_session ;
 
          v_session=TransitContext("restore","session","") ;
 
-     parent.frames['section'].location.assign("mob_client_prescr.php"+"?Session="+v_session) ;
+     parent.frames['section'].location.assign("mob_doctors_list.php"+"?Session="+v_session) ;
   }
 
   function GoToMenu() 
@@ -121,13 +121,12 @@ function SuccessMsg() {
     <tbody>
     <tr class="fieldC">
       <td width="34%"> 
-       <input class="B_bttn" type="button" value="Список" onclick=GoToPages()>
+       <input class="B_bttn" type="button" value="Список" onclick=GoToList()>
       </td> 
       <td> 
        <input class="G_bttn" type="button" value="Меню" onclick=GoToMenu()>
       </td> 
       <td width="34%">
-       <input hidden class="R_bttn" type="button" value="Действ" onclick=parent.frames['section'].ShowExtActions(true)>
       </td> 
     </tr>
     </tbody>

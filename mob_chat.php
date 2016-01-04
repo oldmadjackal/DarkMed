@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Messages_char_lr.php" ;
+   $glb_script="Mob_chat.php" ;
 
   require("stdlib.php") ;
 
@@ -24,11 +24,26 @@ function ProcessDB() {
                         $session=$_GET ["Session"] ;
   if(!isset($session))  $session=$_POST["Session"] ;
 
-                        $sender =$_GET ["Sender" ] ;
-  if(!isset($sender ))  $sender =$_POST["Sender" ] ;
+                        $sender =$_GET ["Sender"] ;
+  if(!isset($sender ))  $sender =$_POST["Sender"] ;
 
-  FileLog("START", "    Session:".$session) ;
-  FileLog("",      "     Sender:".$sender) ;
+                        $topread=$_POST["TopRead"] ;
+
+  if( isset($topread))
+  {
+                        $text   =$_POST["Text"] ;
+                        $copy   =$_POST["Copy"] ;
+  }
+
+     FileLog("START", "    Session:".$session) ;
+     FileLog("",      "     Sender:".$sender) ;
+
+  if( isset($topread))
+  {
+     FileLog("",      "    TopRead:".$topread) ;
+     FileLog("",      "       Text:".$text) ;
+     FileLog("",      "       Copy:".$copy) ;
+  }
 
 //--------------------------- Подключение БД
 
@@ -46,11 +61,54 @@ function ProcessDB() {
                          return ;
   }
 
-       $user_=$db->real_escape_string($user ) ;
-
-//--------------------------- Извлечение ключей подписи получателя и отправителя
-
+       $user_  =$db->real_escape_string($user  ) ;
        $sender_=$db->real_escape_string($sender) ;
+
+//--------------------------- Отправка сообщения
+
+  if(isset($text)) 
+  {
+//- - - - - - - - - - - - - - Регистрация сообщения
+          $topread=$db->real_escape_string($topread) ;
+          $text   =$db->real_escape_string($text) ;
+          $copy   =$db->real_escape_string($copy) ;
+
+                       $sql="Insert into messages(Receiver,Sender,Type,Text,Copy)".
+                                         " values('$sender_','$user_','CHAT_MESSAGE','$text','$copy')" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+             FileLog("ERROR", "Insert MESSAGES... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка создания сообщения") ;
+                         return ;
+    }
+//- - - - - - - - - - - - - - Простановка метки "Прочитано"
+          $topread=$db->real_escape_string($topread) ;
+
+                       $sql="Update messages".
+                            "   Set `read`='Y'".
+                            " Where sender  ='$sender_'".
+                            "  and  receiver='$user_'".
+                            "  and  type='CHAT_MESSAGE'".
+                            "  and  id<=$topread".
+                            "  and  `read` is null" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+             FileLog("ERROR", "Update MESSAGES... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка простановки меток 'прочитано'") ;
+                         return ;
+    }
+//- - - - - - - - - - - - - -
+             $db->commit() ;
+
+        FileLog("", "Message for User ".$sender." sent successfully") ;
+
+              SuccessMsg() ;
+  }
+//--------------------------- Извлечение ключей подписи получателя и отправителя
 
                        $sql="Select login, sign_s_key, sign_p_key, msg_key".
                             "  From users".
@@ -65,15 +123,15 @@ function ProcessDB() {
                          return ;
     }
 
-     for($i=0 ; $i<$res->num_rows ; $i++)
-     {
+    for($i=0 ; $i<$res->num_rows ; $i++)
+    {
 	      $fields=$res->fetch_row() ;
 
         if($fields[0]==$user) {  echo "rec_s_key='" .$fields[1]."' ;	\n" ;
 				 echo "rec_p_key='" .$fields[2]."' ;	\n" ;
 				 echo "  msg_key='" .$fields[3]."' ;	\n" ;  }
         else                  {  echo "snd_p_key='" .$fields[2]."' ;	\n" ;  }
-     }
+    }
 
 				 echo "  msg_key=Crypto_decode(  msg_key, password) ;	\n" ;
 				 echo "rec_s_key=Crypto_decode(rec_s_key, password) ;	\n" ;
@@ -145,8 +203,8 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
     echo  "return ;" ;
 }
 
@@ -155,8 +213,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Доступ к указанным страницам предоставлен.\" ;" ;
+    echo  "i_error.style.color='green' ;		\n" ;
+    echo  "i_error.innerHTML  ='Сообщение отправлено' ;	\n" ;
 }
 //============================================== 
 ?>
@@ -169,11 +227,11 @@ function SuccessMsg() {
 
 <head>
 
-<title>DarkMed Chat Left-Right</title>
+<title>DarkMed Mobile Chat</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("mob_common.css")
 </style>
 
 <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
@@ -181,11 +239,14 @@ function SuccessMsg() {
 <!--
 
     var  i_messages ;
+    var  i_text ;
+    var  i_copy ;
     var  i_error ;
     var  rec_s_key ;
     var  rec_p_key ;
     var  snd_p_key ;
-    var  msg_text ;
+    var  top_id ;
+    var  msg_key ;
 
   function FirstField() 
   {
@@ -196,6 +257,8 @@ function SuccessMsg() {
 
 
        i_messages=document.getElementById("Messages") ;
+       i_text    =document.getElementById("Text") ;
+       i_copy    =document.getElementById("Copy") ;
        i_error   =document.getElementById("Error") ;
 
        password=TransitContext("restore", "password", "") ;
@@ -205,9 +268,7 @@ function SuccessMsg() {
             ProcessDB() ;
 ?>
 
-	parent.frames["details"].location.assign("message_details_chat.php?Session="+session+
-                                                                        "&Receiver="+partner+
-                                                                         "&TopRead="+top_id) ;
+       document.getElementById("TopRead").value=top_id ;
 
          return true ;
   }
@@ -219,6 +280,11 @@ function SuccessMsg() {
 
             error_text="" ;
 
+    if(i_text.value=="")  return(false) ;
+
+	i_copy.value=Crypto_encode(i_text.value, msg_key) ;
+	i_text.value=  Sign_encode(i_text.value, rec_s_key, snd_p_key) ;
+
         i_error.style.color="red" ;
         i_error.innerHTML  = error_text ;
 
@@ -229,6 +295,8 @@ function SuccessMsg() {
 
   function AddNewMessage(p_dir, p_id, p_type, p_type_desc, p_text, p_sent)
   {
+     var  i_tab_new ;
+     var  i_tbd_new ;
      var  i_row_new ;
      var  i_col_new ;
      var  i_txt_new ;
@@ -246,13 +314,17 @@ function SuccessMsg() {
    if(p_dir=='R')  txt_left =p_text ;
    else		   txt_right=p_text ;
 
+	i_tab_new = document.createElement("table") ;
+	i_tbd_new = document.createElement("tbody") ;
+
 	i_row_new = document.createElement("tr") ;
-//	i_row_new . className = "table" ;
 
 	i_col_new = document.createElement("td") ;
 
-   if(p_dir=='R') {
+   if(p_dir=='R')
+   {
 	i_col_new . className = "chat_r" ;
+	i_col_new . width     = "75%" ;
         i_dev_new = document.createElement("dev") ;
 	i_dev_new . style.fontWeight=600 ;
         i_txt_new = document.createTextNode(header) ;
@@ -260,15 +332,22 @@ function SuccessMsg() {
 	i_col_new . appendChild(i_dev_new) ;
 	i_dev_new = document.createElement("br") ;
 	i_col_new . appendChild(i_dev_new) ;
-		  }
+   }
+   else
+   {
+	i_col_new . width     = "25%" ;
+   }
+
         i_txt_new = document.createTextNode(txt_left) ;
 	i_col_new . appendChild(i_txt_new) ;
 	i_row_new . appendChild(i_col_new) ;
 
 	i_col_new = document.createElement("td") ;
 
-   if(p_dir=='S') {
+   if(p_dir=='S')
+   {
 	i_col_new . className = "chat_s" ;
+	i_col_new . width     = "75%" ;
         i_dev_new = document.createElement("dev") ;
 	i_dev_new . style.fontWeight=600 ;
         i_txt_new = document.createTextNode(header) ;
@@ -276,15 +355,30 @@ function SuccessMsg() {
 	i_col_new . appendChild(i_dev_new) ;
 	i_dev_new = document.createElement("br") ;
 	i_col_new . appendChild(i_dev_new) ;
-		  }
+   }
+   else
+   {
+	i_col_new . width     = "25%" ;
+   }
+
         i_txt_new = document.createTextNode(txt_right) ;
 	i_col_new . appendChild(i_txt_new) ;
 	i_row_new . appendChild(i_col_new) ;
 
-	i_messages.appendChild(i_row_new) ;
+	i_tbd_new .appendChild(i_row_new) ;
+	i_tab_new .appendChild(i_tbd_new) ;
+	i_messages.appendChild(i_tab_new) ;
 
     return ;         
   } 
+
+  function EnableReply() 
+  {
+	document.getElementById("Send" ).hidden=true ;
+	document.getElementById("Reply").hidden=false ;     
+	document.getElementById("Text" ).focus() ;     
+  }
+
 
 <?php
   require("common.inc") ;
@@ -309,7 +403,7 @@ function SuccessMsg() {
     <tr>
       <td width="10%"> 
         <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" value="!" hidden onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
       <td class="title"> 
         <b>ПЕРЕПИСКА</b>
@@ -318,16 +412,25 @@ function SuccessMsg() {
     </tbody>
   </table>
 
-  <br>
   <form onsubmit="return SendFields();" method="POST">
   <p class="error" id="Error"></p>
-  <table width="100%">
-    <thead>
-    <input type="submit" value="Обновить"> 
-    </thead>
-    <tbody id="Messages">
-    </tbody>
-  </table>
+
+  <div class="fieldC" id="Send">
+    <input type="button" value="Написать сообщение" onclick=EnableReply()>
+  </div>
+
+  <div class="fieldC" hidden id="Reply">
+    <textarea cols=32 rows=7 wrap="soft" name="Text" id="Text"></textarea>
+    <br>
+    <input type="submit" value="Отправить"> 
+    <input type="hidden" name="TopRead" id="TopRead">
+    <input type="hidden" name="Copy"    id="Copy">
+  </div>
+
+  <br>
+
+  <div id="Messages">
+  </div>
 
   </form>
 

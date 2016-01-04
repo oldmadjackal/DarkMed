@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Z_clear_tmp.php" ;
+   $glb_script="Mob_client_page_footer.php" ;
 
   require("stdlib.php") ;
 
@@ -22,20 +22,8 @@ function ProcessDB() {
 //--------------------------- Извлечение параметров
 
                         $session=$_GET ["Session"] ;
-                        $wait   =$_GET ["Wait"] ;
 
   FileLog("START", "    Session:".$session) ;
-
- if(isset($wait))
-  FileLog("",      "       Wait:".$wait) ;
-
-//--------------------------- Выдержка паузы
-
-   if(isset($wait))  sleep($wait) ;
-
-//--------------------------- Очистка и удаление временной папки
-
-        RemoveTmpFolder($session) ;
 
 //--------------------------- Завершение
 

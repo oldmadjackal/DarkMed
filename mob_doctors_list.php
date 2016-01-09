@@ -320,7 +320,7 @@ function SuccessMsg() {
     window.open("doctor_view.php"+"?Owner="+doctor_id) ;
   } 
 
-  function GoToMail(p_user)
+  function GoToMail()
   {
     var  v_session ;
 
@@ -329,7 +329,7 @@ function SuccessMsg() {
 	parent.frames["section"].location.assign("mob_chat.php?Session="+v_session+"&Sender="+doctor_id) ;
   } 
 
-  function GoToAccess(p_user)
+  function GoToAccess()
   {
     var  v_session ;
 
@@ -443,11 +443,11 @@ function SuccessMsg() {
     <tbody>
     <tr>
       <td class="fieldC"> <br> <input type="button" value="Переписка" onclick=GoToMail()></td>
-    <tr>
     </tr>
+    <tr>
       <td class="fieldC"> <br> <input type="button" value="Детали" onclick=GoToView()> </td>
-    <tr>
     </tr>
+    <tr>
       <td class="fieldC"> <br> <input type="button" class="G_bttn" value="Приглашение" onclick=GoToAccess()> </td>
     </tr>
     <tr>

@@ -26,12 +26,10 @@ function ProcessDB() {
                         $message=$_GET ["Message"] ;
 
                         $details=$_POST["Details"] ;
-                        $check  =$_POST["Check"] ;
 
   FileLog("START", "    Session:".$session) ;
   FileLog("",      "    Message:".$message) ;
   FileLog("",      "    Details:".$details) ;
-  FileLog("",      "    Check  :".$check  ) ;
 
 //--------------------------- Подключение БД
 
@@ -123,7 +121,6 @@ function ProcessDB() {
 
   if(isset($details)) 
   {
-        $check_=$db->real_escape_string($check) ;
 //- - - - - - - - - - - - - - Перебор страниц, по которым предоставлен доступ
 	$words=explode(" ", $details) ;
 
@@ -188,8 +185,8 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
     echo  "return ;" ;
 }
 
@@ -198,8 +195,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Доступ предоставлен!\" ;" ;
+    echo  "i_error.style.color='green' ;		\n" ;
+    echo  "i_error.innerHTML  ='Доступ предоставлен!' ;	\n" ;
 }
 //============================================== 
 ?>
@@ -227,7 +224,6 @@ function SuccessMsg() {
     var  i_msg_sent ;
     var  i_msg_text ;
     var  i_details ;
-    var  i_check ;
     var  i_error ;
     var  password ;
     var  message_id ;
@@ -251,7 +247,6 @@ function SuccessMsg() {
        i_msg_text   =document.getElementById("MsgText") ;
        i_error      =document.getElementById("Error") ;
        i_details    =document.getElementById("Details") ;
-       i_check      =document.getElementById("Check") ;
 
        password=TransitContext("restore", "password", "") ;
 
@@ -354,7 +349,6 @@ function SuccessMsg() {
   </table>
 
   <input type="hidden" name="Details" id="Details">
-  <input type="hidden" name="Check"   id="Check">
 
   </form>
 

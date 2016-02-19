@@ -375,6 +375,7 @@ function SuccessMsg() {
 
 	i_c_exercise       =document.getElementById("C_exercise"       ) ;
 	i_c_exploration    =document.getElementById("C_exploration"    ) ;
+	i_c_measurement    =document.getElementById("C_measurement"    ) ;
 	i_c_operation      =document.getElementById("C_operation"      ) ;
 	i_c_others         =document.getElementById("C_others"         ) ;
 	i_c_pharmacotherapy=document.getElementById("C_pharmacotherapy") ;
@@ -388,6 +389,9 @@ function SuccessMsg() {
 			            i_c_exploration.length++ ;
 	i_c_exploration    .options[i_c_exploration.length-1].text ='' ;
 	i_c_exploration    .options[i_c_exploration.length-1].value='0' ;
+			            i_c_measurement.length++ ;
+	i_c_measurement    .options[i_c_measurement.length-1].text ='' ;
+	i_c_measurement    .options[i_c_measurement.length-1].value='0' ;
 			            i_c_operation.length++ ;
 	i_c_operation      .options[i_c_operation.length-1].text ='' ;
 	i_c_operation      .options[i_c_operation.length-1].value='0' ;
@@ -876,6 +880,7 @@ function SuccessMsg() {
     <select hidden id="Category"         ></select>
     <select hidden id="C_exercise"       ></select>
     <select hidden id="C_exploration"    ></select>
+    <select hidden id="C_measurement"    ></select>
     <select hidden id="C_operation"      ></select>
     <select hidden id="C_others"         ></select>
     <select hidden id="C_pharmacotherapy"></select>

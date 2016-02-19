@@ -69,7 +69,9 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-      echo     "   page_key=\"" .$fields[0]."\" ;\n" ;
+      echo     "   page_num  ='" .$page."' ;		\n" ;
+      echo     "   page_owner='" .$owner."' ;		\n" ;
+      echo     "   page_key  ='" .$fields[0]."' ;	\n" ;
 
 //--------------------------- Извлечение данных страницы
 
@@ -99,7 +101,7 @@ function ProcessDB() {
 
 //--------------------------- Извлечение списка назначений
 
-                     $sql="Select prescription_id, name, remark".
+                     $sql="Select prescription_id, name, remark, `type`, if(reference=0,id,reference)".
 			  "  From prescriptions_pages".
                           " Where owner='$owner_'".
                           "  and  page = $page_".
@@ -120,6 +122,8 @@ function ProcessDB() {
        echo "   a_plist_id    [".($i+1)."]='".$fields[0]."' ;	\n" ;
        echo "   a_plist_name  [".($i+1)."]='".$fields[1]."' ;	\n" ;
        echo "   a_plist_remark[".($i+1)."]='".$fields[2]."' ;	\n" ;
+       echo "   a_plist_type  [".($i+1)."]='".$fields[3]."' ;	\n" ;
+       echo "   a_plist_ref   [".($i+1)."]='".$fields[4]."' ;	\n" ;
      }
   }
 
@@ -144,9 +148,9 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      \n" ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;\n" ;
-    echo  "return ;\n" ;
+    echo  "i_error.style.color='red' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
+    echo  "return ;				\n" ;
 }
 
 //============================================== 
@@ -154,8 +158,8 @@ function ErrorMsg($text) {
 
 function InfoMsg($text) {
 
-    echo  "i_error.style.color=\"blue\" ;      \n" ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;\n" ;
+    echo  "i_error.style.color='blue' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
 }
 
 //============================================== 
@@ -163,8 +167,8 @@ function InfoMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    \n" ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;\n" ;
+    echo  "i_error.style.color='green' ;			\n" ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ;	\n" ;
 }
 //============================================== 
 ?>
@@ -194,10 +198,14 @@ function SuccessMsg() {
     var  i_set ;
     var  i_error ;
     var  creator ;
+    var  page_owner ;
+    var  page_num ;
 
     var  a_plist_id ;
     var  a_plist_name ;
     var  a_plist_remark ;
+    var  a_plist_type ;
+    var  a_plist_ref ;
 
 
   function FirstField() 
@@ -217,6 +225,8 @@ function SuccessMsg() {
 	a_plist_id    =new Array() ;
 	a_plist_name  =new Array() ;
 	a_plist_remark=new Array() ;
+	a_plist_type  =new Array() ;
+	a_plist_ref   =new Array() ;
 
 <?php
             ProcessDB() ;
@@ -234,7 +244,7 @@ function SuccessMsg() {
              prescr_name  =Crypto_decode(a_plist_name  [i], page_key) ;
              prescr_remark=Crypto_decode(a_plist_remark[i], page_key) ;
 
-          AddListRow(i, prescr_id, prescr_name, prescr_remark) ;
+          AddListRow(i, prescr_id, prescr_name, prescr_remark, a_plist_type[i], a_plist_ref[i]) ;
        }
 
          return true ;
@@ -254,13 +264,19 @@ function SuccessMsg() {
                          return true ;
   } 
 
-  function AddListRow(p_order, p_id, p_name, p_remark)
+  function AddListRow(p_order, p_id, p_name, p_remark, p_type, p_ref)
   {
      var  i_row_new ;
      var  i_col_new ;
      var  i_txt_new ;
      var  i_shw_new ;
+     var  i_msr_new ;
+     var  i_msr_list ;
+     var  measurement ;
 
+
+     if(p_type=="measurement")  measurement=true ;
+     else                       measurement=false ;
 
 	i_row_new = document.createElement("tr") ;
 	i_row_new . className = "table" ;
@@ -294,11 +310,24 @@ function SuccessMsg() {
 	i_shw_new . value  ="Подробнее" ;
 	i_shw_new . id     ='Details_'+ p_order ;
 	i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
+	i_msr_new = document.createElement("input") ;
+	i_msr_new . type   ="button" ;
+	i_msr_new . value  ="Занести данные" ;
+	i_msr_new . id     ='Measurement_'+ p_order ;
+	i_msr_new . onclick= function(e) {  CheckMeasurements(p_ref) ;  }
   if(p_id!="0")
 	i_col_new . appendChild(i_shw_new) ;
+  if(measurement)
+	i_col_new . appendChild(i_msr_new) ;
 	i_row_new . appendChild(i_col_new) ;
 
 	i_set     . appendChild(i_row_new) ;
+
+  if(measurement) 
+  {
+	i_msr_list=document.getElementById("MeasurementsList") ;
+     if(i_msr_list.hidden==true)  i_msr_list.hidden=false ;
+  }
 
     return ;         
   } 
@@ -324,6 +353,16 @@ function SuccessMsg() {
 	 v_session=TransitContext("restore","session","") ;
 
 	location.assign("messages_chat_lr.php?Session="+v_session+"&Sender="+creator) ;
+  }
+
+  function CheckMeasurements(p_ref)
+  {
+    var  v_session ;
+
+	 v_session=TransitContext("restore","session","") ;
+
+     if(p_ref==null) 	             location.assign("measurements_check.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
+     else   parent.frames["details"].location.assign("measurement_check_details.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num+"&Reference="+p_ref) ;
   }
 
 
@@ -374,6 +413,12 @@ function SuccessMsg() {
   <br>
   <div left=5m id="Remark"></div> 
   <br>
+
+  <div class="fieldC" hidden id="MeasurementsList">
+    <input type="button" value="Занести контрольные измерения" onclick=CheckMeasurements(null)>
+    <br>
+    <br>
+  </div>
 
   <table width="100%">
     <thead>

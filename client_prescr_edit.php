@@ -51,6 +51,7 @@ function ProcessDB() {
              $a_prescr=array() ;
              $a_name  =array() ;
              $a_remark=array() ;
+             $a_ref   =array() ;
 
   if(isset($update)) {
 
@@ -60,9 +61,10 @@ function ProcessDB() {
  	         $id=$_POST["Id_".$i] ;
         if(isset($id))
         {
-             $a_prescr[$prescr_count]=$_POST["Id_"    .$i] ;
-             $a_name  [$prescr_count]=$_POST["Name_"  .$i] ;
-             $a_remark[$prescr_count]=$_POST["Remark_".$i] ;
+             $a_prescr[$prescr_count]=$_POST["Id_"       .$i] ;
+             $a_name  [$prescr_count]=$_POST["Name_"     .$i] ;
+             $a_remark[$prescr_count]=$_POST["Remark_"   .$i] ;
+             $a_ref   [$prescr_count]=$_POST["Reference_".$i] ;
                        $prescr_count++ ;
         }
      }
@@ -94,7 +96,7 @@ function ProcessDB() {
     FileLog("",     "  Count:".$count) ;
 
    for($i=0 ; $i<$prescr_count ; $i++) 
-    FileLog("",      "Prescription:".$a_prescr[$i]." ".$a_name[$i]." ".$a_remark[$i]) ;
+    FileLog("",      "Prescription:".$a_prescr[$i]." ".$a_name[$i]." ".$a_remark[$i]." ".$a_ref[$i]) ;
   }
 //--------------------------- Подключение БД
 
@@ -115,7 +117,10 @@ function ProcessDB() {
           $owner_=$db->real_escape_string($owner) ;
           $user_ =$db->real_escape_string($user ) ;
 
-//--------------------------- Извлечение данных страницы
+//--------------------------- Извлечение создателя страницы
+
+  if(isset($page) && $page!="")
+  {
 
           $page_=$db->real_escape_string($page) ;
 
@@ -135,10 +140,12 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-  if($fields[0]!=$user) {
+    if($fields[0]!=$user) {
                        $db->close() ;
                     ErrorMsg("Редактировать страницу назначений может только ее создатель") ;
                          return ;
+    }
+
   }
 //--------------------------- Извлечение списка типов назначений
 
@@ -358,9 +365,29 @@ function ProcessDB() {
           $name_  =$db->real_escape_string($a_name  [$i]) ;
           $remark_=$db->real_escape_string($a_remark[$i]) ;
 
+      if($a_ref[$i]!="") 
+      {
+        if(strpos($a_ref[$i], ":")===false) 
+        {
+           $type_=$db->real_escape_string($a_ref[$i]) ;
+           $ref_ ='' ;
+        }
+        else
+        {
+           $words=explode(":", $a_ref[$i]) ;
+           $type_=$db->real_escape_string($words[0]) ;
+           $ref_ =$db->real_escape_string($words[1]) ;
+        }
+      }
+      else
+      {
+           $type_='' ;
+           $ref_ ='0' ;
+      }  
+
                        $sql="Insert into prescriptions_pages".
-                            "       (  owner,   page,   order_num,  prescription_id,   name,     remark  )".
-                            " Values('$owner_', $page_,  $i,      '$prescr_',        '$name_', '$remark_')" ; 
+                            "       (  owner,   page,   order_num,  prescription_id,   name,     remark,     type,     reference)".
+                            " Values('$owner_', $page_,  $i,      '$prescr_',        '$name_', '$remark_', '$type_', '$ref_'    )" ; 
        $res=$db->query($sql) ;
     if($res===false) {
              FileLog("ERROR", "Insert PRESCRIPTIONS_PAGES... : ".$db->error) ;
@@ -397,7 +424,9 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-      echo     "   page_key=\"" .$fields[0]."\" ;\n" ;
+      echo  "   page_key  ='".$fields[0]."' ;	\n" ;
+      echo  "   page_owner='".$owner    ."' ;	\n" ;
+      echo  "   page_num  ='".$page     ."' ;	\n" ;
 
 //--------------------------- Извлечение ключей подписи
 
@@ -429,8 +458,8 @@ function ProcessDB() {
 
                        $sql="Select `check`, title, remark, published".
                             "  From client_pages".
-                            " Where `owner`='$owner_'".
-                            "  and  `page` = $page_" ;
+                            " Where owner='$owner_'".
+                            "  and  page = $page_" ;
        $res=$db->query($sql) ;
     if($res===false) {
           FileLog("ERROR", "DB query(Select CLIENT_PAGES...) : ".$db->error) ;
@@ -454,7 +483,7 @@ function ProcessDB() {
 
       echo     "  i_count.value='0'	;\n" ;
 
-                     $sql="Select prescription_id, remark".
+                     $sql="Select prescription_id, remark, if(`type` is null or `type`='', '', concat(`type`,':',if(reference=0,id,reference)))".
 			  "  From prescriptions_pages".
                           " Where owner='$owner_'".
                           "  and  page = $page_".
@@ -474,6 +503,7 @@ function ProcessDB() {
 
        echo "   a_plist_id    [".$i."]='".$fields[0]."' ;	\n" ;
        echo "   a_plist_remark[".$i."]='".$fields[1]."' ;	\n" ;
+       echo "   a_plist_ref   [".$i."]='".$fields[2]."' ;	\n" ;
      }
   }
 
@@ -508,9 +538,9 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      \n" ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;\n" ;
-    echo  "return ;\n" ;
+    echo  "i_error.style.color='red' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
+    echo  "return ;				\n" ;
 }
 
 //============================================== 
@@ -518,8 +548,8 @@ function ErrorMsg($text) {
 
 function InfoMsg($text) {
 
-    echo  "i_error.style.color=\"blue\" ;      \n" ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;\n" ;
+    echo  "i_error.style.color='blue' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
 }
 
 //============================================== 
@@ -527,8 +557,8 @@ function InfoMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    \n" ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;\n" ;
+    echo  "i_error.style.color='green' ;			\n" ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ;	\n" ;
 }
 //============================================== 
 ?>
@@ -558,6 +588,7 @@ function SuccessMsg() {
     var  i_crypto ;
     var  i_title ;
     var  i_remark ;
+    var  i_measurements ;
     var  i_id ;
     var  i_count ;
     var  i_update ;
@@ -570,6 +601,7 @@ function SuccessMsg() {
     var  i_error ;
     var  password ;
     var  page_key ;
+    var  page_owner ;
     var  msg_key ;
     var  check_key ;
     var  next_page ;
@@ -577,6 +609,7 @@ function SuccessMsg() {
     var  a_prescriptions ;
     var  a_plist_id ;
     var  a_plist_remark ;
+    var  a_plist_ref ;
 
   function FirstField() 
   {
@@ -584,23 +617,24 @@ function SuccessMsg() {
     var  prescr_remark ;
 
 
-       i_table    =document.getElementById("Fields") ;
-       i_page     =document.getElementById("Page") ;
-       i_check    =document.getElementById("Check") ;
-       i_crypto   =document.getElementById("Crypto") ;
-       i_title    =document.getElementById("Title") ;
-       i_remark   =document.getElementById("Remark") ;
-       i_id       =document.getElementById("Id") ;
-       i_count    =document.getElementById("Count") ;
-       i_sets_list=document.getElementById("SetsList") ;
-       i_update   =document.getElementById("Update") ;
-       i_publish  =document.getElementById("Publish") ;
-       i_s_key    =document.getElementById("Sign_s_key") ;
-       i_r_key    =document.getElementById("Sign_r_key") ;
-       i_invite   =document.getElementById("Invite") ;
-       i_letter   =document.getElementById("Letter") ;
-       i_incopy   =document.getElementById("InCopy") ;
-       i_error    =document.getElementById("Error") ;
+       i_table       =document.getElementById("Fields") ;
+       i_page        =document.getElementById("Page") ;
+       i_check       =document.getElementById("Check") ;
+       i_crypto      =document.getElementById("Crypto") ;
+       i_title       =document.getElementById("Title") ;
+       i_remark      =document.getElementById("Remark") ;
+       i_measurements=document.getElementById("Measurements") ;
+       i_id          =document.getElementById("Id") ;
+       i_count       =document.getElementById("Count") ;
+       i_sets_list   =document.getElementById("SetsList") ;
+       i_update      =document.getElementById("Update") ;
+       i_publish     =document.getElementById("Publish") ;
+       i_s_key       =document.getElementById("Sign_s_key") ;
+       i_r_key       =document.getElementById("Sign_r_key") ;
+       i_invite      =document.getElementById("Invite") ;
+       i_letter      =document.getElementById("Letter") ;
+       i_incopy      =document.getElementById("InCopy") ;
+       i_error       =document.getElementById("Error") ;
 
 			    i_sets_list.length++ ;
 	i_sets_list.options[i_sets_list.length-1].text ='' ;
@@ -610,6 +644,7 @@ function SuccessMsg() {
 	a_prescriptions=new Array() ;
 	a_plist_id     =new Array() ;
 	a_plist_remark =new Array() ;
+	a_plist_ref    =new Array() ;
 
 	i_category=document.getElementById("Category") ;
 			   i_category.length++ ;
@@ -618,6 +653,7 @@ function SuccessMsg() {
 
 	i_c_exercise       =document.getElementById("C_exercise"       ) ;
 	i_c_exploration    =document.getElementById("C_exploration"    ) ;
+	i_c_measurement    =document.getElementById("C_measurement"    ) ;
 	i_c_operation      =document.getElementById("C_operation"      ) ;
 	i_c_others         =document.getElementById("C_others"         ) ;
 	i_c_pharmacotherapy=document.getElementById("C_pharmacotherapy") ;
@@ -631,6 +667,9 @@ function SuccessMsg() {
 			            i_c_exploration.length++ ;
 	i_c_exploration    .options[i_c_exploration.length-1].text ='' ;
 	i_c_exploration    .options[i_c_exploration.length-1].value='0' ;
+			            i_c_measurement.length++ ;
+	i_c_measurement    .options[i_c_measurement.length-1].text ='' ;
+	i_c_measurement    .options[i_c_measurement.length-1].value='0' ;
 			            i_c_operation.length++ ;
 	i_c_operation      .options[i_c_operation.length-1].text ='' ;
 	i_c_operation      .options[i_c_operation.length-1].value='0' ;
@@ -682,7 +721,7 @@ function SuccessMsg() {
              prescr_id    =Crypto_decode(a_plist_id    [i], page_key) ;
              prescr_remark=Crypto_decode(a_plist_remark[i], page_key) ;
 
-          AddListRow(prescr_id, 'UNKNOWN', prescr_remark) ;
+          AddListRow(prescr_id, 'UNKNOWN', prescr_remark, a_plist_ref[i]) ;
        }
 
     }
@@ -755,16 +794,22 @@ function SuccessMsg() {
        i_remark.value=Crypto_encode(i_remark.value, page_key) ;
 
      for(i=1 ; i<=i_count.value ; i++) {
-       i_id    =document.getElementById("Id_"          +i) ;
-       i_remark=document.getElementById("Remark_"      +i) ;
-       i_prescr=document.getElementById("Prescription_"+i) ;
-       i_name  =document.getElementById("Name_"        +i) ;
+	 i_id    =document.getElementById("Id_"          +i) ;
+	 i_remark=document.getElementById("Remark_"      +i) ;
+	 i_prescr=document.getElementById("Prescription_"+i) ;
+	 i_categ =document.getElementById("Category_"    +i) ;
+	 i_name  =document.getElementById("Name_"        +i) ;
+	 i_ref   =document.getElementById("Reference_"   +i) ;
 
-       i_name  .value=i_prescr.options[i_prescr.selectedIndex].text ;
+	 i_name  .value=i_prescr.options[i_prescr.selectedIndex].text ;
 
-       i_id    .value=Crypto_encode(i_id    .value, page_key) ;
-       i_name  .value=Crypto_encode(i_name  .value, page_key) ;
-       i_remark.value=Crypto_encode(i_remark.value, page_key) ;
+      if(i_ref.value=="")
+       if(i_categ.options[i_categ.selectedIndex].value=="measurement")
+	 i_ref   .value=i_categ.options[i_categ.selectedIndex].value ;
+
+	 i_id    .value=Crypto_encode(i_id    .value, page_key) ;
+	 i_name  .value=Crypto_encode(i_name  .value, page_key) ;
+	 i_remark.value=Crypto_encode(i_remark.value, page_key) ;
      }    
 
                          return true ;
@@ -818,7 +863,7 @@ function SuccessMsg() {
     return ;         
   } 
 
-  function AddListRow(p_id, p_category, p_remark)
+  function AddListRow(p_id, p_category, p_remark, p_reference)
   {
      var  i_set ;
      var  i_row_new ;
@@ -831,6 +876,8 @@ function SuccessMsg() {
      var  i_del_new ;
      var  i_upp_new ;
      var  num_new ;
+     var  fixed ; 
+
 
      if(p_id=='0')  p_category='unregistered' ;
 
@@ -838,12 +885,20 @@ function SuccessMsg() {
 		p_category=a_prescriptions[p_id] ;
      }
 
+     if(p_category=="measurement") {
+		i_measurements.hidden=false ;
+     }
+
+     if(p_reference.indexOf(":")>=0)  fixed=true ;
+     else                             fixed=false ;
+
        num_new=parseInt(i_count.value)+1 ;
                         i_count.value=num_new ;
 
        i_cat_new = document.getElementById("Category").cloneNode(true) ;
        i_cat_new . id      ='Category_'+num_new ;
        i_cat_new . hidden  = false ;
+       i_cat_new . disabled=fixed ;
        i_cat_new . onchange= function(e) {                      this.options[0].disabled=true ;
                                            SetCategory(this.id, this.options[this.selectedIndex].value) ;  } ;
        i_cat_new.options[0].disabled=true ;
@@ -855,6 +910,7 @@ function SuccessMsg() {
        i_prc_new         =document.getElementById("C_"+p_category).cloneNode(true) ;
        i_prc_new.id      ='Prescription_'+num_new ;
        i_prc_new.hidden  =false ;
+       i_prc_new.disabled=fixed ;
        i_prc_new.onchange=function(e) {                 this.options[0].disabled=true ;
                                          SetPrescription(this.id, this.options[this.selectedIndex].value) ;  } ;
 
@@ -909,6 +965,12 @@ function SuccessMsg() {
        i_fld_new . type     ="text" ;
        i_fld_new . size     =  80 ;
        i_fld_new . value    = p_remark ;
+       i_col_new . appendChild(i_fld_new) ;
+       i_fld_new = document.createElement("input") ;
+       i_fld_new . id       ='Reference_'+ num_new ;
+       i_fld_new . name     ='Reference_'+ num_new ;
+       i_fld_new . type     ="hidden" ;
+       i_fld_new . value    = p_reference ;
        i_col_new . appendChild(i_fld_new) ;
        i_row_new . appendChild(i_col_new) ;
 
@@ -1013,6 +1075,11 @@ function SuccessMsg() {
        i_fld_new . type     ="text" ;
        i_fld_new . size     =  80 ;
        i_col_new . appendChild(i_fld_new) ;
+       i_fld_new = document.createElement("input") ;
+       i_fld_new . id       ='Reference_'+ num_new ;
+       i_fld_new . name     ='Reference_'+ num_new ;
+       i_fld_new . type     ="hidden" ;
+       i_col_new . appendChild(i_fld_new) ;
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
@@ -1045,14 +1112,24 @@ function SuccessMsg() {
 
   function DeleteRow(p_id)
   {
+    var  i_ref  ;
     var  i_del  ;
     var  i_col  ;
     var  i_row  ;
     var  i_list  ;
     var  i_elm  ;
+    var  reply  ;
     var  top  ;
+    var  bottom  ;
     var  a_names ;
 
+
+	 i_ref =document.getElementById(p_id.replace("Delete","Reference")) ;
+      if(i_ref.value.indexOf(":")>0)
+      {
+            reply=confirm("При удалении данного назначения будет удалена также вся история сделанных по нему измерений. Удалить назначение?") ;
+         if(reply==false)  return ;
+      }
 
 	 i_elm =document.getElementById(p_id.replace("Delete","Order")) ;
            top =parseInt(i_elm.value) ;         
@@ -1065,7 +1142,7 @@ function SuccessMsg() {
 
          i_list.removeChild(i_row) ;
 
-       a_names=["Order","Id","Category","Prescription","Name","Remark","Details","Delete","LiftUp"] ;
+       a_names=["Order","Id","Category","Prescription","Name","Remark","Reference","Details","Delete","LiftUp"] ;
 
      for(i=top+1 ; i<=bottom ; i++) {
      for(j in a_names) {
@@ -1112,7 +1189,7 @@ function SuccessMsg() {
 
          i_list.insertBefore(i_row_2, i_row_1) ;
 
-       a_names=["Order","Id","Category","Prescription","Name","Remark","Details","Delete","LiftUp"] ;
+       a_names=["Order","Id","Category","Prescription","Name","Remark","Reference","Details","Delete","LiftUp"] ;
 
      for(j in a_names) {
 			 i_row_1      =document.getElementById(a_names[j]+"_"+up  ) ;
@@ -1167,6 +1244,16 @@ function SuccessMsg() {
   {
 	alert("Test "+p_id+" "+p_remark) ;
   } 
+
+  function ShowMeasurements()
+  {
+    var  v_session ;
+
+	 v_session=TransitContext("restore","session","") ;
+
+      location.assign("measurements_view.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
+  }
+
 
 <?php
   require("common.inc") ;
@@ -1230,6 +1317,12 @@ function SuccessMsg() {
     </tr>
     <tr>
       <td class="field"> </td>
+      <td> 
+        <input type="button" hidden value="Результаты контрольных измерений" id="Measurements" onclick=ShowMeasurements()> 
+      </td>
+    </tr>
+    <tr>
+      <td class="field"> </td>
       <td>
         <input type="hidden" name="Page"       id="Page"> 
         <input type="hidden" name="Check"      id="Check"> 
@@ -1259,10 +1352,13 @@ function SuccessMsg() {
       <br>
       <dev>Комплексы назначений:</dev>
       <select id="SetsList"></select>
+      <br>
+      <br>
 
     <select hidden id="Category"         ></select>
     <select hidden id="C_exercise"       ></select>
     <select hidden id="C_exploration"    ></select>
+    <select hidden id="C_measurement"    ></select>
     <select hidden id="C_operation"      ></select>
     <select hidden id="C_others"         ></select>
     <select hidden id="C_pharmacotherapy"></select>

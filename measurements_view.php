@@ -152,6 +152,9 @@ function ProcessDB() {
              if(count($values)<2)  $values=explode("-", $fields[1]) ;
 
            foreach($values as $value) {
+
+             if(!is_numeric($value)) continue ;
+
              if(!isset($a_grid[$fields[0]]["min"])      ||
                        $a_grid[$fields[0]]["min"]>$value  )  $a_grid[$fields[0]]["min"]=$value ;
              if(!isset($a_grid[$fields[0]]["max"])      ||
@@ -215,6 +218,9 @@ function ProcessDB() {
              if(count($values)<2)  $values   =explode("-", $sys_vals[$i][$sys_cols[$j]]) ;
              if(count($values)<2)  $values[1]=$values[0] ;
 
+             if(!is_numeric($values[0]) ||
+                !is_numeric($values[1])   ) continue ;
+
                      $Y1=$values[0] ;
              settype($Y1, "double") ; 
                      $Y2=$values[1] ;
@@ -232,7 +238,9 @@ function ProcessDB() {
 //- - - - - - - - - - - - - - Для дискретных значений
         else
         {
-                     $Y=$sys_vals[$i][$sys_cols[$j]] ;
+                            $Y=$sys_vals[$i][$sys_cols[$j]] ;
+             if(!is_numeric($Y)) continue ;
+
              settype($Y, "double") ;
 
                      $X=        ($X-$X_min)*$X_size/($X_max-$X_min) ;

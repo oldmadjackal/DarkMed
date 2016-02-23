@@ -326,7 +326,7 @@ function ShowMeasurements() {
     }
        echo  "  </tr>							\n" ;
 
-  for($i=1 ; $i<$sys_vals_count ; $i++)
+  for($i=$sys_vals_count-1 ; $i>0 ; $i--)
   {
         $row=$i ;
 

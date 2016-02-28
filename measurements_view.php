@@ -85,11 +85,23 @@ function ProcessDB() {
                           "  and  page = $page_".
                           " Order by measurement_id" ;
      $res=$db->query($sql) ;
-  if($res===false) {
+  if($res===false) 
+  {
           FileLog("ERROR", "Select PRESCRIPTIONS_PAGES... : ".$db->error) ;
                             $db->close() ;
          ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса списка назначений") ;
                          return ;
+  }
+  else
+  if($res->num_rows==0) 
+  {
+     $sys_cols_count=0 ;
+
+     $db->close() ;
+
+        InfoMsg("Данные контрольных измерений отсутствуют") ;
+        FileLog("STOP", "Done") ;
+           return ;
   }
   else
   {  
@@ -305,6 +317,8 @@ function ShowMeasurements() {
   global  $sys_vals_count  ;
   global  $sys_vals        ;
 
+
+   if($sys_cols_count==0)  return ;
 
        echo  "  <tr class='table'>					\n" ;
        echo  "    <td class='table'>					\n" ;

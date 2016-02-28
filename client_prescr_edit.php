@@ -177,7 +177,8 @@ function ProcessDB() {
 
                      $sql="Select id, type, name".
 			  "  From prescriptions_registry".
-                          " Where type<>'dummy'" ;
+                          " Where type<>'dummy'".
+                          " Order by name" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select PRESCRIPTIONS_REGISTRY... : ".$db->error) ;
@@ -206,7 +207,8 @@ function ProcessDB() {
                      $sql="Select id, name".
 			  "  From sets_registry".
                           " Where name not like '#%'".
-                          "  and  user='$user_'" ;
+                          "  and  user='$user_'".
+                          " Order by name" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select SETS_REGISTRY... : ".$db->error) ;

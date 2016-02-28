@@ -245,7 +245,8 @@ function ProcessDB() {
 
                      $sql="Select id, type, name".
 			  "  From prescriptions_registry".
-                          " Where type<>'dummy'" ;
+                          " Where type<>'dummy'".
+                          " Order by name" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select PRESCRIPTIONS_REGISTRY... : ".$db->error) ;

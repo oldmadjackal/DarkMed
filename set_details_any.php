@@ -67,7 +67,7 @@ function ProcessDB() {
 
 //--------------------------- Формирование данных страницы
 
-      echo "  i_id         .innerHTML='".$id         ."' ;	\n" ;
+//    echo "  i_id         .innerHTML='".$id         ."' ;	\n" ;
       echo "  i_name       .innerHTML='".$name       ."' ;	\n" ;
       echo "  i_description.innerHTML='".$description."' ;	\n" ;
 
@@ -110,8 +110,8 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;		\r\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\r\n" ;
     echo  "return ;" ;
 }
 
@@ -120,8 +120,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;" ;
+    echo  "i_error.style.color='green' ;			\r\n" ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!'	\r\n;" ;
 }
 //============================================== 
 ?>
@@ -187,8 +187,8 @@ function SuccessMsg() {
   {
 
      for(i in a_id) {
-          parent.frames['section'].AddListRow(a_id[i], a_type[i], a_remark[i]) ;
-                    }  
+          parent.frames['section'].AddListRow(a_id[i], a_type[i], a_remark[i], "") ;
+                    }
   } 
 
 <?php

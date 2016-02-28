@@ -126,8 +126,8 @@ function ProcessDB() {
 
                        $sql="Select creator".
                             "  From client_pages".
-                            " Where `owner`='$owner_'".
-                            "  and  `page` = $page_" ;
+                            " Where owner='$owner_'".
+                            "  and  page = $page_" ;
        $res=$db->query($sql) ;
     if($res===false) {
           FileLog("ERROR", "DB query(Select CLIENT_PAGES(CREATOR)) : ".$db->error) ;
@@ -151,7 +151,7 @@ function ProcessDB() {
 
                      $sql="Select code, name".
 			  "  From ref_prescriptions_types".
-			  " Where `language`='RU'" ;
+			  " Where language='RU'" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select REF_PRESCRIPTIONS_TYPES... : ".$db->error) ;
@@ -347,17 +347,7 @@ function ProcessDB() {
                          return ;
     }
 //- - - - - - - - - - - - - - Сохранение списка назначений
-                       $sql="Delete from prescriptions_pages".
-                            " Where owner='$owner_'".
-                            "  and  page = $page_" ; 
-       $res=$db->query($sql) ;
-    if($res===false) {
-             FileLog("ERROR", "Delete PRESCRIPTIONS_PAGES... : ".$db->error) ;
-                     $db->rollback();
-                     $db->close() ;
-            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных 1") ;
-                         return ;
-    }
+           $assign_reference=false ;
 
    for($i=0 ; $i<$prescr_count ; $i++) 
    {
@@ -369,6 +359,8 @@ function ProcessDB() {
       {
         if(strpos($a_ref[$i], ":")===false) 
         {
+           $assign_reference=true ;
+
            $type_=$db->real_escape_string($a_ref[$i]) ;
            $ref_ ='' ;
         }
@@ -397,6 +389,39 @@ function ProcessDB() {
                          return ;
     }
 
+    if($i==0)  $new_first_id=$db->insert_id ;
+
+   }
+//- - - - - - - - - - - - - - Удаление старого списка назначений
+                       $sql="Delete from prescriptions_pages".
+                            " Where owner='$owner_'".
+                            "  and  page = $page_".
+                            "  and  id   < $new_first_id" ; 
+       $res=$db->query($sql) ;
+    if($res===false) {
+             FileLog("ERROR", "Delete PRESCRIPTIONS_PAGES... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных 1") ;
+                         return ;
+    }
+//- - - - - - - - - - - - - - Назначение референсов
+   if($assign_reference)
+   {
+                       $sql="Update prescriptions_pages".
+                            "   Set reference=id".
+                            " Where owner    ='$owner_'".
+                            "  and  page     = $page_".
+                            "  and  type     ='measurement'".
+                            "  and  reference= 0 " ; 
+       $res=$db->query($sql) ;
+    if($res===false) {
+             FileLog("ERROR", "Delete PRESCRIPTIONS_PAGES... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных 1") ;
+                         return ;
+    }
    }
 //- - - - - - - - - - - - - -
           $db->commit() ;

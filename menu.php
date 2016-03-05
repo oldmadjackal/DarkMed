@@ -150,6 +150,11 @@ header("Content-type: text/html; charset=windows-1251") ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('messages.php'+'?Session='+v_session) ; "
          target="section">Сообщения</a></li> 
+    <br>
+    <li><a href="javascript:
+                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
+                                parent.frames['section'].location.assign('deseases_registry.php'+'?Session='+v_session) ; "
+         target="section">Реестр заболеваний</a></li> 
     <li><a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                                 parent.frames['section'].location.assign('prescriptions_registry.php'+'?Session='+v_session) ; "

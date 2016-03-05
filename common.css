@@ -41,7 +41,22 @@
                   padding-left : 1ex             ; 
                  padding-right : 1ex             ; 
             }
-    .tableB  {
+    .tableG {
+                    text-align : left            ;
+                vertical-align : top             ;
+                        border : 1px solid black ; 
+              background-color : RGB(74,255,74)  ;
+                  padding-left : 1ex             ; 
+                 padding-right : 1ex             ; 
+            }
+    .tableL {
+                    text-align : left            ;
+                vertical-align : top             ;
+                        border : 1px solid black ; 
+                  padding-left : 5ex             ; 
+                 padding-right : 1ex             ; 
+            }
+    .tableB {
                     text-align : center          ;
                 vertical-align : middle          ;
                         border : 1px solid black ; 

@@ -44,7 +44,7 @@ function ProcessDB() {
 
           $get_id_=$db->real_escape_string($get_id) ;
 
-                       $sql="Select  r.id, r.user, t.name, r.name, r.reference, r.description, r.www_link".
+                       $sql="Select  r.id, r.user, t.name, r.name, r.reference, r.description, r.www_link, r.deseases".
                             "       ,d.name_f, d.name_i, d.name_o".
                             "  From  prescriptions_registry r".
                             "        inner join doctor_page_main d on d.owner=r.user".
@@ -63,15 +63,56 @@ function ProcessDB() {
 
                    $put_id     =$fields[0] ;
                    $owner      =$fields[1] ;
-                   $owner_name =$fields[7]." ".$fields[8]." ".$fields[9]." (".$fields[1].")" ;
+                   $owner_name =$fields[8]." ".$fields[9]." ".$fields[10]." (".$fields[1].")" ;
                    $type       =$fields[2] ;
                    $name       =$fields[3] ;
                    $reference  =$fields[4] ;
                    $description=$fields[5] ;
                    $www_link   =$fields[6] ;
+                   $deseases   =$fields[7] ;
 
         FileLog("", "Prescription data selected successfully") ;
 
+//--------------------------- Извлечение списка связанных заболеваний
+
+  if($deseases!="")
+  {
+             $deseases_list=str_replace(" ", ",", $deseases) ;
+
+                       $sql="Select name, grp, code, id".
+                            "  from (".
+                            "        Select ''name, d3.name grp, '0'code, d3.id".
+                            "          From deseases_registry d3".
+                            "         Where d3.type =  '0'".
+                            "        union all".
+                            "        Select d1.name, d2.name grp, d1.type code, d1.id".
+                            "          From deseases_registry d1, deseases_registry d2".
+                            "         Where d1.type = d2.id".
+                            "        )list".
+                            " Where id in (".$deseases_list.")".
+                            " Order by grp, name" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+            FileLog("ERROR", "Select DESEASES_REGISTRY... : ".$db->error) ;
+                              $db->close() ;
+           ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса списка связанных заболеваний") ;
+                           return ;
+    }
+
+    for($i=0 ; $i<$res->num_rows ; $i++)
+    {
+	      $fields=$res->fetch_row() ;
+
+       echo "    dss_name ='".$fields[0]."' ;	\n" ;
+       echo "    dss_group='".$fields[1]."' ;	\n" ;
+       echo "    dss_gcode='".$fields[2]."' ;	\n" ;
+       echo "    dss_id   ='".$fields[3]."' ;	\n" ;
+
+       echo "  AddDesease(dss_id, dss_name, dss_group, dss_gcode) ;	\n" ;
+    }
+
+     $res->close() ;
+  }
 //--------------------------- Извлечение дополнительных блоков
 
                      $sql="Select CONCAT_WS(' ', d.name_f, d.name_i, d.name_o)".
@@ -189,8 +230,8 @@ function ShowExtensions() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;		\r\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\r\n" ;
     echo  "return ;" ;
 }
 
@@ -199,8 +240,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;" ;
+    echo  "i_error.style.color='green' ;			\r\n" ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ;	\r\n" ;
 }
 //============================================== 
 ?>
@@ -281,6 +322,53 @@ function SuccessMsg() {
     window.open("doctor_view.php"+"?Owner="+creator) ;
   } 
 
+  function AddDesease(p_id, p_name, p_group, p_gcode)
+  {
+     var  i_dss_list ;
+     var  i_row_new ;
+     var  i_col_new ;
+     var  i_txt_new ;
+     var  v_id ;
+
+
+                   v_id="Desease_"+p_id ;
+
+       i_dss_list= document.getElementById("Deseases_list") ;
+
+       i_row_new = document.createElement("tr") ;
+       i_row_new . className = "table" ;
+       i_row_new . id        =  v_id ;
+
+       i_col_new = document.createElement("td") ;
+
+   if(p_gcode==0)
+   {
+       i_col_new . className = "tableG" ;
+       i_txt_new = document.createTextNode(p_group) ;
+       i_col_new . appendChild(i_txt_new) ;
+   }
+   else
+   {
+       i_col_new . className = "tableL" ;
+       i_txt_new = document.createTextNode(p_name) ;
+       i_col_new . appendChild(i_txt_new) ;
+   } 
+       i_col_new . onclick= function(e) {
+					    var  v_session ;
+					    var  v_form ;
+						 v_session=TransitContext("restore","session","") ;
+									      v_form="desease_details_any.php" ;
+						parent.frames["details"].location.replace(v_form+
+                                                                                         "?Session="+v_session+
+                                                                                         "&Id="+p_id) ;
+					} ;
+       i_row_new . appendChild(i_col_new) ;
+
+       i_dss_list. appendChild(i_row_new) ;
+
+    return ;         
+  } 
+
 <?php
   require("common.inc") ;
 ?>
@@ -315,17 +403,21 @@ function SuccessMsg() {
   </table>
 
   <form onsubmit="return SendFields();" method="POST">
-  <table width="100%" id="Fields">
+
+  <table width="100%" >
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="field"> </td>
-    </tr>
-    <tr>
-      <td class="field"> </td>
       <td> <div class="error" id="Error"></div> </td>
     </tr>
+    <tr>
+    <td class="table">
+
+  <table width="100%" id="Fields">
+    <thead>
+    </thead>
+    <tbody>
     <tr>
       <td class="field"><b> Код: </b></td>
       <td> <dev id="Id"></dev> </td>
@@ -360,6 +452,19 @@ function SuccessMsg() {
     <tr>
       <td class="field"><b> Описание: </b></td>
       <td> <div id="Description"></div> </td>
+    </tr>
+    </tbody>
+  </table>
+
+      </td>
+      <td class="table">
+        <table width="100%">
+          <thead>
+          </thead>
+          <tbody  id="Deseases_list">
+          </tbody>
+        </table>
+      </td>
     </tr>
     </tbody>
   </table>

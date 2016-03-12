@@ -43,7 +43,7 @@ function ProcessDB() {
                             "       ,d.name_f, d.name_i, d.name_o".
                             "  From  deseases_registry r".
                             "        inner join doctor_page_main  d on d.owner=r.user".
-                            "        inner join deseases_registry t on t.id   =r.type".
+                            "        left outer join deseases_registry t on t.id=r.type".
                             " Where  r.id=$id_" ; 
        $res=$db->query($sql) ;
     if($res===false) {
@@ -70,6 +70,8 @@ function ProcessDB() {
                    $reference  =$fields[3] ;
                    $description=$fields[4] ;
                    $www_link   =$fields[5] ;
+
+        if($type=="")  $type="Группа заболеваний" ;
 
         FileLog("", "Desease data selected successfully") ;
 

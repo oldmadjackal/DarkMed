@@ -45,6 +45,7 @@ function ProcessDB() {
                          $reference  =$_POST["Reference"] ;
                          $description=$_POST["Description"] ;
                          $www_link   =$_POST["WWW_link"] ;
+                         $deseases   =$_POST["Deseases"] ;
                          $count      =$_POST["Count"] ;
                          $delete     =$_POST["Delete"] ;
                          $reorder    =$_POST["ReOrder"] ;
@@ -82,6 +83,7 @@ function ProcessDB() {
     FileLog("",      "  Reference:".$reference) ;
     FileLog("",      "Description:".$description) ;
     FileLog("",      "   WWW_link:".$www_link) ;
+    FileLog("",      "   Deseases:".$deseases) ;
     FileLog("",      "      Count:".$count) ;
     FileLog("",      "     Delete:".$delete) ;
     FileLog("",      "    ReOrder:".$reorder) ;
@@ -125,6 +127,7 @@ function ProcessDB() {
           $reference_  =$db->real_escape_string($reference) ;
           $description_=$db->real_escape_string($description) ;
           $www_link_   =$db->real_escape_string($www_link) ;
+          $deseases_   =$db->real_escape_string($deseases) ;
 
                        $sql="Update prescriptions_registry".
                             " Set   type       ='$type_'".
@@ -132,6 +135,7 @@ function ProcessDB() {
                             "      ,reference  ='$reference_'".
                             "      ,description='$description_'".
                             "      ,www_link   ='$www_link_'".
+                            "      ,deseases   ='$deseases_'".
                             " Where id='$put_id_'" ; 
        $res=$db->query($sql) ;
     if($res===false) {
@@ -320,6 +324,7 @@ function ProcessDB() {
                    $reference  ='' ;
                    $description='' ;
                    $www_link   ='' ;
+                   $deseases   ='' ;
 
           $get_id_=$db->real_escape_string($put_id) ;
 
@@ -331,7 +336,7 @@ function ProcessDB() {
   {
           $get_id_=$db->real_escape_string($get_id) ;
 
-                       $sql="Select id, user, type, name, reference, description, www_link".
+                       $sql="Select id, user, type, name, reference, description, www_link, deseases".
                             "  From  prescriptions_registry".
                             " Where  id='$get_id_'" ; 
        $res=$db->query($sql) ;
@@ -352,6 +357,7 @@ function ProcessDB() {
                    $reference  =$fields[4] ;
                    $description=$fields[5] ;
                    $www_link   =$fields[6] ;
+                   $deseases   =$fields[7] ;
 
         FileLog("", "Prescription data selected successfully") ;
   }
@@ -382,6 +388,46 @@ function ProcessDB() {
 
      $res->close() ;
 
+//--------------------------- Извлечение списка связанных заболеваний
+
+  if($deseases!="")
+  {
+             $deseases_list=str_replace(" ", ",", $deseases) ;
+
+                       $sql="Select name, grp, code, id".
+                            "  from (".
+                            "        Select ''name, d3.name grp, '0'code, d3.id".
+                            "          From deseases_registry d3".
+                            "         Where d3.type =  '0'".
+                            "        union all".
+                            "        Select d1.name, d2.name grp, d1.type code, d1.id".
+                            "          From deseases_registry d1, deseases_registry d2".
+                            "         Where d1.type = d2.id".
+                            "        )list".
+                            " Where id in (".$deseases_list.")".
+                            " Order by grp, name" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+            FileLog("ERROR", "Select DESEASES_REGISTRY... : ".$db->error) ;
+                              $db->close() ;
+           ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса списка связанных заболеваний") ;
+                           return ;
+    }
+
+    for($i=0 ; $i<$res->num_rows ; $i++)
+    {
+	      $fields=$res->fetch_row() ;
+
+       echo "    dss_name ='".$fields[0]."' ;	\n" ;
+       echo "    dss_group='".$fields[1]."' ;	\n" ;
+       echo "    dss_gcode='".$fields[2]."' ;	\n" ;
+       echo "    dss_id   ='".$fields[3]."' ;	\n" ;
+
+       echo "  SetDeseaseSelection(true, dss_id, dss_name, dss_group, dss_gcode, null) ;	\n" ;
+    }
+
+     $res->close() ;
+  }
 //--------------------------- Извлечение дополнительных блоков
 
       echo     "  i_count    .value='0' ;	\n" ;
@@ -434,6 +480,7 @@ function ProcessDB() {
       echo     "  i_reference  .value='".$reference  ."' ;\n" ;
       echo     "  i_description.value='".$description."' ;\n" ;
       echo     "  i_www_link   .value='".$www_link   ."' ;\n" ;
+      echo     "  i_deseases   .value='".$deseases   ."' ;\n" ;
 
       echo     "  SetType('".$type."') ;\n" ;
 
@@ -568,6 +615,7 @@ function SuccessMsg() {
     var  i_reference ;
     var  i_description ;
     var  i_www_link ;
+    var  i_deseases ;
     var  i_ext_type ;
     var  i_count ;
     var  i_new_order ;
@@ -577,6 +625,7 @@ function SuccessMsg() {
 
     var  a_types ;
 
+    var  s_deseases_select_use ;
 
   function FirstField() 
   {
@@ -590,6 +639,7 @@ function SuccessMsg() {
 	i_reference  =document.getElementById("Reference") ;
 	i_description=document.getElementById("Description") ;
 	i_www_link   =document.getElementById("WWW_link") ;
+	i_deseases   =document.getElementById("Deseases") ;
 	i_ext_type   =document.getElementById("ExtensionType") ;
 	i_count      =document.getElementById("Count") ;
 	i_new_order  =document.getElementById("NewOrder") ;
@@ -599,6 +649,8 @@ function SuccessMsg() {
 
 	a_types=new Array() ;
 
+        s_deseases_select_use=false ;
+
 <?php
             ProcessDB() ;
 ?>
@@ -606,6 +658,12 @@ function SuccessMsg() {
        i_description.value=i_description.value.replace(nl,"\n") ;
 
          return true ;
+  }
+
+  function GoAway() 
+  {
+     if(s_deseases_select_use)
+             parent.frames["details"].location.replace("start.html") ;
   }
 
   function SendFields() 
@@ -1052,6 +1110,84 @@ function SuccessMsg() {
     window.open(document.getElementById(p_link).value) ;
   } 
 
+  function LinkDesease() 
+  {
+    var  v_session ;
+
+         v_session=TransitContext("restore","session","") ;
+
+        parent.frames["details"].location.replace("deseases_select.php"+"?Session="+v_session+"&Deseases="+i_deseases.value) ;
+
+        s_deseases_select_use=true ;
+  } 
+
+  function SetDeseaseSelection(p_checked, p_id, p_name, p_group, p_gcode, p_before)
+  {
+     var  i_dss_list ;
+     var  i_row_new ;
+     var  i_col_new ;
+     var  i_txt_new ;
+     var  i_before ;
+     var  v_id ;
+
+
+                   v_id="Desease_"+p_id ;
+       i_deseases.value=" "+i_deseases.value+" " ;
+
+       i_dss_list= document.getElementById("Deseases_list") ;
+
+   if(p_checked==false)
+   {
+     i_deseases.value=i_deseases.value.replace(" "+p_id+" ", " ").trim() ;
+
+     i_dss_list.removeChild(document.getElementById(v_id)) ;
+         return ;
+   }
+
+   if(i_deseases.value.indexOf(" "+p_id+" ")<0)
+   {
+       i_deseases.value+=p_id ;
+   }
+       i_deseases.value =i_deseases.value.trim() ;
+
+       i_row_new = document.createElement("tr") ;
+       i_row_new . className = "table" ;
+       i_row_new . id        =  v_id ;
+
+       i_col_new = document.createElement("td") ;
+
+   if(p_gcode==0)
+   {
+       i_col_new . className = "tableG" ;
+       i_txt_new = document.createTextNode(p_group) ;
+       i_col_new . appendChild(i_txt_new) ;
+   }
+   else
+   {
+       i_col_new . className = "tableL" ;
+       i_txt_new = document.createTextNode(p_name) ;
+       i_col_new . appendChild(i_txt_new) ;
+   } 
+       i_col_new . onclick= function(e) {
+					    var  v_session ;
+					    var  v_form ;
+						 v_session=TransitContext("restore","session","") ;
+									      v_form="desease_details_any.php" ;
+						parent.frames["details"].location.replace(v_form+
+                                                                                         "?Session="+v_session+
+                                                                                         "&Id="+p_id) ;
+					} ;
+       i_row_new . appendChild(i_col_new) ;
+
+
+   if(p_before!=null)  i_before=document.getElementById("Desease_"+p_before) ;
+   else                i_before= null ;
+
+       i_dss_list.insertBefore(i_row_new, i_before) ;
+
+    return ;         
+  } 
+
 
 <?php
   require("common.inc") ;
@@ -1063,7 +1199,7 @@ function SuccessMsg() {
 
 </head>
 
-<body onload="FirstField();">
+<body onload="FirstField();" onunload="GoAway();">
 
 <noscript>
 </noscript>
@@ -1087,18 +1223,28 @@ function SuccessMsg() {
   </table>
 
   <form onsubmit="return SendFields();" method="POST" enctype="multipart/form-data">
-  <table width="100%" id="Fields">
+
+  <table width="100%" >
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="field"> </td>
-      <td> <br> <input type="submit" value="Сохранить"  id="Save1"> </td>
+      <td class="fieldC">
+          <br> 
+          <input type="submit" value="Сохранить"  id="Save1"> 
+      </td>
+      <td> </td>
     </tr>
     <tr>
-      <td class="field"> </td>
       <td> <div class="error" id="Error"></div> </td>
     </tr>
+    <tr>
+    <td class="table">
+
+  <table width="100%" id="Fields">
+    <thead>
+    </thead>
+    <tbody>
     <tr>
       <td class="field"> Код </td>
       <td> <input type="text" size=10 disabled name="Id" id="Id"> </td>
@@ -1138,6 +1284,22 @@ function SuccessMsg() {
     </tbody>
   </table>
 
+      </td>
+      <td class="table">
+        <div class="fieldC">
+          <input type="button" value="Добавить/удалить заболевания" onclick=LinkDesease()>
+        </div> 
+        <table width="100%">
+          <thead>
+          </thead>
+          <tbody  id="Deseases_list">
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
   <table width="100%">
     <thead>
     </thead>
@@ -1159,6 +1321,7 @@ function SuccessMsg() {
       <option value="File">Файл с пояснением</option>
     </select> 
     <input type="button" value="Добавить" onclick=AddNewExtension() id="AddExtension">
+    <input type="hidden" name="Deseases" id="Deseases">
     <input type="hidden" name="Count" id="Count">
     <input type="hidden" name="NewOrder" id="NewOrder">
     <input type="hidden" name="FileName" id="FileName">

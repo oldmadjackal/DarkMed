@@ -31,6 +31,7 @@ function ProcessDB() {
   {
                          $name       =$_POST["Name"] ;
                          $description=$_POST["Description"] ;
+                         $deseases   =$_POST["Deseases"] ;
                          $count      =$_POST["Count"] ;
 
              $a_prescr=array() ;
@@ -61,6 +62,7 @@ function ProcessDB() {
     FileLog("",      "     Put_Id:".$put_id) ;
     FileLog("",      "       Name:".$name) ;
     FileLog("",      "Description:".$description) ;
+    FileLog("",      "   Deseases:".$deseases) ;
     FileLog("",      "      Count:".$count) ;
 
    for($i=0 ; $i<$prescr_count ; $i++) 
@@ -121,6 +123,7 @@ function ProcessDB() {
                    $put_id     =$fields[0] ;
                    $name       ='' ;
                    $description='' ;
+                   $deseases   ='' ;
 
         FileLog("", "New prescription generated successfully") ;
   }
@@ -130,7 +133,7 @@ function ProcessDB() {
   {
           $get_id_=$db->real_escape_string($get_id) ;
 
-                       $sql="Select id, user, name, description".
+                       $sql="Select id, user, name, description, deseases".
                             "  From  sets_registry".
                             " Where  id='$get_id_'" ; 
        $res=$db->query($sql) ;
@@ -148,6 +151,7 @@ function ProcessDB() {
                    $owner      =$fields[1] ;
                    $name       =$fields[2] ;
                    $description=$fields[3] ;
+                   $deseases   =$fields[4] ;
 
         FileLog("", "Set data selected successfully") ;
 
@@ -160,12 +164,15 @@ function ProcessDB() {
   else
   {
           $put_id_     =$db->real_escape_string($put_id) ;
+
           $name_       =$db->real_escape_string($name) ;
           $description_=$db->real_escape_string($description) ;
+          $deseases_   =$db->real_escape_string($deseases) ;
 
                        $sql="Update sets_registry".
                             " Set   name       ='$name_'".
                             "      ,description='$description_'".
+                            "      ,deseases   ='$deseases_'".
                             " Where id='$put_id_'" ; 
        $res=$db->query($sql) ;
     if($res===false) {
@@ -211,9 +218,50 @@ function ProcessDB() {
         FileLog("", "Set data saved successfully") ;
      SuccessMsg() ;
   }
+//--------------------------- Извлечение списка связанных заболеваний
+
+  if($deseases!="")
+  {
+             $deseases_list=str_replace(" ", ",", $deseases) ;
+
+                       $sql="Select name, grp, code, id".
+                            "  from (".
+                            "        Select ''name, d3.name grp, '0'code, d3.id".
+                            "          From deseases_registry d3".
+                            "         Where d3.type =  '0'".
+                            "        union all".
+                            "        Select d1.name, d2.name grp, d1.type code, d1.id".
+                            "          From deseases_registry d1, deseases_registry d2".
+                            "         Where d1.type = d2.id".
+                            "        )list".
+                            " Where id in (".$deseases_list.")".
+                            " Order by grp, name" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+            FileLog("ERROR", "Select DESEASES_REGISTRY... : ".$db->error) ;
+                              $db->close() ;
+           ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса списка связанных заболеваний") ;
+                           return ;
+    }
+
+    for($i=0 ; $i<$res->num_rows ; $i++)
+    {
+	      $fields=$res->fetch_row() ;
+
+       echo "    dss_name ='".$fields[0]."' ;	\n" ;
+       echo "    dss_group='".$fields[1]."' ;	\n" ;
+       echo "    dss_gcode='".$fields[2]."' ;	\n" ;
+       echo "    dss_id   ='".$fields[3]."' ;	\n" ;
+
+       echo "  SetDeseaseSelection(true, dss_id, dss_name, dss_group, dss_gcode, null) ;	\n" ;
+    }
+
+     $res->close() ;
+  }
 //--------------------------- Извлечение назначений комплекса
 
-                   $count      ='0' ;
+           $count  ='0' ;
+           $put_id_=$db->real_escape_string($put_id) ;
 
 //--------------------------- Извлечение списка типов назначений
 
@@ -241,13 +289,56 @@ function ProcessDB() {
 
      $res->close() ;
 
+//------------------------- Определение списка заболеваний
+
+  if($deseases!="")
+  {
+                      $list=str_replace(" ", ",", $deseases) ;
+
+                       $sql="Select id".
+			    "  From deseases_registry".
+			    " Where id in (".$list.") ".
+                            " UNION ALL ".
+                            "Select type".
+			    "  From deseases_registry".
+			    " Where id in (".$list.")".
+                            "  and  type>0" ;
+
+       $res=$db->query($sql) ;
+    if($res===false) {
+          FileLog("ERROR", "Select DESEASES_REGISTRY... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка формирования фильтра по заболеваниям") ;
+                         return ;
+    }
+    else
+    {  
+       for($i=0 ; $i<$res->num_rows ; $i++)
+       {
+	    $fields =$res->fetch_row() ;
+	  $a_dss[$i]=$fields[0] ;
+       }
+    }
+
+	$res->close() ;
+  }
 //--------------------------- Извлечение списка назначений
 
-                     $sql="Select id, type, name".
-			  "  From prescriptions_registry".
-                          " Where type<>'dummy'".
-                          " Order by name" ;
-     $res=$db->query($sql) ;
+                     $sql ="Select id, type, name".
+			   "  From prescriptions_registry".
+                           " Where type<>'dummy'\r\n" ;
+
+  if($deseases!="")
+  {
+                                 $sql.="  and (   id in (Select e.prescription_id From sets_elements e  Where e.set_id=$put_id_) \r\n" ;
+                                 $sql.="       or deseases is null \r\n" ;
+      foreach($a_dss as $value)  $sql.="       or instr(concat(' ', deseases, ' '), ' ".$value." ')>0 \r\n" ;
+                                 $sql.="      )\r\n" ;
+  }
+                        $sql.=" Order by name" ;
+          FileLog("DEBUG", $sql) ;
+
+        $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select PRESCRIPTIONS_REGISTRY... : ".$db->error) ;
                             $db->close() ;
@@ -271,8 +362,6 @@ function ProcessDB() {
 //--------------------------- Извлечение состава комплекса
 
       echo     "  i_count.value='0'	;\n" ;
-
-          $put_id_=$db->real_escape_string($put_id) ;
 
                      $sql="Select e.prescription_id, r.type, e.remark".
 			  "  From sets_elements e left outer join prescriptions_registry r on e.prescription_id=r.id".
@@ -315,9 +404,18 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;		\r\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\r\n" ;
     echo  "return ;" ;
+}
+
+//============================================== 
+//  Выдача информационного сообщения на WEB-страницу
+
+function InfoMsg($text) {
+
+    echo  "i_error.style.color='blue' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
 }
 
 //============================================== 
@@ -325,8 +423,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;" ;
+    echo  "i_error.style.color='green' ;			\r\n" ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ;	\r\n" ;
 }
 //============================================== 
 ?>
@@ -354,8 +452,10 @@ function SuccessMsg() {
     var  i_count ;
     var  i_name ;
     var  i_description ;
+    var  i_deseases ;
     var  i_error ;
 
+    var  s_deseases_select_use ;
 
   function FirstField() 
   {
@@ -367,6 +467,7 @@ function SuccessMsg() {
 	i_count      =document.getElementById("Count") ;
 	i_name       =document.getElementById("Name") ;
 	i_description=document.getElementById("Description") ;
+	i_deseases   =document.getElementById("Deseases") ;
 	i_error      =document.getElementById("Error") ;
 
 	i_category=document.getElementById("Category") ;
@@ -412,6 +513,8 @@ function SuccessMsg() {
 	i_c_unregistered   .options[i_c_unregistered.length-1].text ='' ;
 	i_c_unregistered   .options[i_c_unregistered.length-1].value='0' ;
 
+        s_deseases_select_use=false ;
+
 <?php
             ProcessDB() ;
 ?>
@@ -419,6 +522,12 @@ function SuccessMsg() {
        i_description.value=i_description.value.replace(nl,"\n") ;
 
          return true ;
+  }
+
+  function GoAway() 
+  {
+     if(s_deseases_select_use)
+             parent.frames["details"].location.replace("start.html") ;
   }
 
   function SendFields() 
@@ -808,6 +917,91 @@ function SuccessMsg() {
     return ;         
   } 
 
+  function LinkDesease() 
+  {
+    var  v_session ;
+
+         v_session=TransitContext("restore","session","") ;
+
+        parent.frames["details"].location.replace("deseases_select.php"+"?Session="+v_session+"&Deseases="+i_deseases.value) ;
+
+        s_deseases_select_use=true ;
+  } 
+
+  function SetDeseaseSelection(p_checked, p_id, p_name, p_group, p_gcode, p_before)
+  {
+     var  i_dss_list ;
+     var  i_row_new ;
+     var  i_col_new ;
+     var  i_txt_new ;
+     var  i_before ;
+     var  v_id ;
+
+
+    if(s_deseases_select_use)
+    {
+       i_error.style.color='blue' ;
+       i_error.innerHTML  ='Новые настройки фильтра по заболеваниям вступят в силу после СОХРАНЕНИЯ' ;
+    }
+
+                   v_id="Desease_"+p_id ;
+       i_deseases.value=" "+i_deseases.value+" " ;
+
+       i_dss_list= document.getElementById("Deseases_list") ;
+
+   if(p_checked==false)
+   {
+     i_deseases.value=i_deseases.value.replace(" "+p_id+" ", " ").trim() ;
+
+     i_dss_list.removeChild(document.getElementById(v_id)) ;
+         return ;
+   }
+
+   if(i_deseases.value.indexOf(" "+p_id+" ")<0)
+   {
+       i_deseases.value+=p_id ;
+   }
+       i_deseases.value =i_deseases.value.trim() ;
+
+       i_row_new = document.createElement("tr") ;
+       i_row_new . className = "table" ;
+       i_row_new . id        =  v_id ;
+
+       i_col_new = document.createElement("td") ;
+
+   if(p_gcode==0)
+   {
+       i_col_new . className = "tableG" ;
+       i_txt_new = document.createTextNode(p_group) ;
+       i_col_new . appendChild(i_txt_new) ;
+   }
+   else
+   {
+       i_col_new . className = "tableL" ;
+       i_txt_new = document.createTextNode(p_name) ;
+       i_col_new . appendChild(i_txt_new) ;
+   } 
+       i_col_new . onclick= function(e) {
+					    var  v_session ;
+					    var  v_form ;
+						 v_session=TransitContext("restore","session","") ;
+									      v_form="desease_details_any.php" ;
+						parent.frames["details"].location.replace(v_form+
+                                                                                         "?Session="+v_session+
+                                                                                         "&Id="+p_id) ;
+					} ;
+       i_row_new . appendChild(i_col_new) ;
+
+
+   if(p_before!=null)  i_before=document.getElementById("Desease_"+p_before) ;
+   else                i_before= null ;
+
+       i_dss_list.insertBefore(i_row_new, i_before) ;
+
+    return ;         
+  } 
+
+
 <?php
   require("common.inc") ;
 ?>
@@ -818,7 +1012,7 @@ function SuccessMsg() {
 
 </head>
 
-<body onload="FirstField();">
+<body onload="FirstField();" onunload="GoAway();">
 
 <noscript>
 </noscript>
@@ -842,28 +1036,57 @@ function SuccessMsg() {
   </table>
 
   <form onsubmit="return SendFields();" method="POST">
+
+  <table width="100%" >
+    <thead>
+    </thead>
+    <tbody>
+    <tr>
+      <td class="fieldC">
+          <br> 
+          <input type="submit" value="Сохранить"  id="Save1"> 
+      </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> <div class="error" id="Error"></div> </td>
+    </tr>
+    <tr>
+    <td class="table">
+
   <table width="100%" id="Fields">
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="field"> </td>
-      <td> <br> <input type="submit" value="Сохранить"  id="Save1"> </td>
-    </tr>
-    <tr>
-      <td class="field"> </td>
-      <td> <div class="error" id="Error"></div> </td>
-    </tr>
-    <tr>
       <td class="field"> Название </td>
-      <td> <input type="text" size=60 name="Name" id="Name"> </td>
-      <td> <input type="hidden" name="Id" id="Id"> </td>
-      <td> <input type="hidden" name="Count" id="Count"> </td>
+      <td>
+        <input type="text" size=60 name="Name" id="Name">
+        <input type="hidden" name="Id" id="Id">
+        <input type="hidden" name="Count" id="Count">
+        <input type="hidden" name="Deseases" id="Deseases">
+      </td>
     </tr>
     <tr>
       <td class="field"> Описание </td>
       <td> 
         <textarea cols=60 rows=7 wrap="soft" name="Description" id="Description"> </textarea>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+      </td>
+      <td class="table">
+        <div class="fieldC">
+          <input type="button" value="Добавить/удалить заболевания" onclick=LinkDesease()>
+        </div> 
+        <table width="100%">
+          <thead>
+          </thead>
+          <tbody  id="Deseases_list">
+          </tbody>
+        </table>
       </td>
     </tr>
     </tbody>

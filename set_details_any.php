@@ -24,9 +24,11 @@ function ProcessDB() {
 
                         $session=$_GET ["Session"] ;
                         $id     =$_GET ["Id"] ;
+                        $append =$_GET ["Append"] ;
 
   FileLog("START", "    Session:".$session) ;
   FileLog("",      "         Id:".$id) ;
+  FileLog("",      "     Append:".$append) ;
 
 //--------------------------- Подключение БД
 
@@ -67,9 +69,12 @@ function ProcessDB() {
 
 //--------------------------- Формирование данных страницы
 
-//    echo "  i_id         .innerHTML='".$id         ."' ;	\n" ;
+      echo "  i_id         .value    ='".$id         ."' ;	\n" ;
       echo "  i_name       .innerHTML='".$name       ."' ;	\n" ;
       echo "  i_description.innerHTML='".$description."' ;	\n" ;
+
+    if($append=="false")
+      echo "  i_append     .hidden   = true ;			\n" ;
 
 //--------------------------- Извлечение состава комплекса
 
@@ -147,6 +152,7 @@ function SuccessMsg() {
     var  i_id ;
     var  i_name ;
     var  i_description ;
+    var  i_append ;
     var  i_error ;
     var  a_id ;
     var  a_type ;
@@ -159,6 +165,7 @@ function SuccessMsg() {
        i_id         =document.getElementById("Id") ;
        i_name       =document.getElementById("Name") ;
        i_description=document.getElementById("Description") ;
+       i_append     =document.getElementById("Append") ;
        i_error      =document.getElementById("Error") ;
 
        a_id    =new Array() ;
@@ -180,7 +187,7 @@ function SuccessMsg() {
 
          v_session=TransitContext("restore","session","") ;
 
-    window.open("set_view.php"+"?Session="+v_session+"&Id="+i_id.innerHTML) ;
+    window.open("set_view.php"+"?Session="+v_session+"&Id="+i_id.value) ;
   } 
 
   function AppendSet()
@@ -213,10 +220,10 @@ function SuccessMsg() {
     </thead>
     <tbody>
     <tr>
-      <td><dev id="Id"></dev>
+      <td><input type="hidden" id="Id">
           <input type="button" value="Полностью" onclick=GoToView()></td>
       <td><b><div id="Name"></div></b></td>
-      <td><input type="button" value="Добавить" onclick=AppendSet()></td>
+      <td><input type="button" value="Добавить" id="Append" onclick=AppendSet()></td>
     </tr>
     </tbody>
   </table>

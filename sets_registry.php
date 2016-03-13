@@ -167,6 +167,15 @@ function SuccessMsg() {
        i_row_new . className = "table" ;
 
        i_col_new = document.createElement("td") ;
+       i_col_new . onclick= function(e) {
+					    var  v_session ;
+					    var  v_form ;
+						 v_session=TransitContext("restore","session","") ;
+									      v_form="set_details_any.php" ;
+						parent.frames["details"].location.assign(v_form+
+                                                                                         "?Session="+v_session+
+                                                                                         "&Id="+p_id+"&Append=false") ;
+					} ;
        i_txt_new = document.createTextNode(p_name) ;
        i_col_new . className = "table" ;
        i_col_new . appendChild(i_txt_new) ;
@@ -175,16 +184,12 @@ function SuccessMsg() {
        i_col_new = document.createElement("td") ;
        i_shw_new = document.createElement("input") ;
        i_shw_new . type   ="button" ;
-       i_shw_new . value  ="Подробнее" ;
+       i_shw_new . value  ="Полностью" ;
        i_shw_new . id     ="Details_"+p_id ;
        i_shw_new . onclick= function(e) {
 					    var  v_session ;
-					    var  v_form ;
 						 v_session=TransitContext("restore","session","") ;
-									      v_form="set_details_any.php" ;
-						parent.frames["details"].location.assign(v_form+
-                                                                                         "?Session="+v_session+
-                                                                                         "&Id="+p_id) ;
+						window.open("set_view.php"+"?Session="+v_session+"&Id="+p_id) ;
 					} ;
        i_col_new . appendChild(i_shw_new) ;
 

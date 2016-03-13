@@ -48,7 +48,9 @@ function ProcessDB() {
 
           $get_id_=$db->real_escape_string($get_id) ;
 
-                       $sql="Select id, user, name, description".
+//--------------------------- Извлечение данных комплекса
+
+                       $sql="Select id, user, name, description, deseases".
                             "  From  sets_registry".
                             " Where  id='$get_id_'" ; 
        $res=$db->query($sql) ;
@@ -66,6 +68,7 @@ function ProcessDB() {
                    $owner      =$fields[1] ;
                    $name       =$fields[2] ;
                    $description=$fields[3] ;
+                   $deseases   =$fields[4] ;
 
         FileLog("", "Set data selected successfully") ;
 
@@ -103,6 +106,46 @@ function ProcessDB() {
 
      $res->close() ;
 
+//--------------------------- Извлечение списка связанных заболеваний
+
+  if($deseases!="")
+  {
+             $deseases_list=str_replace(" ", ",", $deseases) ;
+
+                       $sql="Select name, grp, code, id".
+                            "  from (".
+                            "        Select ''name, d3.name grp, '0'code, d3.id".
+                            "          From deseases_registry d3".
+                            "         Where d3.type =  '0'".
+                            "        union all".
+                            "        Select d1.name, d2.name grp, d1.type code, d1.id".
+                            "          From deseases_registry d1, deseases_registry d2".
+                            "         Where d1.type = d2.id".
+                            "        )list".
+                            " Where id in (".$deseases_list.")".
+                            " Order by grp, name" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+            FileLog("ERROR", "Select DESEASES_REGISTRY... : ".$db->error) ;
+                              $db->close() ;
+           ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса списка связанных заболеваний") ;
+                           return ;
+    }
+
+    for($i=0 ; $i<$res->num_rows ; $i++)
+    {
+	      $fields=$res->fetch_row() ;
+
+       echo "    dss_name ='".$fields[0]."' ;	\n" ;
+       echo "    dss_group='".$fields[1]."' ;	\n" ;
+       echo "    dss_gcode='".$fields[2]."' ;	\n" ;
+       echo "    dss_id   ='".$fields[3]."' ;	\n" ;
+
+       echo "  AddDesease(dss_id, dss_name, dss_group, dss_gcode) ;	\n" ;
+    }
+
+     $res->close() ;
+  }
 //--------------------------- Вывод данных на страницу
 
       echo     "  i_name       .innerHTML='".$name       ."' ;\n" ;
@@ -221,14 +264,6 @@ function SuccessMsg() {
 
        i_col_new = document.createElement("td") ;
        i_col_new . className = "table" ;
-  if(p_id!='0') {
-       i_txt_new = document.createTextNode(p_id) ;
-       i_col_new . appendChild(i_txt_new) ;
-                }
-       i_row_new . appendChild(i_col_new) ;
-
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
        i_txt_new = document.createTextNode(p_category) ;
        i_col_new . appendChild(i_txt_new) ;
        i_row_new . appendChild(i_col_new) ;
@@ -251,6 +286,7 @@ function SuccessMsg() {
 
        i_col_new = document.createElement("td") ;
        i_col_new . className = "table" ;
+       i_col_new . width     = "3%" ;
   if(p_id!='0') {
        i_shw_new = document.createElement("input") ;
        i_shw_new . type   ="button" ;
@@ -270,6 +306,53 @@ function SuccessMsg() {
   {
     window.open("prescription_view.php?Id="+p_id) ;
   }
+
+  function AddDesease(p_id, p_name, p_group, p_gcode)
+  {
+     var  i_dss_list ;
+     var  i_row_new ;
+     var  i_col_new ;
+     var  i_txt_new ;
+     var  v_id ;
+
+
+                   v_id="Desease_"+p_id ;
+
+       i_dss_list= document.getElementById("Deseases_list") ;
+
+       i_row_new = document.createElement("tr") ;
+       i_row_new . className = "table" ;
+       i_row_new . id        =  v_id ;
+
+       i_col_new = document.createElement("td") ;
+
+   if(p_gcode==0)
+   {
+       i_col_new . className = "tableG" ;
+       i_txt_new = document.createTextNode(p_group) ;
+       i_col_new . appendChild(i_txt_new) ;
+   }
+   else
+   {
+       i_col_new . className = "tableL" ;
+       i_txt_new = document.createTextNode(p_name) ;
+       i_col_new . appendChild(i_txt_new) ;
+   } 
+       i_col_new . onclick= function(e) {
+					    var  v_session ;
+					    var  v_form ;
+						 v_session=TransitContext("restore","session","") ;
+									      v_form="desease_details_any.php" ;
+						parent.frames["details"].location.replace(v_form+
+                                                                                         "?Session="+v_session+
+                                                                                         "&Id="+p_id) ;
+					} ;
+       i_row_new . appendChild(i_col_new) ;
+
+       i_dss_list. appendChild(i_row_new) ;
+
+    return ;         
+  } 
 
 <?php
   require("common.inc") ;
@@ -305,14 +388,21 @@ function SuccessMsg() {
   </table>
 
   <form onsubmit="return SendFields();" method="POST">
-  <table width="100%" id="Fields">
+
+  <table width="100%" >
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="field"> </td>
       <td> <div class="error" id="Error"></div> </td>
     </tr>
+    <tr>
+    <td class="table">
+
+  <table width="100%" id="Fields">
+    <thead>
+    </thead>
+    <tbody>
     <tr>
       <td class="field"> <b>Название</b> </td>
       <td> <dev name="Name" id="Name"><dev></td>
@@ -327,8 +417,28 @@ function SuccessMsg() {
     </tbody>
   </table>
 
+      </td>
+      <td class="table">
+        <table width="100%">
+          <thead>
+          </thead>
+          <tbody  id="Deseases_list">
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <br>
   <table width="100%">
     <thead>
+      <tr>
+        <td class="fieldC"><b>N         </b></td>
+        <td               ><b>Категория </b></td>
+        <td               ><b>Название  </b></td>
+        <td               ><b>Примечание</b></td>
+      </tr>
     </thead>
     <tbody  id="Prescriptions">
     </tbody>

@@ -178,6 +178,7 @@ function SuccessMsg() {
 
        i_col_new = document.createElement("td") ;
        i_col_new . className = "table" ;
+       i_col_new . width     = "40%" ;
        i_txt_new = document.createTextNode(p_message) ;
        i_col_new . appendChild(i_txt_new) ;
        i_col_new . innerHTML=i_col_new.innerHTML.replace(nl,"<br>") ;
@@ -211,6 +212,7 @@ function SuccessMsg() {
 
        i_col_new = document.createElement("td") ;
        i_col_new . className = "table" ;
+       i_col_new . width     = "40%" ;
        i_txt_new = document.createTextNode(p_remark) ;
        i_col_new . appendChild(i_txt_new) ;
        i_col_new . innerHTML=i_col_new.innerHTML.replace(nl,"<br>") ;

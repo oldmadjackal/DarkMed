@@ -185,6 +185,9 @@ function SuccessMsg() {
 <?php
             ProcessDB() ;
 ?>
+
+	gshow_start="none" ;
+
          return true ;
   }
 
@@ -282,8 +285,10 @@ function SuccessMsg() {
   {
     var  i_row ;
 
+
                     id_from++ ;
 
+   if(gshow_start!="none")
      for(i=gshow_start ; i<=gshow_end ; i++) 
      {
            i_row=document.getElementById(i) ;
@@ -292,15 +297,17 @@ function SuccessMsg() {
            i_row.hidden=true ;
      }
 
-   if(id_from==gshow_start)  {  gshow_start="" ;  return ;  }
+   if(id_from==gshow_start)  {  gshow_start="none" ;  return ;  }
 
-        gshow_start=id_from ; 
+            gshow_start="none" ; 
 
      for(i=id_from ; ; i++) 
      {
            i_row=document.getElementById(i) ;
         if(i_row       ==null )  break ;
         if(i_row.hidden==false)  break ;
+
+            gshow_start=id_from ; 
 
            i_row.hidden=false ;
               gshow_end=i ; 

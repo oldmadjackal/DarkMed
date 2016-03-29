@@ -776,6 +776,13 @@ function SuccessMsg() {
             ProcessDB() ;
 ?>
 
+    if(i_update.value=='insert')
+    {
+       document.getElementById("AddExtension").disabled=true ;
+        i_error.style.color='blue' ;
+        i_error.innerHTML  ='Создание дополнительных блоков будет доступно после первого сохранения' ;
+    }
+
        password=TransitContext("restore", "password", "") ;
         session=TransitContext("restore", "session",  "") ;
 

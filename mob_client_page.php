@@ -801,6 +801,13 @@ function SuccessMsg() {
        password=TransitContext("restore", "password", "") ;
         session=TransitContext("restore", "session",  "") ;
 
+    if(i_update.value=='insert')
+    {
+       document.getElementById("AddExtension").disabled=true ;
+        i_error.style.color='blue' ;
+        i_error.innerHTML  ='Добавление фотографий будет доступно после первого сохранения' ;
+    }
+
     if(ext_key!="")
     {
             ext_key      =Crypto_decode(ext_key, password) ;

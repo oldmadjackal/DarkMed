@@ -7,11 +7,15 @@ function TransitContext(p_action, p_context, p_text)
   {
     if(p_context=="password")  parent.frames["menu"].document.getElementById("glbPassword").value=p_text ;
     if(p_context=="session" )  parent.frames["menu"].document.getElementById("glbSession" ).value=p_text ;
+    if(p_context=="value"   )  parent.frames["menu"].document.getElementById("glbValue"   ).value=p_text ;
+    if(p_context=="callback")  parent.frames["menu"].document.getElementById("glbCallBack").value=p_text ;
   }
   else
   {
     if(p_context=="password")  return(parent.frames["menu"].document.getElementById("glbPassword").value) ;
     if(p_context=="session" )  return(parent.frames["menu"].document.getElementById("glbSession" ).value) ;
+    if(p_context=="value"   )  return(parent.frames["menu"].document.getElementById("glbValue"   ).value) ;
+    if(p_context=="callback")  return(parent.frames["menu"].document.getElementById("glbCallBack").value) ;
 
        window.alert("Unnown p_context in TransitContext function") ;
   }

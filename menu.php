@@ -185,6 +185,12 @@ header("Content-type: text/html; charset=windows-1251") ;
     <tr>
       <td> <input type="hidden" name="glbPassword" id="glbPassword"> </td>
     </tr>
+    <tr>
+      <td> <input type="hidden" name="glbValue"    id="glbValue"> </td>
+    </tr>
+    <tr>
+      <td> <input type="hidden" name="glbCallBack" id="glbCallBack"> </td>
+    </tr>
     </tbody>
   </table>
 

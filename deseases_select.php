@@ -24,10 +24,12 @@ function ProcessDB() {
                          $session =$_GET ["Session"] ;
   if(!isset($session ))  $session =$_POST["Session"] ;
                          $deseases=$_GET ["Deseases"] ;
-  if(!isset($deseases))  $session =$_POST["Deseases"] ;
+  if(!isset($deseases))  $deseases=$_POST["Deseases"] ;
+                         $groups  =$_GET ["Groups"] ;
 
   FileLog("START", "    Session:".$session) ;
   FileLog("",      "   Deseases:".$deseases) ;
+  FileLog("",      "     Groups:".$groups) ;
 
 //--------------------------- Подключение БД
 
@@ -53,6 +55,12 @@ function ProcessDB() {
                          return ;
     }
   }
+//---------------------------------------- Режим выбора групп
+
+                      echo "    g_select=true ;		\n" ;
+
+  if(isset($groups))  echo "    g_select=".$groups." ;	\n" ;
+
 //--------------------------- Формирование списка заболеваний
 
                      $sql="Select name, grp, code, id".
@@ -90,7 +98,7 @@ function ProcessDB() {
        echo "    dss_gcode='".$fields[2]."' ;	\n" ;
        echo "    dss_id   ='".$fields[3]."' ;	\n" ;
 
-       if(strpos($deseases, "".$fields[3]."")===false)  
+       if(strpos($deseases, " ".$fields[3]." ")===false)  
               echo "  AddNewRow(".$i.", dss_name, dss_group, dss_gcode, dss_id, false) ;	\n" ;
        else   echo "  AddNewRow(".$i.", dss_name, dss_group, dss_gcode, dss_id, true ) ;	\n" ;
      }
@@ -145,8 +153,11 @@ function SuccessMsg() {
 <!--
 
     var  i_error ;
+    var  g_select ;
     var  gshow_start ;
     var  gshow_end ;
+    var  callback ;
+
 
   function FirstField() 
   {
@@ -159,6 +170,9 @@ function SuccessMsg() {
 ?>
 
 	gshow_start="none" ;
+
+     callback=TransitContext("restore", "callback", "") ;
+              TransitContext("save",    "callback", "") ;
 
          return true ;
   }
@@ -183,12 +197,15 @@ function SuccessMsg() {
       if(p_checked)  g_disabled= true ;
       else           g_disabled= false ; 
                      v_disabled= false ;
+
+      if(!g_select)  v_disabled= true ;
    }
    else
    {
                      v_class   ="tableL" ;
                      v_disabled= g_disabled ;
    }
+
 
        i_deseases= document.getElementById("Deseases") ;
 
@@ -213,7 +230,6 @@ function SuccessMsg() {
        i_chk_new . onclick  = function(e) {  DeseaseSet(this, p_id, p_name, p_group, p_gcode) ;  } ;
        i_col_new . appendChild(i_chk_new) ;
        i_row_new . appendChild(i_col_new) ;
-
        i_col_new = document.createElement("td") ;
        i_col_new . className = v_class ;
 
@@ -335,10 +351,22 @@ function SuccessMsg() {
 </noscript>
 
 <div>
+
   <table width="100%">
-    <thead>
-    </thead>
-    <tbody id="Deseases">
+    <tbody>
+      <tr>
+        <td>
+          <input type="button" value="Обратно" onclick=CallBack()>
+        </td>
+        <td>
+          <table width="100%">
+            <thead>
+            </thead>
+            <tbody id="Deseases">
+            </tbody>
+          </table>
+        </td>
+      </tr>
     </tbody>
   </table>
 

@@ -115,8 +115,9 @@ header("Content-type: text/html; charset=windows-1251") ;
 </noscript>
 
 <div class="menu">
-  <div class="header">
-     Header picture block
+  <div class="fieldC">
+    <br>
+    <img src="images/NewStep.png">
   </div>
 
   <ul class="menu">

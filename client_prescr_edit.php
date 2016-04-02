@@ -313,6 +313,7 @@ function ProcessDB() {
 
   if($publish=="1")
   {
+//- - - - - - - - - - - - - - Направление внутреннего сообщения
           $invite=$db->real_escape_string($invite) ;
           $letter=$db->real_escape_string($letter) ;
           $incopy=$db->real_escape_string($incopy) ;
@@ -326,7 +327,9 @@ function ProcessDB() {
             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка создания сообщения пациенту") ;
                          return ;
     }
-
+//- - - - - - - - - - - - - - Направление уведомления по Email
+            Email_prs_notification($db, $owner, $error) ;
+//- - - - - - - - - - - - - -
         FileLog("", "Message for User ".$owner." to access page ".$page_." sent successfully") ;
   }
 //--------------------------- Сохранение данных страницы

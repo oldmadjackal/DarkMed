@@ -65,6 +65,7 @@ function ProcessDB() {
 
   if(isset($receiver))
   {
+//- - - - - - - - - - - - - - Внутреннее сообщение
           $receiver=$db->real_escape_string($receiver) ;
           $letter  =$db->real_escape_string($letter) ;
           $invite  =$db->real_escape_string($invite) ;
@@ -82,7 +83,9 @@ function ProcessDB() {
     }
 
           $db->commit() ;
-
+//- - - - - - - - - - - - - - Направление уведомления по Email
+            Email_inv_notification($db, $receiver, $error) ;
+//- - - - - - - - - - - - - -
         FileLog("", "Access message saved successfully") ;
      SuccessMsg() ;
   }

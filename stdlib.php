@@ -17,6 +17,7 @@ function ReadConfig()
   global  $glb_cfg_errors ;
   global  $glb_cfg_images ;
   global  $glb_cfg_temporary ;
+  global  $glb_cfg_email_forms ;
 
 
                    $date=date("Y_m_d") ;
@@ -43,6 +44,9 @@ function ReadConfig()
      if($key=="delete_file" )  $glb_cfg_delete_file = $value ;
      if($key=="images"      )  $glb_cfg_images      = $value ;
      if($key=="temporary"   )  $glb_cfg_temporary   = $value ;
+     if($key=="email_forms" )  $glb_cfg_email_forms = $value ;
+     if($key=="email_smtp"  )      $cfg_email_smtp  = $value ;
+     if($key=="email_from"  )      $cfg_email_from  = $value ;
      if($key=="log_file"    )  $glb_cfg_log_file    =str_replace("#DATE#", $date, $value) ;
      if($key=="errors"      )  $glb_cfg_errors      =str_replace("#DATE#", $date, $value) ;
    } 
@@ -51,6 +55,9 @@ function ReadConfig()
             ini_set("display_errors", "Off") ;
             ini_set("error_log",      $glb_cfg_errors) ;
             ini_set("log_errors",     "On") ;
+
+            ini_set("SMTP",           $cfg_email_smtp) ;
+            ini_set("sendmail_from",  $cfg_email_from) ;
 
    return true ;
 }
@@ -61,7 +68,7 @@ function ReadConfig()
 
 function ShowLog($text) 
 {
-    echo  "document.getElementById(\"DebugLog\").innerHTML+=\"<br>".$text."\" ;" ;
+    echo  "document.getElementById('DebugLog').innerHTML+='<br>".$text."' ;" ;
 }
 
 //============================================== 
@@ -404,6 +411,106 @@ function LoadFile($image, $file_name, $data_segment, $data_elem, $data_type, $op
 //---------------------------
 
   return($path) ;
+}
+
+//============================================== 
+//  Отправка письма пользователю
+
+function Email($db, $user, $subject, $text, &$error) 
+{
+//--------------------------- Извлечение адреса пользователя
+
+                $user=$db->real_escape_string($user) ;
+
+                     $sql="Select email From users Where login ='$user'" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "User e-mail extract : ".$db->error) ;
+                         return(false) ;
+  }
+  if($res->num_rows==0) {
+          FileLog("ERROR", "Unknown user detected : ".$user) ;
+                         return(false) ;
+  }
+
+       $fields=$res->fetch_row() ;
+               $res->close() ;
+     $receiver=$fields[0] ;
+
+//--------------------------- Отправка сообщения
+
+       $subject="=?windows-1251?B?".base64_encode($subject)."?=" ;
+
+       $header ="Content-type: text/html; charset=windows-1251\r\n" ;
+       $header.="From: GeneralPractice <blackjackal@hotmail.ru>" ;
+
+       $body   = $text ;
+
+       $status=mail($receiver, $subject, $body, $header) ;
+
+//---------------------------
+
+  return(true) ;
+}
+
+//============================================== 
+//  Отправка пользователю уведомления о сообщении
+
+function Email_msg_notification($db, $user, &$error) 
+{
+  global  $glb_cfg_email_forms ;
+
+//--------------------------- Считывание файла сообщения
+
+   $text=file_get_contents($glb_cfg_email_forms."/MessageNotification.html") ;
+  
+//--------------------------- Отправка сообщения
+
+  $status=Email($db, $user, "GeneralPractice.ru - Вас ожидает сообщение", $text, &$error) ;
+
+//---------------------------
+
+  return($status) ;
+}
+
+//============================================== 
+//  Отправка пользователю уведомления о сделанном назначении
+
+function Email_prs_notification($db, $user, &$error) 
+{
+  global  $glb_cfg_email_forms ;
+
+//--------------------------- Считывание файла сообщения
+
+   $text=file_get_contents($glb_cfg_email_forms."/PrescriptionNotification.html") ;
+  
+//--------------------------- Отправка сообщения
+
+  $status=Email($db, $user, "GeneralPractice.ru - Вам сделано назначение", $text, &$error) ;
+
+//---------------------------
+
+  return($status) ;
+}
+
+//============================================== 
+//  Отправка пользователю уведомления о приглашении
+
+function Email_inv_notification($db, $user, &$error) 
+{
+  global  $glb_cfg_email_forms ;
+
+//--------------------------- Считывание файла сообщения
+
+   $text=file_get_contents($glb_cfg_email_forms."/InviteNotification.html") ;
+
+//--------------------------- Отправка сообщения
+
+  $status=Email($db, $user, "GeneralPractice.ru - Вам направлено приглашение", $text, &$error) ;
+
+//---------------------------
+
+  return($status) ;
 }
 
 //============================================== 

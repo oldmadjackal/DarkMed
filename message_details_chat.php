@@ -35,6 +35,7 @@ function ProcessDB() {
   FileLog("",      "       Copy:".$copy) ;
 
 //--------------------------- Подключение БД
+
      $db=DbConnect($error) ;
   if($db===false) {
                     ErrorMsg($error) ;
@@ -168,6 +169,8 @@ function ProcessDB() {
             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка создания сообщения") ;
                          return ;
     }
+//- - - - - - - - - - - - - - Направление уведомления по Email
+            Email_msg_notification($db, $receiver, $error) ;
 //- - - - - - - - - - - - - - Простановка метки "Прочитано"
           $topread=$db->real_escape_string($topread) ;
 

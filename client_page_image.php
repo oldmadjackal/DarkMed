@@ -131,8 +131,6 @@ function ShowFrame() {
 
 
     if($sys_show_frame!="1")  return ;
-
-  FileLog("DEBUG",      "ShowFrame ".$sys_show_frame) ;
   
 	$picture="client_page_image.php?Session=".$sys_session."&Image=".$sys_image."&Key=".$sys_key."&Show=1" ;
 
@@ -153,8 +151,6 @@ function ShowImage() {
 
 
     if($sys_show_frame!="0")  return ;
-
-  FileLog("DEBUG",      "ShowImage ".$sys_show_frame) ;
 
     echo  "  <body onload='FirstField();'>		\n" ;
     echo  "  <img src='".$sys_image_path."'>		\n" ;

@@ -163,8 +163,6 @@ function RegistryDB() {
 
 //--------------------------- Автоматический переход на формы
 
-          FileLog("DEBUG", "msg_flag<".$msg_flag.">") ;
-
    if($msg_flag=="0")
    {
       if($user_type=="Doctor"  ||

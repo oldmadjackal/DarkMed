@@ -466,7 +466,7 @@ function Email_msg_notification($db, $user, &$error)
   
 //--------------------------- Отправка сообщения
 
-  $status=Email($db, $user, "GeneralPractice.ru - Вас ожидает сообщение", $text, &$error) ;
+  $status=Email($db, $user, "GeneralPractice.ru - Вас ожидает сообщение", $text, $error) ;
 
 //---------------------------
 
@@ -486,7 +486,7 @@ function Email_prs_notification($db, $user, &$error)
   
 //--------------------------- Отправка сообщения
 
-  $status=Email($db, $user, "GeneralPractice.ru - Вам сделано назначение", $text, &$error) ;
+  $status=Email($db, $user, "GeneralPractice.ru - Вам сделано назначение", $text, $error) ;
 
 //---------------------------
 
@@ -506,7 +506,7 @@ function Email_inv_notification($db, $user, &$error)
 
 //--------------------------- Отправка сообщения
 
-  $status=Email($db, $user, "GeneralPractice.ru - Вам направлено приглашение", $text, &$error) ;
+  $status=Email($db, $user, "GeneralPractice.ru - Вам направлено приглашение", $text, $error) ;
 
 //---------------------------
 

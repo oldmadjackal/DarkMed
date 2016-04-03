@@ -1315,8 +1315,8 @@ function SuccessMsg() {
   <br>
   <div class="fieldC">
     <select name="ExtensionType" id="ExtensionType"> 
-      <option value="Text">Текстовой блок</option>
       <option value="Image">Картинка с пояснением</option>
+      <option value="Text">Текстовой блок</option>
       <option value="Link">Ссылка с пояснением</option>
       <option value="File">Файл с пояснением</option>
     </select> 

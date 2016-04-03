@@ -240,12 +240,15 @@ function SuccessMsg() {
        i_remark.innerHTML=Crypto_decode(i_remark.innerHTML, page_key) ;
 
        for(i in a_plist_id) {
-             prescr_id    =Crypto_decode(a_plist_id    [i], page_key) ;
-             prescr_name  =Crypto_decode(a_plist_name  [i], page_key) ;
-             prescr_remark=Crypto_decode(a_plist_remark[i], page_key) ;
-
-          AddListRow(i, prescr_id, prescr_name, prescr_remark, a_plist_type[i], a_plist_ref[i]) ;
+//             prescr_id    =Crypto_decode(a_plist_id    [i], page_key) ;
+//             prescr_name  =Crypto_decode(a_plist_name  [i], page_key) ;
+//             prescr_remark=Crypto_decode(a_plist_remark[i], page_key) ;
+             a_plist_id    [i]=Crypto_decode(a_plist_id    [i], page_key) ;
+             a_plist_name  [i]=Crypto_decode(a_plist_name  [i], page_key) ;
+             a_plist_remark[i]=Crypto_decode(a_plist_remark[i], page_key) ;
        }
+
+           ShowPrescriptions("Tiles") ;
 
          return true ;
   }
@@ -264,7 +267,152 @@ function SuccessMsg() {
                          return true ;
   } 
 
-  function AddListRow(p_order, p_id, p_name, p_remark, p_type, p_ref)
+  function ShowPrescriptions() 
+  {
+       
+    if(document.getElementById("Tiles").checked==true)  presentation="Tiles" ;
+    else						presentation="List" ;
+
+       for(i in a_plist_id) {
+      	    i_row=document.getElementById("Row_"+a_plist_id[i]) ;
+  	 if(i_row!=null)  i_set.removeChild(i_row) ;
+       }
+
+       for(i in a_plist_id)
+         if(presentation=="Tiles")
+                  AddListRow_tiles(i, a_plist_id[i], a_plist_name[i], a_plist_remark[i], a_plist_type[i], a_plist_ref[i]) ;
+         else     AddListRow_list (i, a_plist_id[i], a_plist_name[i], a_plist_remark[i], a_plist_type[i], a_plist_ref[i]) ;
+
+                  AddListRow_tiles(0) ;
+  }
+
+     var  s_order ;
+     var  s_id   ;
+     var  s_name ;
+     var  s_remark ;
+     var  s_type ;
+     var  s_ref ;
+     var  s_tail=0 ;
+
+  function AddListRow_tiles(p_order, p_id, p_name, p_remark, p_type, p_ref)
+  {
+     var  i_row_new ;
+     var  i_col_new ;
+     var  i_txt_new ;
+     var  i_elm_new ;
+     var  i_frm_new ;
+     var  i_shw_new ;
+     var  i_msr_new ;
+     var  i_msr_list ;
+     var  style ;
+     var  msr_flag ;
+     var  col ;
+
+
+     if(p_order  ==0) {
+			if(s_tail==0)  return ;	
+                      }
+     else 
+     if(p_order%2==1) {
+			  s_order =p_order ;
+			  s_id    =p_id  ;
+			  s_name  =p_name ;
+			  s_remark=p_remark ;
+			  s_type  =p_type  ;
+			  s_ref   =p_ref ;
+			  s_tail  = 1 ;
+                            return ;
+                      }
+     else             {
+			  s_tail  = 2 ;
+                      }
+
+		  i_row_new = document.createElement("tr") ;
+		  i_row_new . className = "table" ;
+		  i_row_new . id        = "Row_"+s_id ;
+
+   for(col=0 ; col<s_tail ; col++)
+   {
+     if(col==1) {
+			  s_order =p_order ;
+			  s_id    =p_id  ;
+			  s_name  =p_name ;
+			  s_remark=p_remark ;
+			  s_type  =p_type  ;
+			  s_ref   =p_ref ;
+                }
+
+     if(s_type=="measurement") {  msr_flag=true ;
+                                     style="tableM" ;  }
+     else                      {  msr_flag=false ;
+                                     style="table" ;   }
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+		  i_txt_new = document.createTextNode(s_order) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		  i_row_new . appendChild(i_col_new) ;
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+		  i_col_new . id = s_id ;
+  if(s_id!="0")   i_col_new . onclick  = function(e) {  ShowDetails(this.id) ;  } ;
+  if(s_id!="0")   i_txt_new = document.createTextNode(s_name) ;
+  else		  i_txt_new = document.createTextNode(s_remark) ;
+		  i_col_new . appendChild(i_txt_new) ;
+
+  if(s_id!="0") {
+		  i_elm_new = document.createElement("br") ;
+		  i_col_new . appendChild(i_elm_new) ;
+		  i_elm_new = document.createElement("br") ;
+		  i_col_new . appendChild(i_elm_new) ;
+		  i_txt_new = document.createTextNode(s_remark) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		}
+
+		  i_row_new . appendChild(i_col_new) ;
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+  if(msr_flag ) {
+		  i_elm_new = document.createElement("br") ;
+		  i_col_new . appendChild(i_elm_new) ;
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="button" ;
+		  i_msr_new . value  ="Занести данные" ;
+		  i_msr_new . id     = s_ref ;
+		  i_msr_new . onclick= function(e) {  CheckMeasurements(this.id) ;  }
+		  i_col_new . appendChild(i_msr_new) ;
+		}
+  else          { 
+		  i_frm_new = document.createElement("iframe") ;
+		  i_frm_new . src         ="prescription_pilot.php?Id="+s_id ;
+		  i_frm_new . seamless    = true ;
+		  i_frm_new . height      ="202" ;
+		  i_frm_new . scrolling   ="no" ;
+		  i_frm_new . frameborder ="0" ;
+		  i_frm_new . marginheight="0" ;
+		  i_frm_new . marginwidth ="0" ;
+		  i_col_new . appendChild(i_frm_new) ;
+		}
+
+		  i_row_new . appendChild(i_col_new) ;
+
+    if(msr_flag) 
+    {
+         i_msr_list=document.getElementById("MeasurementsList") ;
+      if(i_msr_list.hidden==true)  i_msr_list.hidden=false ;
+    }
+   }
+
+		  i_set.appendChild(i_row_new) ;
+
+		  s_tail=0 ;
+
+    return ;         
+  } 
+
+  function AddListRow_list(p_order, p_id, p_name, p_remark, p_type, p_ref)
   {
      var  i_row_new ;
      var  i_col_new ;
@@ -272,62 +420,63 @@ function SuccessMsg() {
      var  i_shw_new ;
      var  i_msr_new ;
      var  i_msr_list ;
-     var  measurement ;
+     var  style ;
+     var  msr_flag ;
 
 
-     if(p_type=="measurement")  measurement=true ;
-     else                       measurement=false ;
+     if(p_order==0)  return ;
 
-	i_row_new = document.createElement("tr") ;
-	i_row_new . className = "table" ;
+     if(p_type=="measurement") {  msr_flag=true ;
+                                     style="tableM" ;  }
+     else                      {  msr_flag=false ;
+                                     style="table" ;   }
 
-	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
-	i_txt_new = document.createTextNode(p_order) ;
-	i_col_new . appendChild(i_txt_new) ;
-	i_row_new . appendChild(i_col_new) ;
+		  i_row_new = document.createElement("tr") ;
+		  i_row_new . className = style ;
+		  i_row_new . id        = "Row_"+p_id ;
 
-	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
-  if(p_id!="0")
-	i_txt_new = document.createTextNode(p_name) ;
-  else	i_txt_new = document.createTextNode(p_remark) ;
-	i_col_new . appendChild(i_txt_new) ;
-	i_row_new . appendChild(i_col_new) ;
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+		  i_txt_new = document.createTextNode(p_order) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		  i_row_new . appendChild(i_col_new) ;
 
-	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
-  if(p_id!="0") {
-	i_txt_new = document.createTextNode(p_remark) ;
-	i_col_new . appendChild(i_txt_new) ;
-  }
-	i_row_new . appendChild(i_col_new) ;
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+		  i_col_new . id        = p_id ;
+   if(p_id!="0")  i_col_new . onclick   = function(e) {  ShowDetails(this.id) ;  } ;
+   if(p_id!="0")  i_txt_new = document.createTextNode(p_name) ;
+   else		  i_txt_new = document.createTextNode(p_remark) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		  i_row_new . appendChild(i_col_new) ;
 
-	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
-	i_shw_new = document.createElement("input") ;
-	i_shw_new . type   ="button" ;
-	i_shw_new . value  ="Подробнее" ;
-	i_shw_new . id     ='Details_'+ p_order ;
-	i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
-	i_msr_new = document.createElement("input") ;
-	i_msr_new . type   ="button" ;
-	i_msr_new . value  ="Занести данные" ;
-	i_msr_new . id     ='Measurement_'+ p_order ;
-	i_msr_new . onclick= function(e) {  CheckMeasurements(p_ref) ;  }
-  if(p_id!="0")
-	i_col_new . appendChild(i_shw_new) ;
-  if(measurement)
-	i_col_new . appendChild(i_msr_new) ;
-	i_row_new . appendChild(i_col_new) ;
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+		  i_col_new . id        = p_id ;
+   if(p_id!="0") {
+		  i_col_new . onclick   = function(e) {  ShowDetails(this.id) ;  } ;
+		  i_txt_new = document.createTextNode(p_remark) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		 }
+		  i_row_new . appendChild(i_col_new) ;
 
-	i_set     . appendChild(i_row_new) ;
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="button" ;
+		  i_msr_new . value  ="Занести данные" ;
+		  i_msr_new . id     ='Measurement_'+ p_order ;
+		  i_msr_new . onclick= function(e) {  CheckMeasurements(p_ref) ;  }
+   if(msr_flag )  i_col_new . appendChild(i_msr_new) ;
+		  i_row_new . appendChild(i_col_new) ;
 
-  if(measurement) 
-  {
+		  i_set     . appendChild(i_row_new) ;
+
+   if(msr_flag) 
+   {
 	i_msr_list=document.getElementById("MeasurementsList") ;
      if(i_msr_list.hidden==true)  i_msr_list.hidden=false ;
-  }
+   }
 
     return ;         
   } 
@@ -361,8 +510,8 @@ function SuccessMsg() {
 
 	 v_session=TransitContext("restore","session","") ;
 
-     if(p_ref==null) 	             location.assign("measurements_check.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
-     else   parent.frames["details"].location.assign("measurement_check_details.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num+"&Reference="+p_ref) ;
+     if(p_ref==null) 	             location.replace("measurements_check.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
+     else   parent.frames["details"].location.replace("measurement_check_details.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num+"&Reference="+p_ref) ;
   }
 
 
@@ -414,13 +563,28 @@ function SuccessMsg() {
   <div left=5m id="Remark"></div> 
   <br>
 
-  <div class="fieldC" hidden id="MeasurementsList">
-    <input type="button" value="Занести контрольные измерения" onclick=CheckMeasurements(null)>
-    <br>
-    <br>
-  </div>
-
   <table width="100%">
+    <thead>
+    </thead>
+    <tbody>
+      <tr>
+        <td width="50%">
+          <div> <input type="radio" name="Type[]" id="Tiles" checked onclick=ShowPrescriptions()>'Плитка' назначений</div>
+          <div> <input type="radio" name="Type[]"                    onclick=ShowPrescriptions()>Список назначений</div>
+        </td>
+        <td width="50%">
+          <div hidden id="MeasurementsList">
+            <input type="button" value="Занести контрольные измерения" onclick=CheckMeasurements(null)>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br>
+  <br>
+
+  <table>
     <thead>
     </thead>
     <tbody  id="Prescriptions">

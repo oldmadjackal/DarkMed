@@ -356,7 +356,7 @@ function SuccessMsg() {
     <tbody>
       <tr>
         <td>
-          <input type="button" value="Обратно" onclick=CallBack()>
+          <input type="button" hidden value="Обратно" onclick=CallBack()>
         </td>
         <td>
           <table width="100%">

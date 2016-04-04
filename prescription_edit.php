@@ -709,7 +709,6 @@ function SuccessMsg() {
                               return false ;
      }
 
-
           i_description.value=i_description.value.replace(nl,"@@") ;
 
         i_new=document.getElementById("FileNew") ;

@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_options_a    ;
+
   global  $sys_doc_count    ;
   global  $sys_doc_owner    ;
   global  $sys_doc_fio      ;
@@ -54,14 +56,11 @@ function ProcessDB() {
 
      $user=DbCheckSession($db, $session, $options, $error) ;
   if($user===false) {
-                      $options="Anonimous" ;
-                         $user="" ;
+                      $glb_options_a["user"]="Anonimous" ;
+                                     $user  ="" ;
   }
 
-                                                      $sys_user_type="Client" ;
-  if(       $options=="Anonimous"                  )  $sys_user_type="Anonimous" ;
-  if(strpos($options, "UserType=Doctor;"  )!==false)  $sys_user_type="Doctor" ;
-  if(strpos($options, "UserType=Executor;")!==false)  $sys_user_type="Executor" ;
+       $sys_user_type=$glb_options_a["user"] ;
 
 //--------------------------- Формирование списка специальностей
 

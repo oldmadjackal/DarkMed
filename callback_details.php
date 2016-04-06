@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+   global  $glb_options_a ;
+
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -52,7 +54,7 @@ function ProcessDB() {
 
 //--------------------------- Анализ прав пользователя
 
-    if(strpos($options, "Support")===false)
+    if(!isset($glb_options_a["support"]))
     {
           FileLog("ERROR", "Deny callback message reply forming for this user") ;
                             $db->close() ;

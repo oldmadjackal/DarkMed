@@ -62,6 +62,29 @@ function ReadConfig()
    return true ;
 }
 
+//============================================== 
+//  Раскладка строки аттрибутов пользователя OPTIONS в массив
+
+function OptionsToArray($options)
+{
+                $words=explode(";", $options) ;
+
+                              $keys["null"]=true ;
+     foreach($words as $word) $keys[$word ]=true ;
+
+                                     $options_a["null"   ]=true ;
+     
+       if(isset($keys["Tester"  ]))  $options_a["tester" ]=true ;
+	  
+       if(isset($keys["Client"  ]))  $options_a["user"   ]="Client" ;
+  else if(isset($keys["Doctor"  ]))  $options_a["user"   ]="Doctor" ;
+  else if(isset($keys["Executor"]))  $options_a["user"   ]="Executor" ;
+  else                               $options_a["user"   ]="Anonimous" ;
+	  
+       if(isset($keys["Support" ]))  $options_a["support"]=true ;
+
+	return($options_a);
+}
 
 //============================================== 
 //  Выдача отладочного лога на WEB-страницу
@@ -228,6 +251,9 @@ function DbConnect(&$error)
 
 function DbCheckSession($db, $session, &$options, &$error)
 {
+  global  $glb_options_a ;
+
+	
                 $session=$db->real_escape_string($session) ;
 
      $res=$db->query("Select s.login, u.options". 
@@ -251,6 +277,8 @@ function DbCheckSession($db, $session, &$options, &$error)
          $user=$fields[0] ;
       $options=$fields[1] ;
 
+    $glb_options_a=OptionsToArray($options) ;
+	  
   return($user) ;
 }
 

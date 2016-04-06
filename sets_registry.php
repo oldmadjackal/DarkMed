@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_options_a ;
+
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -42,7 +44,6 @@ function ProcessDB() {
   if($session!="") {
 
        $user=DbCheckSession($db, $session, $options, $error) ;
-                    FileLog("", "User Options:".$options) ;
 
     if($user===false) {
                        $db->close() ;
@@ -53,7 +54,7 @@ function ProcessDB() {
 
        $user_=$db->real_escape_string($user ) ;
 
-  if(strpos($options, "UserType=Doctor;")===false) {
+  if($glb_options_a["user"]!="Doctor") {
 	      echo     "  SetReadOnly() ;\n" ;
                     ErrorMsg("Данная секция доступна только для врачей") ;
                          return ;

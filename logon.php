@@ -74,14 +74,10 @@ function RegistryDB() {
 
 //--------------------------- Выделение атрибутов пользователя
 
-     $user_type="Unknown" ;
-           $key="UserType=" ;
+    $options_a=OptionsToArray($options) ;
 
-     $pos=strpos($options, $key) ;
-  if($pos!==false) {
-        $end=strpos($options, ";", $pos) ;
-     if($end!==false)  $user_type=substr($options, $pos+strlen($key), $end-$pos-strlen($key)) ;
-                   }
+     $user_type=$options_a["user"] ;
+
 //--------------------------- Регистрация сессии
 
            $session=GetRandomString(16) ;

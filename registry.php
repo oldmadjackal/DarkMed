@@ -3,13 +3,13 @@
 header("Content-type: text/html; charset=windows-1251") ;
 
    $glb_script="Registry.php" ;
-
-  require("stdlib.php") ;
+   
+   require("stdlib.php") ;
 
 //============================================== 
 //  Проверка и запись регистрационных в БД
 
-function RegistryDB() {
+function RegistryDB(){
 
 //--------------------------- Считывание конфигурации
 
@@ -105,10 +105,16 @@ function RegistryDB() {
                          return ;
   }
 //--------------------------- Создание учетной записи пользователя
+        
+                                              $options="" ;
 
-                                        $options="" ;
-  if(strpos($type, "Doctor"  )!==false) $options="UserType=Doctor;" ;
-  if(strpos($type, "Executor")!==false) $options="UserType=Executor;" ;
+       if(strpos($type, "Doctor"  )!==false)  $options.="Doctor;" ;
+  else if(strpos($type, "Executor")!==false)  $options.="Executor;" ;
+  else                                        $options.="Client;" ;
+  
+       if(strpos($login, "test"   )!==false)  $options.="Tester;" ;
+
+              $options_a=OptionsToArray($options) ;
 
      $res=$db->query("Insert into `users`(Login, Password, Email, Sign_p_key, Sign_s_key, Msg_key, Options)".
                                  " values('$login','$password','$email','$p_key','$s_key','$msg_key','$options')") ;
@@ -131,22 +137,22 @@ function RegistryDB() {
   }
 //--------------------------- Для пользователя типа CLIENT
 
-if(strpos($type, "Client")!==false)
+if($options_a["user"]=="Client")
 {
 //- - - - - - - - - - - - - - Создание главной страницы
-     $res=$db->query("Insert into `client_page_main`(`Owner`,`Check`) values('$login','$check')") ;
-  if($res===false) {
+        $res=$db->query("Insert into `client_page_main`(`Owner`,`Check`) values('$login','$check')") ;
+     if($res===false) {
              FileLog("ERROR", "Insert CLIENT_CARD_MAIN... : ".$db->error) ;
                      $db->rollback();
                      $db->close() ;
             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных 3") ;
                          return ;
-  }
+     }
 }
 //--------------------------- Для пользователя типа DOCTOR, EXECUTOR
 
-if(strpos($type, "Doctor"  )!==false ||
-   strpos($type, "Executor")!==false   )
+if($options_a["user"]=="Doctor"  ||
+   $options_a["user"]=="Executor"  )
 {
 //- - - - - - - - - - - - - - Создание главной страницы
      $res=$db->query("Insert into `doctor_page_main`(`Owner`) values('$login')") ;

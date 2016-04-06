@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_options_a ;
+
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -51,8 +53,8 @@ function ProcessDB() {
   }
 //--------------------------- Анализ прав пользователя
 
-                                           $readonly=false ;
-  if(strpos($options, "Support")===false)  $readonly=true ;
+                                        $readonly=true ;
+  if(isset($glb_options_a["support"]))  $readonly=false ;
        
 //--------------------------- Формирование списка сообщений
 

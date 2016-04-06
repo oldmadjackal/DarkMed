@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_options_a ;
+
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -68,8 +70,8 @@ function ProcessDB() {
 
 //--------------------------- Формирование списка сообщений
 
-  if(strpos($options, "UserType=Doctor;"  )!==false ||
-     strpos($options, "UserType=Executor;")!==false   )
+  if($glb_options_a["user"]=="Doctor"   ||
+     $glb_options_a["user"]=="Executor"   )
   {
                      $sql="Select m.* from (".
 			  "Select m1.id, m1.sender, m1.type, t1.name, m1.text, u1.sign_p_key,".

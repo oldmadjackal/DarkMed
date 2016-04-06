@@ -47,7 +47,6 @@ function ProcessDB() {
   if($session!="") {
 
        $user=DbCheckSession($db, $session, $options, $error) ;
-                    FileLog("", "User Options:".$options) ;
 
     if($user===false) {
                        $db->close() ;

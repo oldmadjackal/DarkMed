@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_options_a ;
+  
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -61,9 +63,9 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-      echo     "   user    ='" .$user."' ;	\n" ;
-      echo     "   user_opt='" .$options."' ;	\n" ;
-      echo     "   main_key='" .$fields[0]."' ;	\n" ;
+      echo     "   user    ='" .$user."' ;            	\n" ;
+      echo     "   user_opt='" .$glb_options_a["user"]."' ;	\n" ;
+      echo     "   main_key='" .$fields[0]."' ;       	\n" ;
 
 //--------------------------- Формирование списка пациентов
 
@@ -422,7 +424,7 @@ function SuccessMsg() {
 	i_list_new.id   =p_client+"_prescriptions" ;
 	i_list_new.class="level2" ;
 
-    if(user_opt.indexOf("UserType=Doctor;")>=0)
+    if(user_opt.indexOf("Doctor")>=0)
     {
 	i_link_new        =document.createElement("a") ;
 	i_link_new.id     =p_client+"_add_prescription" ;

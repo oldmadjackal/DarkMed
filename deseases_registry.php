@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_options_a ;
+
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -42,7 +44,6 @@ function ProcessDB() {
   if($session!="") {
 
        $user=DbCheckSession($db, $session, $options, $error) ;
-                    FileLog("", "User Options:".$options) ;
 
     if($user===false) {
                        $db->close() ;
@@ -51,9 +52,9 @@ function ProcessDB() {
     }
   }
 
-       if(strpos($options, "UserType=Doctor;"  )!==false)  $read_only=false ;
-  else if(strpos($options, "UserType=Executor;")!==false)  $read_only=false ;
-  else                                                     $read_only=true ;
+       if($glb_options_a["user"]=="Doctor"  )  $read_only=false ;
+  else if($glb_options_a["user"]=="Executor")  $read_only=false ;
+  else                                         $read_only=true ;
 
 //------------------------ Проверка "подтвержденности" врача
 

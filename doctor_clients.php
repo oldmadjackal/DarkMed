@@ -63,9 +63,9 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-      echo     "   user    ='" .$user."' ;            	\n" ;
+      echo     "   user    ='" .$user."' ;                  	\n" ;
       echo     "   user_opt='" .$glb_options_a["user"]."' ;	\n" ;
-      echo     "   main_key='" .$fields[0]."' ;       	\n" ;
+      echo     "   main_key='" .$fields[0]."' ;          	\n" ;
 
 //--------------------------- Формирование списка пациентов
 
@@ -353,6 +353,7 @@ function SuccessMsg() {
   {
     var  i_client ;
     var  i_link_new ;
+    var  i_view_new ;
     var  i_devv_new ;
     var  i_text_new ;
     var  i_roww_new ;
@@ -400,13 +401,13 @@ function SuccessMsg() {
         if(words[0]=="0")  url="client_card.php" ;
         else               url="client_page.php" ;
 
-	  i_link_new        =document.createElement("a") ;
+	 i_link_new        =document.createElement("a") ;
           i_link_new.id     =elem ;
           i_link_new.href   =url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
           i_text_new        =document.createTextNode(a_page_title[elem]) ;
           i_link_new.appendChild(i_text_new) ;
 
-	  i_roww_new        =document.createElement("li") ;
+	 i_roww_new        =document.createElement("li") ;
           i_roww_new.appendChild(i_link_new) ;
 
           i_list_new.appendChild(i_roww_new) ;
@@ -431,6 +432,8 @@ function SuccessMsg() {
 	i_link_new.href   ="client_prescr_edit.php?Session="+v_session+"&Owner="+p_client+"&NewPage=1" ;
 	i_text_new        =document.createTextNode("Новое назначение") ;
 	i_link_new.appendChild(i_text_new) ;
+
+
 	i_roww_new        =document.createElement("li") ;
 	i_roww_new.appendChild(i_link_new) ;
 	i_list_new.appendChild(i_roww_new) ;
@@ -447,7 +450,7 @@ function SuccessMsg() {
         if(user==a_prsc_creator[elem])  url="client_prescr_edit.php" ;
         else                            url="client_prescr_view.php" ;
 
-	  i_link_new        =document.createElement("a") ;
+          i_link_new        =document.createElement("a") ;
           i_link_new.id     =elem ;
           i_link_new.href   =url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
           i_text_new        =document.createTextNode(a_prsc_title[elem]) ;
@@ -455,6 +458,19 @@ function SuccessMsg() {
 
 	  i_roww_new        =document.createElement("li") ;
           i_roww_new.appendChild(i_link_new) ;
+
+       if(user_opt.indexOf("Doctor")>=0)
+       {
+                url="client_prescr_view.php" ;
+
+          i_view_new        =document.createElement("a") ;
+          i_view_new.id     =elem ;
+          i_view_new.href   =url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
+          i_text_new        =document.createTextNode(" (просмотр)") ;
+          i_view_new.appendChild(i_text_new) ;
+
+          i_roww_new.appendChild(i_view_new) ;
+       }
 
           i_list_new.appendChild(i_roww_new) ;
       }

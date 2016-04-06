@@ -1284,6 +1284,17 @@ function SuccessMsg() {
       location.assign("measurements_view.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
   }
 
+  function GoToViewMode()
+  {
+    var  v_session ;
+
+     if(confirm("Внимание! Все несохраненные изменения будут утеряны! Продолжать?")==false)  return ;
+
+
+	 v_session=TransitContext("restore","session","") ;
+
+      location.assign("client_prescr_view.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
+  }
 
 <?php
   require("common.inc") ;
@@ -1329,6 +1340,7 @@ function SuccessMsg() {
       <td> 
         <input type="submit" value="Сохранить" id="Save1"> 
         <input type="checkbox" value="1" name="Publish" id="Publish"> Передать пациенту
+        <input type="button" value="Перейти в режим просмотра" id="View" onclick="GoToViewMode()"> 
       </td>
     </tr>
     <tr>

@@ -75,7 +75,7 @@ function ProcessDB() {
 
 //--------------------------- Извлечение данных страницы
 
-                       $sql="Select p.title, p.remark, p.creator, CONCAT_WS(' ', d.name_f,d.name_i,d.name_o)".
+                       $sql="Select p.title, p.remark, p.creator, CONCAT_WS(' ', d.name_f,d.name_i,d.name_o), p.presentation".
                             "  From client_pages p, doctor_page_main d".
                             " Where d.owner=p.creator".
 			    "  and  p.owner='$owner_'".
@@ -92,10 +92,11 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-                   $title    =$fields[0] ;
-                   $remark   =$fields[1] ;
-                   $creator  =$fields[2] ;
-                   $creator_n=$fields[3] ;
+                   $title       =$fields[0] ;
+                   $remark      =$fields[1] ;
+                   $creator     =$fields[2] ;
+                   $creator_n   =$fields[3] ;
+                   $presentation=$fields[4] ;
 
         FileLog("", "User ".$owner." additional page ".$page_." presented successfully") ;
 
@@ -136,6 +137,17 @@ function ProcessDB() {
       echo     "  i_creator.innerHTML='".$creator_n."'	;\n" ;
       echo     "  i_remark .innerHTML='".$remark   ."'	;\n" ;
 
+  if($presentation=="TILES")
+  {
+      echo     "  i_pres_list .checked=false ; \n" ;
+      echo     "  i_pres_tiles.checked=true ;	\n" ;          
+  }
+  else
+  {
+      echo     "  i_pres_list .checked=true ; \n" ;
+      echo     "  i_pres_tiles.checked=false ;	\n" ;          
+  }      
+      
 //--------------------------- Завершение
 
      $db->close() ;
@@ -195,6 +207,8 @@ function SuccessMsg() {
     var  i_title ;
     var  i_creator ;
     var  i_remark ;
+    var  i_pres_list ;
+    var  i_pres_title ;
     var  i_set ;
     var  i_error ;
     var  creator ;
@@ -216,11 +230,13 @@ function SuccessMsg() {
     var  prescr_name ;
     var  prescr_remark ;
 
-       i_title  =document.getElementById("Title") ;
-       i_creator=document.getElementById("Creator") ;
-       i_remark =document.getElementById("Remark") ;
-       i_set    =document.getElementById("Prescriptions") ;
-       i_error  =document.getElementById("Error") ;
+       i_title     =document.getElementById("Title") ;
+       i_creator   =document.getElementById("Creator") ;
+       i_remark    =document.getElementById("Remark") ;
+       i_set       =document.getElementById("Prescriptions") ;
+       i_pres_list =document.getElementById("List") ;
+       i_pres_tiles=document.getElementById("Tiles") ;
+       i_error     =document.getElementById("Error") ;
 
 	a_plist_id    =new Array() ;
 	a_plist_name  =new Array() ;
@@ -270,8 +286,8 @@ function SuccessMsg() {
   function ShowPrescriptions() 
   {
        
-    if(document.getElementById("Tiles").checked==true)  presentation="Tiles" ;
-    else						presentation="List" ;
+    if(i_pres_tiles.checked==true)  presentation="Tiles" ;
+    else	                    presentation="List" ;
 
        for(i in a_plist_id) {
       	    i_row=document.getElementById("Row_"+a_plist_id[i]) ;
@@ -570,7 +586,7 @@ function SuccessMsg() {
       <tr>
         <td width="50%">
           <div> <input type="radio" name="Type[]" id="Tiles" checked onclick=ShowPrescriptions()>'Плитка' назначений</div>
-          <div> <input type="radio" name="Type[]"                    onclick=ShowPrescriptions()>Список назначений</div>
+          <div> <input type="radio" name="Type[]" id="List"          onclick=ShowPrescriptions()>Список назначений</div>
         </td>
         <td width="50%">
           <div hidden id="MeasurementsList">

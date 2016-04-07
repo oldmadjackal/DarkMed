@@ -36,6 +36,7 @@ function ProcessDB() {
                            $check=$_POST["Check"] ;
                            $title=$_POST["Title"] ;
                           $remark=$_POST["Remark"] ;
+                    $presentation=$_POST["Presentation"] ;
                            $count=$_POST["Count"] ;
   }
 
@@ -70,30 +71,31 @@ function ProcessDB() {
      }
   }
 
-    FileLog("START", "Session:".$session) ;
-    FileLog("",      "NewPage:".$new_page) ;
-    FileLog("",      "  Owner:".$owner) ;
-    FileLog("",      "   Page:".$page) ;
+    FileLog("START", "      Session:".$session) ;
+    FileLog("",      "      NewPage:".$new_page) ;
+    FileLog("",      "        Owner:".$owner) ;
+    FileLog("",      "         Page:".$page) ;
 
   if(isset($update)) {
-    FileLog("",      " Update:".$update) ;
-    FileLog("",      "  Check:".$check) ;
-    FileLog("",      " Crypto:".$crypto) ;
-    FileLog("",      "  Title:".$title) ;
-    FileLog("",      " Remark:".$remark) ;
+    FileLog("",      "       Update:".$update) ;
+    FileLog("",      "        Check:".$check) ;
+    FileLog("",      "       Crypto:".$crypto) ;
+    FileLog("",      "        Title:".$title) ;
+    FileLog("",      "       Remark:".$remark) ;
+    FileLog("",      " Presentation:".$presentation) ;
   }
 
   if(isset($publish)    &&
            $publish=="1"  ) {
-    FileLog("",     " Publish:".$publish) ;
-    FileLog("",     "  Invite:".$invite) ;
-    FileLog("",     "  Letter:".$letter) ;
-    FileLog("",     "  InCopy:".$incopy) ;
+    FileLog("",     "       Publish:".$publish) ;
+    FileLog("",     "        Invite:".$invite) ;
+    FileLog("",     "        Letter:".$letter) ;
+    FileLog("",     "        InCopy:".$incopy) ;
   }
 
   if(isset($update)) {
 
-    FileLog("",     "  Count:".$count) ;
+    FileLog("",     "        Count:".$count) ;
 
    for($i=0 ; $i<$prescr_count ; $i++) 
     FileLog("",      "Prescription:".$a_prescr[$i]." ".$a_name[$i]." ".$a_remark[$i]." ".$a_ref[$i]) ;
@@ -253,11 +255,12 @@ function ProcessDB() {
 
   if(isset($update)) 
   {
-          $crypto_ =$db->real_escape_string($crypto) ;
-          $check_  =$db->real_escape_string($check ) ;
-          $title_  =$db->real_escape_string($title ) ;
-          $remark_ =$db->real_escape_string($remark) ;
-          $publish_=$db->real_escape_string($publish) ;
+          $crypto_      =$db->real_escape_string($crypto) ;
+          $check_       =$db->real_escape_string($check ) ;
+          $title_       =$db->real_escape_string($title ) ;
+          $remark_      =$db->real_escape_string($remark) ;
+          $publish_     =$db->real_escape_string($publish) ;
+          $presentation_=$db->real_escape_string($presentation) ;
   }
 //--------------------------- Первое сохранение новой страницы
 
@@ -338,9 +341,10 @@ function ProcessDB() {
   {
 //- - - - - - - - - - - - - - Сохранение титульных данных
                        $sql="Update client_pages".
-                            "   Set title    ='$title_'".
-                            "      ,remark   ='$remark_'".
-                            "      ,published='$publish_'".
+                            "   Set title       ='$title_'".
+                            "      ,remark      ='$remark_'".
+                            "      ,published   ='$publish_'".
+                            "      ,presentation='$presentation_'".
                             " Where `owner`='$owner_' ".
                             "  and   page  = $page_" ;
        $res=$db->query($sql) ;
@@ -486,7 +490,7 @@ function ProcessDB() {
 
 //--------------------------- Извлечение данных страницы
 
-                       $sql="Select `check`, title, remark, published".
+                       $sql="Select `check`, title, remark, published, presentation".
                             "  From client_pages".
                             " Where owner='$owner_'".
                             "  and  page = $page_" ;
@@ -502,10 +506,11 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-                   $check    =$fields[0] ;
-                   $title    =$fields[1] ;
-                   $remark   =$fields[2] ;
-                   $published=$fields[3] ;
+                   $check       =$fields[0] ;
+                   $title       =$fields[1] ;
+                   $remark      =$fields[2] ;
+                   $published   =$fields[3] ;
+                   $presentation=$fields[4] ;
 
         FileLog("", "User ".$owner." additional page ".$page_." presented successfully") ;
 
@@ -541,12 +546,23 @@ function ProcessDB() {
 
 //--------------------------- Отображение данных на странице
 
-      echo     "  i_page  .value='".$page_.  "' ;\n" ;
-      echo     "  i_check .value='".$check. "' ;\n" ;
-      echo     "  i_title .value='".$title. "' ;\n" ;
-      echo     "  i_remark.value='".$remark."' ;\n" ;
+      echo     "  i_page  .value='".$page_.  "' ; \n" ;
+      echo     "  i_check .value='".$check. "' ; \n" ;
+      echo     "  i_title .value='".$title. "' ; \n" ;
+      echo     "  i_remark.value='".$remark."' ; \n" ;
       echo     "  i_update.value='update' ;	\n" ;
 
+  if($presentation=="TILES")
+  {
+      echo     "  i_pres_list .checked=false ; \n" ;
+      echo     "  i_pres_tiles.checked=true ;	\n" ;          
+  }
+  else
+  {
+      echo     "  i_pres_list .checked=true ; \n" ;
+      echo     "  i_pres_tiles.checked=false ;	\n" ;          
+  }
+      
   if($published=="1")
   {
       echo     "  i_publish.checked =true ;	\n" ;
@@ -618,6 +634,8 @@ function SuccessMsg() {
     var  i_crypto ;
     var  i_title ;
     var  i_remark ;
+    var  i_presentation_list ;
+    var  i_presentation_tiles ;
     var  i_measurements ;
     var  i_id ;
     var  i_count ;
@@ -653,6 +671,8 @@ function SuccessMsg() {
        i_crypto      =document.getElementById("Crypto") ;
        i_title       =document.getElementById("Title") ;
        i_remark      =document.getElementById("Remark") ;
+       i_pres_list   =document.getElementById("Presentation-List") ;
+       i_pres_tiles  =document.getElementById("Presentation-Tiles") ;
        i_measurements=document.getElementById("Measurements") ;
        i_id          =document.getElementById("Id") ;
        i_count       =document.getElementById("Count") ;
@@ -822,8 +842,9 @@ function SuccessMsg() {
 
        i_title .value=Crypto_encode(i_title .value, page_key) ;
        i_remark.value=Crypto_encode(i_remark.value, page_key) ;
-
-     for(i=1 ; i<=i_count.value ; i++) {
+       
+     for(i=1 ; i<=i_count.value ; i++)
+     {
 	 i_id    =document.getElementById("Id_"          +i) ;
 	 i_remark=document.getElementById("Remark_"      +i) ;
 	 i_prescr=document.getElementById("Prescription_"+i) ;
@@ -865,6 +886,17 @@ function SuccessMsg() {
 
   	   document.getElementById(id_id).value='0' ;
 
+     if(p_category=="exercise")
+     {
+            i_pres_list .checked=false ;
+            i_pres_tiles.checked=true ;             
+     }
+     else
+     {
+            i_pres_list .checked=true ;
+            i_pres_tiles.checked=false ;
+     }
+           
     return ;         
   } 
 
@@ -1331,6 +1363,14 @@ function SuccessMsg() {
 
   <div><br></div>
   <form onsubmit="return SendFields();" method="POST" id="Form">
+
+  <table width="100%">
+    <thead>
+    </thead>
+    <tbody>
+    <tr>
+      <td>
+    
   <table width="100%" id="Fields">
     <thead>
     </thead>
@@ -1340,7 +1380,6 @@ function SuccessMsg() {
       <td> 
         <input type="submit" value="Сохранить" id="Save1"> 
         <input type="checkbox" value="1" name="Publish" id="Publish"> Передать пациенту
-        <input type="button" value="Перейти в режим просмотра" id="View" onclick="GoToViewMode()"> 
       </td>
     </tr>
     <tr>
@@ -1382,6 +1421,17 @@ function SuccessMsg() {
     </tbody>
   </table>
 
+      </td>
+      <td class="fieldL">
+        <input type="button" value="Перейти в режим просмотра пациентом" id="View" onclick="GoToViewMode()"> 
+        <div>Представление назначений для пациента:</div>
+        <div> <input type="radio" name="Presentation" value="LIST"  id="Presentation-List" checked>Списoк               </div>
+        <div> <input type="radio" name="Presentation" value="TILES" id="Presentation-Tiles"       >"Плиткa" с картинками</div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  
   <table width="100%">
     <thead>
     </thead>

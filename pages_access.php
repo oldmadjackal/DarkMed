@@ -10,7 +10,7 @@ header("Content-type: text/html; charset=windows-1251") ;
 //  Проверка и запись регистрационных в БД
 
 function ProcessDB() {
-
+  global  $glb_options_a    ;
 //--------------------------- Считывание конфигурации
 
      $status=ReadConfig() ;
@@ -54,10 +54,9 @@ function ProcessDB() {
           $user_=$db->real_escape_string($user) ;
 
 //--------------------------- Формирование списка специальностей
-
-                     $sql="Select code, name".
-			  "  From ref_doctor_specialities".
-			  " Where language='RU'" ;
+       $sql="Select code, name".
+            "  From ref_doctor_specialities".
+	    " Where language='RU'" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select REF_DOCTOR_SPECIALITIES... : ".$db->error) ;
@@ -80,11 +79,27 @@ function ProcessDB() {
      $res->close() ;
 
 //--------------------------- Формирование списка врачей
+   
+//--$sql="Select owner, name_f, name_i, name_o, speciality".
+//--			  "  From doctor_page_main".
+//--                          " Where confirmed='Y'".
+//--			  " Order by name_f, name_i, name_o" ;
 
-                     $sql="Select owner, name_f, name_i, name_o, speciality".
+
+if ($glb_options_a[tester]==true)
+            {$sql="Select owner, name_f, name_i, name_o, speciality".
 			  "  From doctor_page_main".
                           " Where confirmed='Y'".
-			  " Order by name_f, name_i, name_o" ;
+			  " Order by name_f, name_i, name_o" ; }
+else 
+      {$sql="Select d.owner, d.name_f, d.name_i, d.name_o, d.speciality".
+			  "  From doctor_page_main  d,users u".
+                          " Where d.confirmed='Y'".
+                          "   and d.owner = u.login" .
+                          "   and u.options not like '%Tester%'". 
+			  " order by name_f, name_i, name_o" ; }
+
+
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select DOCTOR_PAGE_MAIN... : ".$db->error) ;

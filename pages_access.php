@@ -80,17 +80,12 @@ function ProcessDB() {
 
 //--------------------------- Формирование списка врачей
    
-//--$sql="Select owner, name_f, name_i, name_o, speciality".
-//--			  "  From doctor_page_main".
-//--                          " Where confirmed='Y'".
-//--			  " Order by name_f, name_i, name_o" ;
-   $sql= "Select d.owner, d.name_f, d.name_i, d.name_o, d.speciality".
-         " From doctor_page_main d, users u".
-                  " Where d.confirmed='Y'".
-                  "    and d.owner = u.login";
-   if (!isset($glb_options_a["tester"])) $sql.="   and  u.options not like '%Tester;%'";
-   
-   $sql.=" Order by d.name_f, d.name_i, d.name_o " ; 
+                                        $sql= "Select d.owner, d.name_f, d.name_i, d.name_o, d.speciality".
+                                              " From doctor_page_main d, users u".
+                                              " Where d.confirmed='Y'".
+                                              "  and  d.owner    =u.login" ;
+   if(!isset($glb_options_a["tester"])) $sql.="  and  u.options not like '%Tester;%'" ;
+                                        $sql.=" Order by d.name_f, d.name_i, d.name_o " ; 
 
      $res=$db->query($sql) ;
   if($res===false) {

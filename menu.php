@@ -15,8 +15,9 @@ header("Content-type: text/html; charset=windows-1251") ;
 <style type="text/css">
   @import url("common.css")
 </style>
-
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <script type="text/javascript">
+
 <!--
 
 <?php
@@ -106,13 +107,11 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 //-->
 </script>
+<script type="text/javascript" src="https://secure.skypeassets.com/i/scom/js/skype-uri.js"></script>
 
 </head>
 
 <body>
-
-<noscript>
-</noscript>
 
 <div class="menu">
   <div class="fieldC">
@@ -121,58 +120,83 @@ header("Content-type: text/html; charset=windows-1251") ;
   </div>
 
   <ul class="menu">
-    <li><a href="registry.php"                        target="section">Регистрация</a></li> 
-    <li><a href="logon.php"                           target="section">Авторизация</a></li> 
     <li hidden id="ClientCard">
-        <a href="javascript:
+        <a class="menu_item"  href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('client_card.php'+'?Session='+v_session) ; "
-         target="section">Карта пациента</a></li> 
-    <li hidden id="DoctorCard">
-        <a href="javascript:
+         target="section" id="user_card_btn">Карта пациента</a>
+		
+	</li> 
+
+	<li hidden id="DoctorCard">
+        <a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('doctor_card.php'+'?Session='+v_session) ; "
-         target="section">Личный формуляр</a></li> 
-    <li hidden id="ClientsList">
-        <a href="javascript:
+         target="section" id="doctor_card_btn">Личный формуляр</a>
+
+	</li> 
+
+	<li hidden id="ClientsList">
+        <a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('doctor_clients.php'+'?Session='+v_session) ; "
-         target="section">Пациенты</a></li> 
-    <li><a href="javascript:
+         target="section" id="patients_btn">Пациенты</a>
+
+	</li> 
+
+	<li><a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                                 parent.frames['section'].location.assign('doctors_list.php'+'?Session='+v_session) ; "
-         target="section">Врачи и специалисты</a></li> 
+         target="section" id="doctors_btn">Врачи и специалисты</a> 
+
+	</li>
+		 
     <li hidden id="Messages">
-        <a href="javascript:
+        <a class="menu_item"  href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('messages.php'+'?Session='+v_session) ; "
-         target="section">Сообщения</a></li> 
-    <br>
-    <li><a href="javascript:
+         target="section" id="forum_btn">Сообщения</a>
+
+	</li>
+
+
+	<li>
+		<a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                                 parent.frames['section'].location.assign('deseases_registry.php'+'?Session='+v_session) ; "
-         target="section">Реестр заболеваний</a></li> 
-    <li><a href="javascript:
+         target="section" id="ill_catalog_btn">Реестр заболеваний</a> 
+
+	</li>
+
+	<li>
+		<a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                                 parent.frames['section'].location.assign('prescriptions_registry.php'+'?Session='+v_session) ; "
-         target="section">Общий регистр назначений</a></li> 
+         target="section" id="presiption_btn">Регистр назначений</a>
+		
+	</li>
+
     <li hidden id="PrescriptionsSets">
-        <a href="javascript:
+        <a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
                   else               parent.frames['section'].location.assign('sets_registry.php'+'?Session='+v_session) ; "
-         target="section">Комплексы назначений</a></li> 
-    <br>
-    <li><a href="help.php" target="section">Как пользоваться порталом?</a></li> 
-    <br>
-    <li><a href="javascript:
+         target="section">Комплексы назначений</a></li>
+		 
+    <li><a class="menu_item" id="how_to_use_btn" href="help.php" target="section"> Помощь</a></li>
+
+ 
+	<li> <a  class="menu_item" id="message_btn" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                                 parent.frames['section'].location.assign('callback_list.php'+'?Session='+v_session) ; "
-         target="section">Сообщения пользователей</a></li> 
+         target="section">Ваши пожелания</a> 
+		 
+	</li>
+
 
   </ul>
 
@@ -193,10 +217,20 @@ header("Content-type: text/html; charset=windows-1251") ;
       <td> <input type="hidden" name="glbCallBack" id="glbCallBack"> </td>
     </tr>
     </tbody>
-  </table>
-
-  <div class="debug" id="DebugLog"></div>
-
+    </table>
+<!-- 	<div id="SkypeButton_Call" class="skype">
+		<em/><em/>
+		 <script type="text/javascript">
+				 Skype.ui({
+				 "name": "dropdown",
+				 "element": "SkypeButton_Call",
+				 "participants": ["lizochka42"],
+				 "listParticipants":"false",
+				 "imageSize": 16,
+				 "imageColor": "skype"
+				 });
+		 </script>
+	</div> -->
 </div>
 
 </body>

@@ -316,6 +316,20 @@ li {
 	background-size: 100% 100%;
 }
 
+#exit_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    line-height: 22px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/logout-icon.png");
+	background-size: 100% 100%;
+}
+
 #registration_btn:before {
     content: "\0000a0";
     display: inline-block;

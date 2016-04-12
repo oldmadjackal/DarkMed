@@ -14,8 +14,26 @@
 
 </head>
 
-<noscript>
-</noscript>
+<script type="text/javascript">
+function changeHiddenAuthBtns(v_session){
+    var exit_btn = document.getElementById("exit_btn");
+	var auth_btn = document.getElementById("auth_btn");
+	var reg_btn = document.getElementById("registration_btn");
+
+	
+    if(v_session == null || v_session==''){
+		auth_btn.style.display = "inline-block";
+	    reg_btn.style.display = "inline-block";
+		exit_btn.style.display = "none";
+		}
+	else{
+		exit_btn.style.display = "inline-block";
+		auth_btn.style.display = "none";
+	    reg_btn.style.display = "none";
+		}	
+}
+
+</script>
 
 	<div class="title">
 		<p class="title_text">Медицинская консультационная сеть</p>
@@ -23,8 +41,11 @@
 		<div class="auth_in_title" >
 			<a class="menu_auth_item" href="registry.php" target="section" id="registration_btn">Регистрация</a> 
 			<em>
-			<a class="menu_auth_item "href="logon.php" target="section" id="auth_btn">Авторизация</a> 
+			<a class="menu_auth_item "href="logon.php" target="section" id="auth_btn" >Авторизация</a> 
 			<em>	
+			<a class="menu_auth_item "href="logon.php" target="section" id="exit_btn" style= "display:none" onclick ="window.top.location.reload(true);">Выход</a> 
+			<em>	
+			
 		</div>
 	</div>
 </body>

@@ -208,6 +208,11 @@ function SuccessMsg($session) {
     echo  "TransitContext('save', 'session', '".$session."') ;	\n" ;
 
     echo  "i_error.style.color='green' ;				\n" ;
+	
+	echo "
+     var  v_session = TransitContext('restore','session','') ; 
+	 parent.frames['title'].changeHiddenAuthBtns(v_session); ";
+
     echo  "i_error.innerHTML  ='Авторизация успешно пройдена!' ;	\n" ;
 }
 //============================================== 
@@ -295,7 +300,8 @@ function SuccessMsg($session) {
 
      if(error_text!="")  return false ;
 
-                   return true ;         
+ 
+      return true ;         
   } 
 
   function AddRelease(p_id, p_date, p_name, p_link)
@@ -359,6 +365,7 @@ function SuccessMsg($session) {
 
 //-->
 </script>
+
 
 </head>
 

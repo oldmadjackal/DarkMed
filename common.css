@@ -1,3 +1,24 @@
+*
+{
+/*    background-color: RGB(215, 254, 95);*/
+    background-color: RGB(223, 254, 131);
+}
+input
+{
+    background-color: white;
+}
+
+.hello
+{
+         position : fixed           ;
+                        bottom :   0px           ;
+                          left :   0px           ;
+                         width : 100%            ; 
+                        height : 450px            ; 
+                        border : 0px solid black ; 
+                    text-align : center          ;
+                vertical-align : center          ;
+}
 
 .header {
     position: static;
@@ -31,6 +52,7 @@
 	font-size:22px;;
     font-family: CANDARA;
     font-style: normal;
+    color: #FB6E1C;
 }
 
 .border {
@@ -157,9 +179,8 @@ div.menu {
     left: 0px;
     width: 100%;
     height: 100%;
-    border: 1px solid black;
+    border: 0px solid black;
     overflow: auto;
-    background-color: white;
     font-weight: bold;
     font-family: CANDARA;
     font-style: normal;

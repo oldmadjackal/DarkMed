@@ -27,11 +27,14 @@ function ProcessDB() {
                          $get_id=$_GET ["Id"] ;
                          $put_id=$_POST["Id"] ;
 
+                         $after_save ="false" ;
+
   if( isset($put_id )) 
   {
                          $name       =$_POST["Name"] ;
                          $description=$_POST["Description"] ;
                          $deseases   =$_POST["Deseases"] ;
+                         $after_save =$_POST["AfterSave"] ;
                          $count      =$_POST["Count"] ;
 
              $a_prescr=array() ;
@@ -263,107 +266,11 @@ function ProcessDB() {
            $count  ='0' ;
            $put_id_=$db->real_escape_string($put_id) ;
 
-//--------------------------- Извлечение списка типов назначений
-
-                     $sql="Select code, name".
-			  "  From ref_prescriptions_types".
-			  " Where `language`='RU'" ;
-     $res=$db->query($sql) ;
-  if($res===false) {
-          FileLog("ERROR", "Select REF_PRESCRIPTIONS_TYPES... : ".$db->error) ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса справочника типов назначений") ;
-                         return ;
-  }
-  else
-  {  
-     for($i=0 ; $i<$res->num_rows ; $i++)
-     {
-	      $fields=$res->fetch_row() ;
-
-       echo "                      i_category.length++ ;				\n" ;
-       echo "   i_category.options[i_category.length-1].text	='".$fields[1]."' ;	\n" ;
-       echo "   i_category.options[i_category.length-1].value	='".$fields[0]."' ;	\n" ;
-     }
-  }
-
-     $res->close() ;
-
-//------------------------- Определение списка заболеваний
-
-  if($deseases!="")
-  {
-                      $list=str_replace(" ", ",", $deseases) ;
-
-                       $sql="Select id".
-			    "  From deseases_registry".
-			    " Where id in (".$list.") ".
-                            " UNION ALL ".
-                            "Select type".
-			    "  From deseases_registry".
-			    " Where id in (".$list.")".
-                            "  and  type>0" ;
-
-       $res=$db->query($sql) ;
-    if($res===false) {
-          FileLog("ERROR", "Select DESEASES_REGISTRY... : ".$db->error) ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка формирования фильтра по заболеваниям") ;
-                         return ;
-    }
-    else
-    {  
-       for($i=0 ; $i<$res->num_rows ; $i++)
-       {
-	    $fields =$res->fetch_row() ;
-	  $a_dss[$i]=$fields[0] ;
-       }
-    }
-
-	$res->close() ;
-  }
-//--------------------------- Извлечение списка назначений
-
-                     $sql ="Select id, type, name".
-			   "  From prescriptions_registry".
-                           " Where type<>'dummy'\r\n" ;
-
-  if($deseases!="")
-  {
-                                 $sql.="  and (   id in (Select e.prescription_id From sets_elements e  Where e.set_id=$put_id_) \r\n" ;
-                                 $sql.="       or deseases is null \r\n" ;
-      foreach($a_dss as $value)  $sql.="       or instr(concat(' ', deseases, ' '), ' ".$value." ')>0 \r\n" ;
-                                 $sql.="      )\r\n" ;
-  }
-                        $sql.=" Order by name" ;
-          FileLog("DEBUG", $sql) ;
-
-        $res=$db->query($sql) ;
-  if($res===false) {
-          FileLog("ERROR", "Select PRESCRIPTIONS_REGISTRY... : ".$db->error) ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса реестра назначений") ;
-                         return ;
-  }
-  else
-  {  
-     for($i=0 ; $i<$res->num_rows ; $i++)
-     {
-	      $fields=$res->fetch_row() ;
-
-       echo "                              i_c_".$fields[1].".length++ ;				\n" ;
-       echo "   i_c_".$fields[1].".options[i_c_".$fields[1].".length-1].text ='".$fields[2]."' ;	\n" ;
-       echo "   i_c_".$fields[1].".options[i_c_".$fields[1].".length-1].value='".$fields[0]."' ;	\n" ;
-     }
-  }
-
-     $res->close() ;
-
 //--------------------------- Извлечение состава комплекса
 
       echo     "  i_count.value='0'	;\n" ;
 
-                     $sql="Select e.prescription_id, r.type, e.remark".
+                     $sql="Select e.prescription_id, r.name, e.remark".
 			  "  From sets_elements e left outer join prescriptions_registry r on e.prescription_id=r.id".
                           " Where e.set_id=$put_id_".
                           " Order by e.order_num" ;
@@ -380,7 +287,7 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-       echo "   AddListRow('".$fields[0]."', '".$fields[1]."', '".$fields[2]."') ;	\n" ;
+       echo "   AddListRow('".$fields[0]."', '".$fields[1]."', '".$fields[2]."', 0) ;	\n" ;
      }
   }
 
@@ -391,6 +298,7 @@ function ProcessDB() {
       echo     "  i_id         .value='".$put_id     ."' ;\n" ;
       echo     "  i_name       .value='".$name       ."' ;\n" ;
       echo     "  i_description.value='".$description."' ;\n" ;
+      echo     "  i_after_save .value='".$after_save ."' ;\n" ;
 
 //--------------------------- Завершение
 
@@ -441,79 +349,39 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script type="text/javascript">
 <!--
 
-    var  i_table ;
     var  i_id ;
     var  i_count ;
     var  i_name ;
     var  i_description ;
     var  i_deseases ;
+    var  i_after_save ;
     var  i_error ;
 
-    var  s_deseases_select_use ;
+    var  s_prescription_list="" ;
+
+    var  a_names=["Order","ShowOrder","Id","Name","Remark","Insert","Details","Delete","LiftUp"] ;
 
   function FirstField() 
   {
      var  i_category ;
      var  nl=new RegExp("@@","g") ;
 
-	i_table      =document.getElementById("Fields") ;
 	i_id         =document.getElementById("Id") ;
 	i_count      =document.getElementById("Count") ;
 	i_name       =document.getElementById("Name") ;
 	i_description=document.getElementById("Description") ;
 	i_deseases   =document.getElementById("Deseases") ;
+	i_after_save =document.getElementById("AfterSave") ;
 	i_error      =document.getElementById("Error") ;
-
-	i_category=document.getElementById("Category") ;
-			   i_category.length++ ;
-	i_category.options[i_category.length-1].text ='' ;
-	i_category.options[i_category.length-1].value='dummy' ;
-
-	i_c_exercise       =document.getElementById("C_exercise"       ) ;
-	i_c_exploration    =document.getElementById("C_exploration"    ) ;
-	i_c_measurement    =document.getElementById("C_measurement"    ) ;
-	i_c_operation      =document.getElementById("C_operation"      ) ;
-	i_c_others         =document.getElementById("C_others"         ) ;
-	i_c_pharmacotherapy=document.getElementById("C_pharmacotherapy") ;
-	i_c_test           =document.getElementById("C_test"           ) ;
-	i_c_treatment      =document.getElementById("C_treatment"      ) ;
-	i_c_unregistered   =document.getElementById("C_unregistered"   ) ;
-
-			            i_c_exercise.length++ ;
-	i_c_exercise       .options[i_c_exercise.length   -1].text ='' ;
-	i_c_exercise       .options[i_c_exercise.length   -1].value='0' ;
-			            i_c_exploration.length++ ;
-	i_c_exploration    .options[i_c_exploration.length-1].text ='' ;
-	i_c_exploration    .options[i_c_exploration.length-1].value='0' ;
-			            i_c_measurement.length++ ;
-	i_c_measurement    .options[i_c_measurement.length-1].text ='' ;
-	i_c_measurement    .options[i_c_measurement.length-1].value='0' ;
-			            i_c_operation.length++ ;
-	i_c_operation      .options[i_c_operation.length-1].text ='' ;
-	i_c_operation      .options[i_c_operation.length-1].value='0' ;
-			            i_c_others.length++ ;
-	i_c_others         .options[i_c_others.length-1].text ='' ;
-	i_c_others         .options[i_c_others.length-1].value='0' ;
-			            i_c_pharmacotherapy.length++ ;
-	i_c_pharmacotherapy.options[i_c_pharmacotherapy.length-1].text ='' ;
-	i_c_pharmacotherapy.options[i_c_pharmacotherapy.length-1].value='0' ;
-			            i_c_test.length++ ;
-	i_c_test           .options[i_c_test.length-1].text ='' ;
-	i_c_test           .options[i_c_test.length-1].value='0' ;
-			            i_c_treatment.length++ ;
-	i_c_treatment      .options[i_c_treatment.length-1].text ='' ;
-	i_c_treatment      .options[i_c_treatment.length-1].value='0' ;
-			            i_c_unregistered.length++ ;
-	i_c_unregistered   .options[i_c_unregistered.length-1].text ='' ;
-	i_c_unregistered   .options[i_c_unregistered.length-1].value='0' ;
-
-        s_deseases_select_use=false ;
 
 <?php
             ProcessDB() ;
@@ -521,13 +389,10 @@ function SuccessMsg() {
 
        i_description.value=i_description.value.replace(nl,"\n") ;
 
-         return true ;
-  }
+     if(i_after_save.value!="true")
+        parent.frames["details"].location.replace("prescriptions_select.php?Deseases="+i_deseases.value+"&Selected="+s_prescription_list) ;
 
-  function GoAway() 
-  {
-     if(s_deseases_select_use)
-             parent.frames["details"].location.replace("start.html") ;
+         return true ;
   }
 
   function SendFields() 
@@ -546,266 +411,213 @@ function SuccessMsg() {
 
           i_description.value=i_description.value.replace(nl,"@@") ;
 
+           i_after_save.value="true" ;
+
                          return true ;         
   } 
 
-  function SetCategory(p_id, p_category)
-  {
-     var  id_id ;
-     var  prescription_id ;
-     var  i_prescription ;
-     var  i_template ;
-
-           
-          id_id            =p_id.replace("Category","Id") ;
-          prescription_id  =p_id.replace("Category","Prescription") ;
-  	i_prescription     =document.getElementById(prescription_id) ;
-  	i_template         =document.getElementById("C_"+p_category).cloneNode(true) ;
-        i_template.id      =prescription_id ;
-        i_template.hidden  =false ;
-        i_template.onchange=function(e) {                 this.options[0].disabled=true ;
-                                          SetPrescription(this.id, this.options[this.selectedIndex].value) ;  } ;
-        i_prescription.parentNode.replaceChild(i_template, i_prescription) ;
-
-  	   document.getElementById(id_id).value='0' ;
-
-    return ;         
-  } 
-
-  function SetPrescription(p_id, p_prescription)
-  {
-     var  v_session ;
-     var  v_form ;
-     var  id_id ;
-     var  show_id ;
-     var  i_id ;
-     var  i_show ;
-
-           
-       id_id      =p_id.replace("Prescription","Id") ;
-  	i_id      =document.getElementById(id_id) ;
-        i_id.value=p_prescription ;
-
-          show_id      =p_id.replace("Prescription","Details") ;
-  	i_show         =document.getElementById(show_id) ;
-        i_show.disabled=false ;
-
-	 v_session=TransitContext("restore","session","") ;
-            v_form="prescription_details_any.php" ;
-	parent.frames["details"].location.assign(v_form+"?Session="+v_session+"&Id="+p_prescription) ;
-
-
-
-    return ;         
-  } 
-
-  function AddListRow(p_id, p_category, p_remark)
+  function AddListRow(p_id, p_name, p_remark, p_order)
   {
      var  i_set ;
      var  i_row_new ;
      var  i_col_new ;
-     var  i_cat_new ;
-     var  i_prs_new ;
      var  i_fld_new ;
      var  i_txt_new ;
      var  i_shw_new ;
      var  i_del_new ;
      var  i_upp_new ;
+     var  i_ins_new ;
      var  num_new ;
 
 
-     if(p_id=='0')  p_category='unregistered' ;
+     if(p_id!='0')
+     {
+        if(s_prescription_list=="")  s_prescription_list =    p_id ;
+        else                         s_prescription_list+=","+p_id ;
+     }
 
-       num_new=parseInt(i_count.value)+1 ;
-                        i_count.value=num_new ;
-
-       i_cat_new = document.getElementById("Category").cloneNode(true) ;
-       i_cat_new . id      ='Category_'+num_new ;
-       i_cat_new . hidden  = false ;
-       i_cat_new . onchange= function(e) {                      this.options[0].disabled=true ;
-                                           SetCategory(this.id, this.options[this.selectedIndex].value) ;  } ;
-       i_cat_new.options[0].disabled=true ;
-       i_cat_new.options[0].selected=false ;
-
-     for(i=1 ; i<i_cat_new.length ; i++)
-       if(i_cat_new.options[i].value==p_category)  i_cat_new.options[i].selected=true ;
-
-       i_prc_new         =document.getElementById("C_"+p_category).cloneNode(true) ;
-       i_prc_new.id      ='Prescription_'+num_new ; ;
-       i_prc_new.hidden  =false ;
-       i_prc_new.onchange=function(e) {                 this.options[0].disabled=true ;
-                                         SetPrescription(this.id, this.options[this.selectedIndex].value) ;  } ;
-
-       i_prc_new.options[0].disabled=true ;
-       i_prc_new.options[0].selected=false ;
-
-     for(i=1 ; i<i_prc_new.length ; i++)
-       if(i_prc_new.options[i].value==p_id)  i_prc_new.options[i].selected=true ;
+     if(p_order==0)
+     {
+         num_new=parseInt(i_count.value)+1 ;
+                          i_count.value=num_new ;
 
        i_set     = document.getElementById("Prescriptions") ;
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+     }
+     else
+     {
+                num_new=p_order ;
+                
+       i_row_new = document.getElementById("NewRow") ;
+     }
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
+
+       i_fld_new = document.createElement("div") ;
+       i_fld_new . id       ='ShowOrder_'+ num_new ;
+       i_txt_new = document.createTextNode(num_new) ;
+       i_fld_new . appendChild(i_txt_new) ;
+       i_col_new . appendChild(i_fld_new) ;
+
        i_fld_new = document.createElement("input") ;
        i_fld_new . id       ='Order_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . disabled = true ;
-       i_fld_new . style.textAlign="right" ;
-       i_fld_new . size     =  1 ;
+       i_fld_new . type     ="hidden" ;
        i_fld_new . value    = num_new ;
        i_col_new . appendChild(i_fld_new) ;
+
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
+
        i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Id_'+ num_new ;
-       i_fld_new . name     ='Id_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . hidden   = true ;
+       i_fld_new . id       ='Id_'+num_new ;
+       i_fld_new . name     ='Id_'+num_new ;
+       i_fld_new . type     ="hidden" ;
        i_fld_new . value    = p_id ;
        i_col_new . appendChild(i_fld_new) ;
-       i_col_new . appendChild(i_cat_new) ;
-       i_row_new . appendChild(i_col_new) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_col_new . appendChild(i_prc_new) ;
-       i_fld_new = document.createElement("br") ;
+       i_fld_new = document.createElement("div") ;
+       i_fld_new . className = "Bold_LT" ;
+       i_fld_new . id        = "Name_"+num_new ;
+       i_txt_new = document.createTextNode(p_name) ;
+       i_fld_new . appendChild(i_txt_new) ;
+  if(p_id!='0' || p_order!=0)
+  {
+       i_txt_new = document.createElement("br") ;
+       i_fld_new . appendChild(i_txt_new) ;
+  }
        i_col_new . appendChild(i_fld_new) ;
+
        i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Remark_'+ num_new ;
-       i_fld_new . name     ='Remark_'+ num_new ;
+       i_fld_new . id       ='Remark_'+num_new ;
+       i_fld_new . name     ='Remark_'+num_new ;
        i_fld_new . type     ="text" ;
-       i_fld_new . size     =  80 ;
+       i_fld_new . size     =  60 ;
        i_fld_new . value    = p_remark ;
+       i_fld_new . onchange = function(e) {  this.parentNode.parentNode.id="" ;  }
        i_col_new . appendChild(i_fld_new) ;
+
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LC" ;
+
        i_shw_new = document.createElement("input") ;
        i_shw_new . type   ="button" ;
-       i_shw_new . value  ="Подробнее" ;
-       i_shw_new . id     ='Details_'+ num_new ;
+       i_shw_new . className ="DetailsButton" ;
+       i_shw_new . value  ="?" ;
+       i_shw_new . id     ='Details_'+num_new ;
        i_shw_new . onclick= function(e) {  ShowDetails(this.id) ;  }
 
      if(p_id=='0')
        i_shw_new . disabled= true ;
 
        i_del_new = document.createElement("input") ;
-       i_del_new . type   ="button" ;
-       i_del_new . value  ="Удалить" ;
-       i_del_new . id     ='Delete_'+ num_new ;
-       i_del_new . onclick= function(e) {  DeleteRow(this.id) ;  }
+       i_del_new . type      ="button" ;
+       i_del_new . className ="DeleteButton" ;
+       i_del_new . value     ="X" ;
+       i_del_new . id        ='Delete_'+ num_new ;
+       i_del_new . onclick   = function(e) {  DeleteRow(this.id) ;  }
        i_upp_new = document.createElement("input") ;
        i_upp_new . type   ="button" ;
-       i_upp_new . value  ="Вверх" ;
+       i_upp_new . className ="UpButton" ;
+       i_upp_new . value  ="^" ;
        i_upp_new . id     ='LiftUp_'+ num_new ;
        i_upp_new . onclick= function(e) {  LiftUpRow(this.id) ;  }
+       i_ins_new = document.createElement("input") ;
+       i_ins_new . type   ="button" ;
+       i_ins_new . className ="InsertButton" ;
+       i_ins_new . value  ="+" ;
+       i_ins_new . id     ='Insert_'+ num_new ;
+       i_ins_new . onclick= function(e) {  InsertNewRow(this.id) ;  }
+       i_col_new . appendChild(i_ins_new) ;
        i_col_new . appendChild(i_upp_new) ;
        i_col_new . appendChild(i_del_new) ;
        i_col_new . appendChild(i_shw_new) ;
        i_row_new . appendChild(i_col_new) ;
 
+     if(p_order==0)
        i_set     . appendChild(i_row_new) ;
 
-    return ;         
+    return(num_new) ;         
   } 
 
-  function AddNewRow()
+  function InsertNewRow(p_id)
   {
-     var  i_set ;
-     var  i_row_new ;
-     var  i_col_new ;
-     var  i_cat_new ;
-     var  i_fld_new ;
-     var  i_txt_new ;
-     var  i_shw_new ;
-     var  i_del_new ;
-     var  i_upp_new ;
-     var  num_new ;
 
-       num_new=parseInt(i_count.value)+1 ;
-                        i_count.value=num_new ;
+    var  i_del  ;
+    var  i_col  ;
+    var  i_row  ;
+    var  i_list  ;
+    var  i_row  ;
+    var  i_row_new  ;
+    var  top  ;
 
-       i_cat_new = document.getElementById("Category").cloneNode(true) ;
-       i_cat_new . id      ='Category_'+ num_new ;
-       i_cat_new . hidden  = false ;
-       i_cat_new . onchange= function(e) {                      this.options[0].disabled=true ;
-                                           SetCategory(this.id, this.options[this.selectedIndex].value) ;  } ;
+    
+    if(document.getElementById("NewRow")!=null)
+    {
+      alert("Сначала удалите ранее добавленную пустую строку") ;
+        return ;
+    }
 
-       i_set     = document.getElementById("Prescriptions") ;
+	 i_elm =document.getElementById(p_id.replace("Insert","Order")) ;
+           top =parseInt(i_elm.value) ;         
+        bottom =parseInt(i_count.value) ;
+
+         i_del =document.getElementById(p_id) ;
+         i_col =   i_del.parentNode ;
+         i_row =   i_col.parentNode ;
+         i_list=   i_row.parentNode ;
+
+     for(i=bottom ; i>=top ; i--)
+     for(j in a_names) {
+			           i_elm      =document.getElementById(a_names[j]+"_"+i) ;
+			           i_elm.id   =a_names[j]+"_"+(i+1) ;
+			           i_elm.name =a_names[j]+"_"+(i+1) ;
+      if(a_names[j]=="Order"    )  i_elm.value= i+1 ;
+      if(a_names[j]=="ShowOrder")  i_elm.innerHTML=i+1 ;
+                       }  
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . id ="NewRow" ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Order_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . disabled = true ;
-       i_fld_new . style.textAlign="right" ;
-       i_fld_new . size     =  1 ;
-       i_fld_new . value    = num_new ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_row_new . appendChild(i_col_new) ;
+       i_list.insertBefore(i_row_new, i_row) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Id_'+ num_new ;
-       i_fld_new . name     ='Id_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . hidden   = true ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_col_new . appendChild(i_cat_new) ;
-       i_row_new . appendChild(i_col_new) ;
+          i_count.value=parseInt(i_count.value)+1 ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("select") ;
-       i_fld_new . disabled = true ;
-       i_fld_new . id       ='Prescription_'+ num_new ;
+     AddListRow(0, "", "", top) ;
+  }
 
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Remark_'+ num_new ;
-       i_fld_new . name     ='Remark_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . size     =  80 ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_row_new . appendChild(i_col_new) ;
+  function AddSelectedRow(p_id, p_name)
+  {
+    var  order ;
+    var  new_row ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_shw_new = document.createElement("input") ;
-       i_shw_new . type    ="button" ;
-       i_shw_new . value   ="Подробнее" ;
-       i_shw_new . id      ='Details_'+ num_new ;
-       i_shw_new . disabled= true ;
-       i_shw_new . onclick = function(e) {  ShowDetails(this.id) ;  }
-       i_del_new = document.createElement("input") ;
-       i_del_new . type   ="button" ;
-       i_del_new . value  ="Удалить" ;
-       i_del_new . id     ='Delete_'+ num_new ;
-       i_del_new . onclick= function(e) {  DeleteRow(this.id) ;  }
-       i_upp_new = document.createElement("input") ;
-       i_upp_new . type   ="button" ;
-       i_upp_new . value  ="Вверх" ;
-       i_upp_new . id     ='LiftUp_'+ num_new ;
-       i_upp_new . onclick= function(e) {  LiftUpRow(this.id) ;  }
-       i_col_new . appendChild(i_upp_new) ;
-       i_col_new . appendChild(i_del_new) ;
-       i_col_new . appendChild(i_shw_new) ;
-       i_row_new . appendChild(i_col_new) ;
 
-       i_set     . appendChild(i_row_new) ;
+       new_row=document.getElementById("NewRow") ;
+
+    if(new_row!=null)
+    {
+                  elems=new_row.getElementsByTagName('td')[0].getElementsByTagName('input') ;
+       for(i=0; i<elems.length; i++)               
+         if(elems[i].id.substr(0, 6)=="Order_") {  order=elems[i].id.substr(6) ;  break ;  } 
+ 
+         document.getElementById("Id_"  +order).value    =p_id  ;
+         document.getElementById("Name_"+order).innerHTML=p_name ;
+         
+      if(s_prescription_list=="")  s_prescription_list =    p_id ;
+      else                         s_prescription_list+=","+p_id ;
+
+             new_row.id="" ;
+    }
+    else
+    {
+       order=AddListRow(p_id, p_name, "", 0) ;
+    }
+
+      document.getElementById("Remark_"+order).focus() ;
 
     return ;         
   } 
@@ -818,7 +630,6 @@ function SuccessMsg() {
     var  i_list  ;
     var  i_elm  ;
     var  top  ;
-    var  a_names ;
 
 
 	 i_elm =document.getElementById(p_id.replace("Delete","Order")) ;
@@ -832,14 +643,13 @@ function SuccessMsg() {
 
          i_list.removeChild(i_row) ;
 
-       a_names=["Order","Id","Category","Prescription","Remark","Details","Delete","LiftUp"] ;
-
      for(i=top+1 ; i<=bottom ; i++) {
      for(j in a_names) {
-			       i_elm      =document.getElementById(a_names[j]+"_"+i) ;
-			       i_elm.id   =a_names[j]+"_"+(i-1) ;
-			       i_elm.name =a_names[j]+"_"+(i-1) ;
-      if(a_names[j]=="Order")  i_elm.value= i-1 ;
+			           i_elm      =document.getElementById(a_names[j]+"_"+i) ;
+			           i_elm.id   =a_names[j]+"_"+(i-1) ;
+			           i_elm.name =a_names[j]+"_"+(i-1) ;
+      if(a_names[j]=="Order"    )  i_elm.value= i-1 ;
+      if(a_names[j]=="ShowOrder")  i_elm.innerHTML=i-1 ;
                        }  
                                     } 
 
@@ -856,7 +666,6 @@ function SuccessMsg() {
     var  i_row_2 ;
     var  i_list  ;
     var  i_elm  ;
-    var  a_names ;
     var  down ;
     var  up ;
 
@@ -879,8 +688,6 @@ function SuccessMsg() {
 
          i_list.insertBefore(i_row_2, i_row_1) ;
 
-       a_names=["Order","Id","Category","Prescription","Remark","Details","Delete","LiftUp"] ;
-
      for(j in a_names) {
 			 i_row_1      =document.getElementById(a_names[j]+"_"+up  ) ;
 			 i_row_2      =document.getElementById(a_names[j]+"_"+down) ;
@@ -893,6 +700,10 @@ function SuccessMsg() {
                          i_row_1.value=down ;
                          i_row_2.value=up  ;
                               }
+      if(a_names[j]=="ShowOrder") {
+                         i_row_1.innerHTML=down ;
+                         i_row_2.innerHTML=up  ;
+                                  }
                        }  
 
      return ;
@@ -905,29 +716,38 @@ function SuccessMsg() {
     var  v_session ;
     var  v_form ;
 
-           
              id_id=p_id.replace("Details","Id") ;
   	      i_id=document.getElementById(id_id) ;
 
-	 v_session=TransitContext("restore","session","") ;
-	    v_form="prescription_details_any.php" ;
-
-	parent.frames["details"].location.assign(v_form+"?Id="+i_id.value) ;
+         window.open("prescription_view.php?Id="+i_id.value) ;
 
     return ;         
   } 
 
   function LinkDesease() 
   {
-    var  v_session ;
+        parent.frames["details"].location.replace("deseases_select.php?&Deseases="+i_deseases.value) ;
 
-         v_session=TransitContext("restore","session","") ;
-
-        parent.frames["details"].location.replace("deseases_select.php"+"?Session="+v_session+"&Deseases="+i_deseases.value) ;
-
-        s_deseases_select_use=true ;
+      document.getElementById("Deseases_select"     ).hidden=true ;
+      document.getElementById("Prescriptions_select").hidden=false ;
   } 
 
+  function LinkPrescriptions() 
+  {
+        parent.frames["details"].location.replace("prescriptions_select.php?Deseases="+i_deseases.value+"&Selected="+s_prescription_list) ;
+
+      document.getElementById("Deseases_select"     ).hidden=false ;
+      document.getElementById("Prescriptions_select").hidden=true ;
+  } 
+
+  function GoToPreview()
+  {
+     var  v_session ;
+
+            v_session=TransitContext("restore","session","") ;
+        window.open("set_view.php?Session="+v_session+"&Id="+i_id.value) ;          
+  }
+  
   function SetDeseaseSelection(p_checked, p_id, p_name, p_group, p_gcode, p_before)
   {
      var  i_dss_list ;
@@ -937,12 +757,6 @@ function SuccessMsg() {
      var  i_before ;
      var  v_id ;
 
-
-    if(s_deseases_select_use)
-    {
-       i_error.style.color='blue' ;
-       i_error.innerHTML  ='Новые настройки фильтра по заболеваниям вступят в силу после СОХРАНЕНИЯ' ;
-    }
 
                    v_id="Desease_"+p_id ;
        i_deseases.value=" "+i_deseases.value+" " ;
@@ -964,32 +778,23 @@ function SuccessMsg() {
        i_deseases.value =i_deseases.value.trim() ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
        i_row_new . id        =  v_id ;
 
        i_col_new = document.createElement("td") ;
 
    if(p_gcode==0)
    {
-       i_col_new . className = "tableG" ;
+       i_col_new . className = "TableDeseasesGroup" ;
        i_txt_new = document.createTextNode(p_group) ;
        i_col_new . appendChild(i_txt_new) ;
    }
    else
    {
-       i_col_new . className = "tableL" ;
+       i_col_new . className = "TableDeseaseItem" ;
        i_txt_new = document.createTextNode(p_name) ;
        i_col_new . appendChild(i_txt_new) ;
    } 
-       i_col_new . onclick= function(e) {
-					    var  v_session ;
-					    var  v_form ;
-						 v_session=TransitContext("restore","session","") ;
-									      v_form="desease_details_any.php" ;
-						parent.frames["details"].location.replace(v_form+
-                                                                                         "?Session="+v_session+
-                                                                                         "&Id="+p_id) ;
-					} ;
+       i_col_new . onclick= function(e) {  window.open("desease_view.php?Id="+p_id) ;  }
        i_row_new . appendChild(i_col_new) ;
 
 
@@ -1012,12 +817,10 @@ function SuccessMsg() {
 
 </head>
 
-<body onload="FirstField();" onunload="GoAway();">
+<body onload="FirstField();">
 
 <noscript>
 </noscript>
-
-<div class="inputF">
 
   <table width="90%">
     <thead>
@@ -1025,10 +828,10 @@ function SuccessMsg() {
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>КАРТОЧКА КОМПЛЕКСА НАЗНАЧЕНИЙ</b>
       </td> 
     </tr>
@@ -1036,39 +839,41 @@ function SuccessMsg() {
   </table>
 
   <form onsubmit="return SendFields();" method="POST">
-
+  
   <table width="100%" >
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="fieldC">
+      <td class="Normal_CT">
           <br> 
-          <input type="submit" value="Сохранить"  id="Save1"> 
+          <input type="submit" value="Сохранить"   id="Save1"> 
+          <input type="button" value="Просмотреть" id="Preview" onclick="GoToPreview();"> 
       </td>
       <td> </td>
     </tr>
     <tr>
-      <td> <div class="error" id="Error"></div> </td>
+      <td> <div class="Error_CT" id="Error"></div> </td>
     </tr>
     <tr>
-    <td class="table">
+    <td>
 
-  <table width="100%" id="Fields">
+  <table>
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="field"> Название </td>
+      <td class="Normal_RT"> Название </td>
       <td>
         <input type="text" size=60 name="Name" id="Name">
         <input type="hidden" name="Id" id="Id">
         <input type="hidden" name="Count" id="Count">
         <input type="hidden" name="Deseases" id="Deseases">
+        <input type="hidden" name="AfterSave" id="AfterSave">
       </td>
     </tr>
     <tr>
-      <td class="field"> Описание </td>
+      <td class="Normal_RT"> Описание </td>
       <td> 
         <textarea cols=60 rows=7 wrap="soft" name="Description" id="Description"> </textarea>
       </td>
@@ -1077,44 +882,32 @@ function SuccessMsg() {
   </table>
 
       </td>
-      <td class="table">
-        <div class="fieldC">
-          <input type="button" value="Добавить/удалить заболевания" onclick=LinkDesease()>
-        </div> 
+    </tr>
+    <tr>
+      <td>
         <table width="100%">
           <thead>
           </thead>
           <tbody  id="Deseases_list">
           </tbody>
         </table>
+        <div class="Normal_CT">
+          <input type="button"        value="Добавить/удалить заболевания" id="Deseases_select"      onclick=LinkDesease()>
+          <input type="button" hidden value="Выбрать назначения"           id="Prescriptions_select" onclick=LinkPrescriptions()>
+        </div> 
       </td>
     </tr>
     </tbody>
   </table>
 
-  <table width="100%">
+  <table>
     <thead>
     </thead>
     <tbody  id="Prescriptions">
     </tbody>
   </table>
-
-      <input type="button" value="Добавить назначение" onclick=AddNewRow()> </td>
-
-    <select hidden id="Category"         ></select>
-    <select hidden id="C_exercise"       ></select>
-    <select hidden id="C_exploration"    ></select>
-    <select hidden id="C_measurement"    ></select>
-    <select hidden id="C_operation"      ></select>
-    <select hidden id="C_others"         ></select>
-    <select hidden id="C_pharmacotherapy"></select>
-    <select hidden id="C_test"           ></select>
-    <select hidden id="C_treatment"      ></select>
-    <select hidden id="C_unregistered"   ></select>
   
   </form>
-
-</div>
 
 </body>
 

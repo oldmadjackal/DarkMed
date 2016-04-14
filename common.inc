@@ -3,21 +3,24 @@
 
 function TransitContext(p_action, p_context, p_text)
 {
+                     context=parent.frames["menu"] ;
+  if(context==null)  context=parent.parent.frames["menu"] ;
+
   if(p_action=="save")
   {
-    if(p_context=="password")  parent.frames["menu"].document.getElementById("glbPassword").value=p_text ;
-    if(p_context=="session" )  parent.frames["menu"].document.getElementById("glbSession" ).value=p_text ;
-    if(p_context=="value"   )  parent.frames["menu"].document.getElementById("glbValue"   ).value=p_text ;
-    if(p_context=="callback")  parent.frames["menu"].document.getElementById("glbCallBack").value=p_text ;
+    if(p_context=="password")  context.document.getElementById("glbPassword").value=p_text ;
+    if(p_context=="session" )  context.document.getElementById("glbSession" ).value=p_text ;
+    if(p_context=="value"   )  context.document.getElementById("glbValue"   ).value=p_text ;
+    if(p_context=="callback")  context.document.getElementById("glbCallBack").value=p_text ;
   }
   else
   {
-    if(p_context=="password")  return(parent.frames["menu"].document.getElementById("glbPassword").value) ;
-    if(p_context=="session" )  return(parent.frames["menu"].document.getElementById("glbSession" ).value) ;
-    if(p_context=="value"   )  return(parent.frames["menu"].document.getElementById("glbValue"   ).value) ;
-    if(p_context=="callback")  return(parent.frames["menu"].document.getElementById("glbCallBack").value) ;
+    if(p_context=="password")  return(context.document.getElementById("glbPassword").value) ;
+    if(p_context=="session" )  return(context.document.getElementById("glbSession" ).value) ;
+    if(p_context=="value"   )  return(context.document.getElementById("glbValue"   ).value) ;
+    if(p_context=="callback")  return(context.document.getElementById("glbCallBack").value) ;
 
-       window.alert("Unnown p_context in TransitContext function") ;
+       window.alert("Unknown p_context in TransitContext function") ;
   }
 }
 //============================================== 
@@ -81,7 +84,7 @@ function Check_generate()
   return "Check"+GetRandomString(32) ;
 }
 //============================================== 
-//  Ппроверка контрольной  группы символов
+//  Проверка контрольной  группы символов
 
 function Check_validate(p_text)
 {
@@ -165,19 +168,4 @@ function Sign_decode(p_text, p_sender_key, p_receiver_key)
          v_form=v_form.substr(0, v_pos) ;
 
     window.open("callback.php"+"?Session="+v_session+"&Form="+v_form) ;
-  } 
-//============================================== 
-  function Test() 
-  {
-   try {
-
-//	window.alert("Hello") ;
-   }
-   catch(Error) {
-	window.alert(Error) ;
-   
-   }
-
-
-         return false ;         
   } 

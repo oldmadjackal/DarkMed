@@ -1,0 +1,61 @@
+.Table_LT  /* Строка с рамкой, лево-верх */
+{
+                    text-align : left            ;
+                vertical-align : top             ;
+                        border : 1px solid black ; 
+                  padding-left : 1ex             ; 
+                 padding-right : 1ex             ; 
+}
+.Table_LC  /* Строка с рамкой, лево-центр */
+{
+                    text-align : left            ;
+                vertical-align : center          ;
+                        border : 1px solid black ; 
+                  padding-left : 1ex             ; 
+                 padding-right : 1ex             ; 
+}
+.TableDeseasesGroup   /* Строка группы заболеваний */
+{
+                    text-align : left            ;
+                vertical-align : top             ;
+                        border : 1px solid black ; 
+              background-color : RGB(74,255,74)  ;
+                  padding-left : 1ex             ; 
+                 padding-right : 1ex             ; 
+}
+.TableDeseaseItem  /* Строка заболевания */
+{
+                    text-align : left            ;
+                vertical-align : top             ;
+                        border : 1px solid black ; 
+              background-color : RGB(250,243,98) ;
+                  padding-left : 5ex             ; 
+                 padding-right : 1ex             ; 
+}
+.TableMeasurement_LT
+{
+                    text-align : left            ;
+                vertical-align : top             ;
+                        border : 1px solid black ; 
+              background-color : RGB(250,243,98) ;
+                  padding-left : 1ex             ; 
+                 padding-right : 1ex             ; 
+}
+.TableRowLBrawn_LC  /* Строка с фоном светло-коричневого цвета, лево-центр */
+{
+                    text-align : left             ;
+                vertical-align : center           ;
+                        border : 0px solid black  ; 
+              background-color : RGB(253,202,132) ;
+                  padding-left : 1ex              ; 
+                 padding-right : 1ex              ; 
+}
+.TableRowLGreen_LC   /* Строка с фоном светло-зеленого цвета, лево-центр */
+{
+                    text-align : left             ;
+                vertical-align : center           ;
+                        border : 0px solid black  ; 
+              background-color : RGB(222,253,100) ;
+                  padding-left : 1ex              ; 
+                 padding-right : 1ex              ; 
+}

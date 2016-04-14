@@ -1,0 +1,39 @@
+.Normal_CT  /* Обычный шрифт, центр-верх */
+ {
+                    text-align : center          ;
+                vertical-align : top             ;
+}
+.Normal_LT  /* Обычный шрифт, лево-верх */
+ {
+                    text-align : left            ;
+                vertical-align : top             ;
+}
+.Normal_RT  /* Обычный шрифт, лево-верх */
+ {
+                    text-align : right           ;
+                vertical-align : top             ;
+}
+.Bold_LT  /* Жирный шрифт, лево-верх */
+ {
+                    text-align : left            ;
+                vertical-align : top             ;
+                   font-weight : bold            ; 
+}
+.Error_CT  /* Строка ошибки, центр-верх */
+ {
+                    text-align : center          ;
+                vertical-align : top             ;
+                   font-weight : bold            ; 
+                         color : red             ;
+}
+.FormTitle  /* Заголовок формы */
+{
+                      position : static          ;
+                           top :   0px           ;
+                          left :   0px           ;
+                         width :  90%            ; 
+                        height :  20px           ; 
+                        border : 0px solid black ;
+                    text-align : center          ;
+                vertical-align : top             ;
+}

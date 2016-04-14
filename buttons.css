@@ -1,0 +1,40 @@
+.AddButton  /* Кнопка добавления */
+{
+                   font-weight : bold            ; 
+              background-color : #E7E7E7         ; 
+}
+.CallBackButton  /* Кнопка "Обратная связь" */
+{
+              background-color : #E7E7E7         ; 
+}
+.DeleteButton  /* Кнопка удаления */
+ {
+                   font-weight : bold            ; 
+                         color : red             ;
+              background-color : #E7E7E7         ; 
+}
+.DetailsButton  /* Кнопка страницы подробностей */
+{
+                   font-weight : bold            ; 
+              background-color : #E7E7E7         ; 
+}
+.GreenButton  /*Зеленая кнопка*/
+ {
+                         color : green           ;
+              background-color : #BBFFBB         ; 
+}   
+.HelpButton  /* Кнопка "Помощь" */
+{
+              background-color : #E7E7E7         ; 
+}
+.InsertButton  /* Кнопка вставки */
+ {
+                   font-weight : bold            ; 
+                         color : green           ;
+              background-color : #E7E7E7         ; 
+}
+.UpButton  /* Кнопка вверх */
+{
+                   font-weight : bold            ; 
+              background-color : #E7E7E7         ; 
+}

@@ -78,11 +78,9 @@ function ProcessDB() {
      }
 //--------------------------- Извлечение состава комплекса
 
-      echo     "  i_count.value='0'	;\n" ;
-
           $put_id_=$db->real_escape_string($put_id) ;
 
-                     $sql="Select e.prescription_id, t.name, r.name, e.remark".
+                     $sql="Select e.prescription_id, r.type, t.name, r.name, e.remark".
 			  "  From sets_elements e left outer join prescriptions_registry r on e.prescription_id=r.id".
                           "       left outer join ref_prescriptions_types t on t.code=r.type and t.language='RU'".
                           " Where e.set_id=$put_id_".
@@ -100,7 +98,11 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-       echo "   AddListRow('".$fields[0]."', '".$fields[1]."', '".$fields[2]."', '".$fields[3]."') ;	\n" ;
+       echo "   a_plist_id    [".($i+1)."]='".$fields[0]."' ;	\n" ;
+       echo "   a_plist_type  [".($i+1)."]='".$fields[1]."' ;	\n" ;
+       echo "   a_plist_tname [".($i+1)."]='".$fields[2]."' ;	\n" ;
+       echo "   a_plist_name  [".($i+1)."]='".$fields[3]."' ;	\n" ;
+       echo "   a_plist_remark[".($i+1)."]='".$fields[4]."' ;	\n" ;
      }
   }
 
@@ -191,17 +193,27 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script type="text/javascript">
 <!--
 
-    var  i_table ;
-    var  i_count ;
     var  i_name ;
     var  i_description ;
+    var  i_pres_list ;
+    var  i_pres_title ;
+    var  i_set ;
     var  i_error ;
+
+    var  a_plist_id ;
+    var  a_plist_type ;
+    var  a_plist_tname ;
+    var  a_plist_name ;
+    var  a_plist_remark ;
 
 
   function FirstField() 
@@ -209,18 +221,26 @@ function SuccessMsg() {
      var  i_category ;
      var  nl=new RegExp("@@","g") ;
 
-	i_table      =document.getElementById("Fields") ;
-	i_count      =document.getElementById("Count") ;
 	i_name       =document.getElementById("Name") ;
 	i_description=document.getElementById("Description") ;
+        i_set        =document.getElementById("Prescriptions") ;
+        i_pres_list  =document.getElementById("List") ;
+        i_pres_tiles =document.getElementById("Tiles") ;
 	i_error      =document.getElementById("Error") ;
 
+	a_plist_id    =new Array() ;
+	a_plist_type  =new Array() ;
+	a_plist_tname =new Array() ;
+	a_plist_name  =new Array() ;
+	a_plist_remark=new Array() ;
 
 <?php
             ProcessDB() ;
 ?>
 
        i_description.innerHTML=i_description.innerHTML.replace(nl,"<br>") ;
+
+        ShowPrescriptions() ;
 
          return true ;
   }
@@ -238,66 +258,201 @@ function SuccessMsg() {
 
                          return true ;         
   } 
-
-  function AddListRow(p_id, p_category, p_name, p_remark)
+   
+  function ShowPrescriptions() 
   {
-     var  i_set ;
+       
+    if(i_pres_tiles.checked==true)  presentation="Tiles" ;
+    else	                    presentation="List" ;
+
+       for(i in a_plist_id) {
+      	    i_row=document.getElementById("Row_"+a_plist_id[i]) ;
+  	 if(i_row!=null)  i_set.removeChild(i_row) ;
+       }
+
+       for(i in a_plist_id)
+         if(presentation=="Tiles")
+                  AddListRow_tiles(i, a_plist_id[i], a_plist_type[i], a_plist_tname[i], a_plist_name[i], a_plist_remark[i]) ;
+         else     AddListRow_list (i, a_plist_id[i], a_plist_type[i], a_plist_tname[i], a_plist_name[i], a_plist_remark[i]) ;
+
+                  AddListRow_tiles(0) ;
+  }
+
+  function AddListRow_list(p_order, p_id, p_type, p_tname, p_name, p_remark)
+  {
      var  i_row_new ;
      var  i_col_new ;
      var  i_txt_new ;
      var  i_shw_new ;
-     var  num_new ;
+     var  v_style ;
 
 
-       num_new=parseInt(i_count.value)+1 ;
-                        i_count.value=num_new ;
+     if(p_order==0)  return ;
 
-       i_set     = document.getElementById("Prescriptions") ;
-       i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+     if(p_type=="measurement")  v_style="TableMeasurement_LT" ; 
+     else                       v_style="Table_LC" ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_txt_new = document.createTextNode(num_new) ;
-       i_col_new . appendChild(i_txt_new) ;
-       i_row_new . appendChild(i_col_new) ;
+                  i_row_new = document.createElement("tr") ;
+		  i_row_new . id        = "Row_"+p_id ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_txt_new = document.createTextNode(p_category) ;
-       i_col_new . appendChild(i_txt_new) ;
-       i_row_new . appendChild(i_col_new) ;
+                  i_col_new = document.createElement("td") ;
+                  i_col_new . className = v_style ;
+                  i_txt_new = document.createTextNode(p_order) ;
+                  i_col_new . appendChild(i_txt_new) ;
+                  i_row_new . appendChild(i_col_new) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-  if(p_id!='0')
-       i_txt_new = document.createTextNode(p_name) ;
-  else i_txt_new = document.createTextNode(p_remark) ;
-       i_col_new . appendChild(i_txt_new) ;
-       i_row_new . appendChild(i_col_new) ;
+                  i_col_new = document.createElement("td") ;
+                  i_col_new . className = v_style ;
+                  i_txt_new = document.createTextNode(p_tname) ;
+                  i_col_new . appendChild(i_txt_new) ;
+                  i_row_new . appendChild(i_col_new) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+                  i_col_new = document.createElement("td") ;
+                  i_col_new . className = v_style ;
+  if(p_id!='0')   i_txt_new = document.createTextNode(p_name) ;
+  else            i_txt_new = document.createTextNode(p_remark) ;
+                  i_col_new . appendChild(i_txt_new) ;
+                  i_row_new . appendChild(i_col_new) ;
+
+                  i_col_new = document.createElement("td") ;
+                  i_col_new . className = v_style ;
   if(p_id!='0') {
-       i_txt_new = document.createTextNode(p_remark) ;
-       i_col_new . appendChild(i_txt_new) ;
+                  i_txt_new = document.createTextNode(p_remark) ;
+                  i_col_new . appendChild(i_txt_new) ;
                 }
-       i_row_new . appendChild(i_col_new) ;
+                  i_row_new . appendChild(i_col_new) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_col_new . width     = "3%" ;
+                  i_col_new = document.createElement("td") ;
+                  i_col_new . className = v_style ;
+                  i_col_new . width     = "3%" ;
   if(p_id!='0') {
-       i_shw_new = document.createElement("input") ;
-       i_shw_new . type   ="button" ;
-       i_shw_new . value  ="Подробнее" ;
-       i_shw_new . id     ='Details_'+ num_new ;
-       i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
-       i_col_new . appendChild(i_shw_new) ;
+                  i_shw_new = document.createElement("input") ;
+                  i_shw_new . type   ="button" ;
+                  i_shw_new . value  ="Подробнее" ;
+                  i_shw_new . id     ='Details_'+ p_order ;
+                  i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
+                  i_col_new . appendChild(i_shw_new) ;
                 }
-       i_row_new . appendChild(i_col_new) ;
+                  i_row_new . appendChild(i_col_new) ;
 
-       i_set     . appendChild(i_row_new) ;
+                  i_set     . appendChild(i_row_new) ;
+
+    return ;         
+  } 
+
+     var  s_order =new Array(3) ;
+     var  s_id    =new Array(3)   ;
+     var  s_type  =new Array(3) ;
+     var  s_name  =new Array(3) ;
+     var  s_remark=new Array(3) ;
+     var  s_num   = 0 ;
+
+  function AddListRow_tiles(p_order, p_id, p_type, p_tname, p_name, p_remark)
+  {
+     var  i_row_new ;
+     var  i_col_new ;
+     var  i_txt_new ;
+     var  i_elm_new ;
+     var  i_frm_new ;
+     var  i_shw_new ;
+     var  i_msr_new ;
+     var  i_msr_list ;
+     var  v_style ;
+     var  v_id ;
+     var  msr_flag ;
+     var  col ;
+
+
+     if(p_order  ==0) {
+			if(s_num==0)  return ;	
+                      }
+     else             {
+			  s_order [s_num]=p_order ;
+			  s_id    [s_num]=p_id  ;
+			  s_type  [s_num]=p_type  ;
+			  s_name  [s_num]=p_name ;
+			  s_remark[s_num]=p_remark ;
+			           s_num++  ;
+
+                  if(p_order%3!=0)  return ;
+                      }
+
+		  i_row_new = document.createElement("tr") ;
+		  i_row_new . id        = "Row_"+s_id[0] ;
+
+   for(col=0 ; col<s_num ; col++)
+   {
+              v_id=s_id[col] ;
+
+     if(s_type[col]=="measurement") {  msr_flag=true ;
+                                        v_style="TableMeasurement_LT" ;  }
+     else                           {  msr_flag=false ;
+                                        v_style="Table_LC" ;             }
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = v_style ;
+		  i_txt_new = document.createTextNode(s_order[col]) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		  i_row_new . appendChild(i_col_new) ;
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = v_style ;
+		  i_col_new . id = s_id[col] ;
+  if(v_id!="0")   i_col_new . onclick  = function(e) {  ShowDetails(this.id) ;  } ;
+
+  if(v_id!="0") {
+                  i_fld_new = document.createElement("div") ;
+                  i_fld_new . className = "Bold_LT" ;
+                  i_txt_new = document.createTextNode(s_name[col]) ;
+                  i_fld_new . appendChild(i_txt_new) ;
+		  i_col_new . appendChild(i_fld_new) ;
+                }
+  else		{
+                  i_txt_new = document.createTextNode(s_remark[col]) ;
+		  i_col_new . appendChild(i_txt_new) ;
+                }
+
+  if(v_id!="0") {
+		  i_elm_new = document.createElement("br") ;
+		  i_col_new . appendChild(i_elm_new) ;
+		  i_txt_new = document.createTextNode(s_remark[col]) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		}
+
+		  i_row_new . appendChild(i_col_new) ;
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = v_style ;
+  if(msr_flag ) {
+		}
+  else          { 
+		  i_frm_new = document.createElement("iframe") ;
+		  i_frm_new . src         ="prescription_pilot.php?Id="+s_id[col] ;
+		  i_frm_new . seamless    = true ;
+		  i_frm_new . height      ="202" ;
+		  i_frm_new . scrolling   ="no" ;
+		  i_frm_new . frameborder ="0" ;
+		  i_frm_new . marginheight="0" ;
+		  i_frm_new . marginwidth ="0" ;
+		  i_col_new . appendChild(i_frm_new) ;
+		}
+
+		  i_row_new . appendChild(i_col_new) ;
+
+  if(col!=s_num-1) {
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = "TableGap" ;
+		  i_col_new . width     = "1%" ;
+		  i_row_new . appendChild(i_col_new) ;
+
+		   }
+
+   }
+
+		  i_set.appendChild(i_row_new) ;
+
+		  s_num=0 ;
 
     return ;         
   } 
@@ -321,32 +476,24 @@ function SuccessMsg() {
        i_dss_list= document.getElementById("Deseases_list") ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
        i_row_new . id        =  v_id ;
 
        i_col_new = document.createElement("td") ;
 
    if(p_gcode==0)
    {
-       i_col_new . className = "tableG" ;
+       i_col_new . className = "TableDeseasesGroup" ;
        i_txt_new = document.createTextNode(p_group) ;
        i_col_new . appendChild(i_txt_new) ;
    }
    else
    {
-       i_col_new . className = "tableL" ;
+       i_col_new . className = "TableDeseaseItem " ;
        i_txt_new = document.createTextNode(p_name) ;
        i_col_new . appendChild(i_txt_new) ;
    } 
-       i_col_new . onclick= function(e) {
-					    var  v_session ;
-					    var  v_form ;
-						 v_session=TransitContext("restore","session","") ;
-									      v_form="desease_details_any.php" ;
-						parent.frames["details"].location.replace(v_form+
-                                                                                         "?Session="+v_session+
-                                                                                         "&Id="+p_id) ;
-					} ;
+       i_col_new . onclick= function(e) {  window.open("desease_details_any.php?Id="+p_id) ;  }
+
        i_row_new . appendChild(i_col_new) ;
 
        i_dss_list. appendChild(i_row_new) ;
@@ -369,49 +516,39 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>КАРТОЧКА КОМПЛЕКСА НАЗНАЧЕНИЙ</b>
       </td> 
     </tr>
     </tbody>
   </table>
 
-  <form onsubmit="return SendFields();" method="POST">
-
   <table width="100%" >
-    <thead>
-    </thead>
     <tbody>
     <tr>
-      <td> <div class="error" id="Error"></div> </td>
+      <td> <div class="Error_CT" id="Error"></div> </td>
     </tr>
     <tr>
     <td class="table">
 
-  <table width="100%" id="Fields">
-    <thead>
-    </thead>
+  <table width="100%">
     <tbody>
     <tr>
-      <td class="field"> <b>Название</b> </td>
+      <td class="Normal_RT"> <b>Название</b> </td>
       <td> <dev name="Name" id="Name"><dev></td>
       <td> <input type="hidden" name="Count" id="Count"> </td>
     </tr>
     <tr>
-      <td class="field"> <b>Описание</b> </td>
+      <td class="Normal_RT"> <b>Описание</b> </td>
       <td> 
-        <dev name="Description" id="Description"> </dev>
+        <div name="Description" id="Description"> </div>
       </td>
     </tr>
     </tbody>
@@ -420,8 +557,6 @@ function SuccessMsg() {
       </td>
       <td class="table">
         <table width="100%">
-          <thead>
-          </thead>
           <tbody  id="Deseases_list">
           </tbody>
         </table>
@@ -431,22 +566,24 @@ function SuccessMsg() {
   </table>
 
   <br>
-  <table width="100%">
-    <thead>
+  
+  <table width="100%" id="Fields">
+    <tbody>
       <tr>
-        <td class="fieldC"><b>N         </b></td>
-        <td               ><b>Категория </b></td>
-        <td               ><b>Название  </b></td>
-        <td               ><b>Примечание</b></td>
-      </tr>
-    </thead>
-    <tbody  id="Prescriptions">
+        <td width="30%"></td>
+        <td>
+          <div> <input type="radio" name="Type[]" id="Tiles"          onclick=ShowPrescriptions()>'Плитка' назначений</div>
+          <div> <input type="radio" name="Type[]" id="List"  checked  onclick=ShowPrescriptions()>Список назначений</div>
+        </td>
     </tbody>
   </table>
 
-  </form>
+  <br>
 
-</div>
+  <table width="100%">
+    <tbody  id="Prescriptions">
+    </tbody>
+  </table>
 
 </body>
 

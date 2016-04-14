@@ -202,7 +202,7 @@ function SuccessMsg() {
 					    var  v_session ;
 					    var  v_form ;
 						 v_session=TransitContext("restore","session","") ;
-									      v_form="set_edit.php" ;
+									      v_form="set_edit_wrapper.php" ;
  						          location.assign(v_form+"?Session="+v_session+
                                                                                  "&Id="+p_id) ;
 					} ;
@@ -269,7 +269,7 @@ function SuccessMsg() {
 
   <input type="button" value="Новый комплекс назначений" onclick=NewSet()  id="NewSet">
 
-  <table class="table" width="100%">
+  <table class="table">
     <thead>
     </thead>
     <tbody id="Sets">

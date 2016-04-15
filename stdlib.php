@@ -18,6 +18,7 @@ function ReadConfig()
   global  $glb_cfg_images ;
   global  $glb_cfg_temporary ;
   global  $glb_cfg_email_forms ;
+  global  $glb_cfg_email_from ;
 
 
                    $date=date("Y_m_d") ;
@@ -46,7 +47,7 @@ function ReadConfig()
      if($key=="temporary"   )  $glb_cfg_temporary   = $value ;
      if($key=="email_forms" )  $glb_cfg_email_forms = $value ;
      if($key=="email_smtp"  )      $cfg_email_smtp  = $value ;
-     if($key=="email_from"  )      $cfg_email_from  = $value ;
+     if($key=="email_from"  )  $glb_cfg_email_from  = $value ;
      if($key=="log_file"    )  $glb_cfg_log_file    =str_replace("#DATE#", $date, $value) ;
      if($key=="errors"      )  $glb_cfg_errors      =str_replace("#DATE#", $date, $value) ;
    } 
@@ -149,14 +150,14 @@ function PrepareImagePath($section, $object, $element, $ext)
              $path.="/".$section ;
 
    if(is_dir($path)==false) {
-              $status=mkdir($path, 0700) ;
+              $status=mkdir($path, 0777) ;
            if($status==false)  return("") ;
                             }
 
              $path.="/".$object ;
 
    if(is_dir($path)==false) {
-              $status=mkdir($path, 0700) ;
+              $status=mkdir($path, 0777) ;
            if($status==false)  return("") ;
                             }
 
@@ -176,7 +177,7 @@ function PrepareTmpFolder($session)
              $path.="/".$session ;
 
    if(is_dir($path)==false) {
-              $status=mkdir($path, 0700) ;
+              $status=mkdir($path, 0777) ;
            if($status==false)  return("") ;
                             }
 
@@ -446,6 +447,7 @@ function LoadFile($image, $file_name, $data_segment, $data_elem, $data_type, $op
 
 function Email($db, $user, $subject, $text, &$error) 
 {
+  global  $glb_cfg_email_from ;
 //--------------------------- Извлечение адреса пользователя
 
                 $user=$db->real_escape_string($user) ;
@@ -470,11 +472,14 @@ function Email($db, $user, $subject, $text, &$error)
        $subject="=?windows-1251?B?".base64_encode($subject)."?=" ;
 
        $header ="Content-type: text/html; charset=windows-1251\r\n" ;
-       $header.="From: GeneralPractice <blackjackal@hotmail.ru>" ;
+//       $header.="From: GeneralPractice <blackjackal@hotmail.ru>" ;
+       $header.="From: GeneralPractice <".$glb_cfg_email_from.">" ;
 
        $body   = $text ;
 
        $status=mail($receiver, $subject, $body, $header) ;
+
+  	FileLog("DEBUG", "Send email for: ".$receiver."\n".$subject."\n".$body."\n".$header."\nstatus: ".$status);
 
 //---------------------------
 
@@ -542,4 +547,33 @@ function Email_inv_notification($db, $user, &$error)
 }
 
 //============================================== 
+//  Отправка пользователю уведомления о регистрации
+
+function Email_confirmation($db, $user, $code_confirm, &$error) 
+{
+  global  $glb_cfg_email_forms ;
+
+//--------------------------- Считывание файла сообщения
+
+   $text=file_get_contents($glb_cfg_email_forms."/EmailConfirmation.html") ;
+
+//--------------------------- Формирование URL для подтверждения e-mail
+
+   $url="http://".$_SERVER["HTTP_HOST"]."/regisry_ack.php?confirm_key=".$code_confirm;
+
+//--------------------------- Вставляем URL в текст сообщения
+
+   $text=str_replace("[EMAIL_CONFIRMATION_URL]", $url, $text); 
+
+//--------------------------- Отправка сообщения
+
+  $status=Email($db, $user, "GeneralPractice.ru - Подтверждение регистрации", $text, $error) ;
+
+//---------------------------
+  FileLog("DEBUG", "Email_confirmation for: ".$user);
+  return($status) ;
+}
+
+//============================================== 
+
 ?>

@@ -66,9 +66,15 @@ function RegistryDB() {
          ErrorMsg("Несоответствие логина и пароля пользователя") ;
                          return ;
   }
-
-	      $fields=$res->fetch_row() ;
+      $fields=$res->fetch_row() ;
              $options=$fields[0] ;
+             if($fields[1]=="N") {Email_confirmation($db, $login, $fields[3] ,$error);
+                         $db->close() ;
+                         FileLog("CANCEL", "Неподтвержденный E-Mail") ;
+                         ErrorMsg("Ваш E-mail не подтвержден.<br>Если Вы не получили ссылку на Ваш E-mail:".$fields[2].
+                                           ", для отправки повторного подтверждения перейдите по ссылке ". 
+                                "<a href=\"http://".$_SERVER["HTTP_HOST"]."/regisry_ack.php?confirm_key=Repeat\">сюда</a>" ) ;
+                         return ; }
 
                     $res->free() ;
 
@@ -103,10 +109,13 @@ function RegistryDB() {
           FileLog("ERROR", "Insert DELETE... : ".$db->error) ;
           InfoMsg("Ошибка на сервере. <br>Детали: ошибка очистки таблицы сессий") ;
   }
+
+
 //--------------------------- Изменение конфигурации главного меню
 
    if($user_type=="Doctor")  echo  "location.assign('mob_menu_doctor.php') ;	\n" ;
    else                      echo  "location.assign('mob_menu_client.php') ;	\n" ;
+
 
 //--------------------------- Завершение
 

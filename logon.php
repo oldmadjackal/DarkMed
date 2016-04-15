@@ -51,7 +51,7 @@ function RegistryDB() {
    $login   =$db->real_escape_string($login   ) ;
    $password=$db->real_escape_string($password) ;
 
-                     $sql="Select options from users Where Login='$login' and Password='$password'" ;
+              $sql="Select options, Email_confirm, email, Code_confirm from users Where Login='$login' and Password='$password'" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select... : ".$db->error) ;
@@ -69,6 +69,13 @@ function RegistryDB() {
 
 	      $fields=$res->fetch_row() ;
              $options=$fields[0] ;
+             if($fields[1]=="N") { Email_confirmation($db, $login, $fields[3] ,$error);
+                         $db->close() ;
+                         FileLog("CANCEL", "Неподтвержденный E-Mail") ;
+                         ErrorMsg("Ваш E-mail не подтвержден.<br>Если Вы не получили ссылку на Ваш E-mail:".$fields[2].
+                                           ", для отправки повторного подтверждения перейдите по ссылке ". 
+                                "<a href=\"http://".$_SERVER["HTTP_HOST"]."/regisry_ack.php?confirm_key=Repeat\">сюда</a>" ) ;
+                         return ;}                                                              
 
                     $res->free() ;
 
@@ -85,7 +92,7 @@ function RegistryDB() {
                      $sql="Insert into sessions(Login, Session) values('$login','$session')" ;
      $res=$db->query($sql) ;
   if($res===false) {
-          FileLog("ERROR", "Insert SESSION... : ".$db->error) ;
+         FileLog("ERROR", "Insert SESSION... : ".$db->error) ;
                      $db->close() ;
          ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных") ;
                          return ;
@@ -105,6 +112,42 @@ function RegistryDB() {
   }
 
      SuccessMsg($session) ;
+//--------------------------- Удаление неподтвержденных регистраций.
+   //--- Проверка наличия регистраций.
+        $sql=" Select count(login_old) from V_REGISTRY_OLDTIME";
+           $res=$db->query($sql) ;
+           $fields=$res->fetch_row();
+   //--- Удаление из таблиц users,  access_list, client_page_main, doctor_page_main 
+  if($fields[0]!=0)
+      {$sql="Delete from access_list where owner in (select login_old from V_REGISTRY_OLDTIME)";
+          $res= $db->query($sql) ;   
+          $num=($res)?$db->affected_rows:0;
+          $text_del=" access_list ".$num;
+        if($res===false) {
+          FileLog("ERROR", "Insert DELETE... : "."Удаление из таблицы access_list ".$db->error) ;
+          }
+       $sql="Delete from client_page_main where owner in (select login_old from V_REGISTRY_OLDTIME)";
+            $res= $db->query($sql) ;   
+            $num=($res)?$db->affected_rows:0;
+            $text_del=$text_del." client_page_main ".$num;
+          if($res===false) {
+                    FileLog("ERROR", "Insert DELETE... : "."Удаление из таблицы client_page_main ".$db->error) ;
+                      }
+       $sql="Delete from doctor_page_main where owner in (select login_old from V_REGISTRY_OLDTIME)";
+             $res= $db->query($sql) ;   
+             $num=($res)?$db->affected_rows:0;
+             $text_del=$text_del." doctor_page_main ".$num;
+          if($res===false) {
+                    FileLog("ERROR", "Insert DELETE... : "."Удаление из таблицы doctor_page_main ".$db->error) ;
+                     }
+       $sql="Delete from users where Date_Reg < DATE_ADD(NOW(), INTERVAL -3 DAY) and Email_confirm = 'N'";
+             $res= $db->query($sql) ;   
+             $num=($res)?$db->affected_rows:0;
+             $text_del=$text_del." users ".$num;
+          if($res===false) {
+                    FileLog("ERROR", "Insert DELETE... : "."Удаление из таблицы users ".$db->error) ;
+                    } 
+          FileLog("INFO", "DELETE ... : "."Удаление записей не подтвержденных регистраций: ".$text_del) ;}
 
 //--------------------------- Запрос списка непрочитанных релизов
 

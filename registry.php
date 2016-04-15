@@ -104,6 +104,13 @@ function RegistryDB(){
          ErrorMsg("Такой логин уже использован другим пользователем") ;
                          return ;
   }
+ //------------------------- Проверка корректности ввода Email   
+ // if (!preg_match( '/^[A-Za-z0-9!#$%&\'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+[A-Za-z]$/', $email)) { 
+     if(!preg_match("|^[-0-9a-z_\.]+@[-0-9a-z_^\.]+\.[a-z]{2,6}$|i", $email)){
+         FileLog("CANCEL", "Incorrect email") ;
+         ErrorMsg("Проверьте правильность написания Email") ;
+                         return ;
+  }  
 //--------------------------- Создание учетной записи пользователя
         
                                               $options="" ;
@@ -115,9 +122,10 @@ function RegistryDB(){
        if(strpos($login, "test"   )!==false)  $options.="Tester;" ;
 
               $options_a=OptionsToArray($options) ;
-
-     $res=$db->query("Insert into `users`(Login, Password, Email, Sign_p_key, Sign_s_key, Msg_key, Options)".
-                                 " values('$login','$password','$email','$p_key','$s_key','$msg_key','$options')") ;
+       $code_confirm=GetRandomString(40);
+       $email_confirm="N";
+     $res=$db->query("Insert into `users`(Login, Password, Email, Sign_p_key, Sign_s_key, Msg_key, Options,Email_Confirm,Code_Confirm)".
+                      " values('$login','$password','$email','$p_key','$s_key','$msg_key','$options','$email_confirm','$code_confirm')") ;
   if($res===false) {
              FileLog("ERROR", "Insert USERS... : ".$db->error) ;
                      $db->rollback();
@@ -170,8 +178,12 @@ if($options_a["user"]=="Doctor"  ||
    echo  "TransitContext('save', 'password', '') ;	" ;
    echo  "TransitContext('save', 'session', '') ;	" ;
 
-//--------------------------- Завершение
+//--------------------------- Отправка запроса подтверждения email
 
+	Email_confirmation($db, $login,$code_confirm ,$error);
+
+//--------------------------- Завершение
+	
      $db->commit();
      $db->close() ;
 
@@ -197,7 +209,7 @@ function ErrorMsg($text) {
 function SuccessMsg() {
 
     echo  "i_error.style.color=\"green\" ;                       " ;
-    echo  "i_error.innerHTML  =\"Вы успешно зарегистрированы!\" ;" ;
+    echo  "i_error.innerHTML  =\"Вы успешно зарегистрированы!<br> Вам на почту отправлен запрос на подтверждение E-mail. Ссылка действительна 3 дня!\" ;" ;
 }
 //============================================== 
 ?>

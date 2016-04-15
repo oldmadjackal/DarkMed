@@ -172,7 +172,7 @@ function RegistryDB() {
    }
    else
    {
-          echo  "  location.assign('messages.php'+'?Session=".$session."') ;	\n" ;
+          echo  "  location.assign('messages_wrapper.php'+'?Session=".$session."') ;	\n" ;
    }
 //--------------------------- Завершение
 

@@ -13,7 +13,9 @@ header("Content-type: text/html; charset=windows-1251") ;
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("buttons.css") ;
 </style>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <script type="text/javascript">
@@ -23,23 +25,6 @@ header("Content-type: text/html; charset=windows-1251") ;
 <?php
   require("common.inc") ;
 ?>
-
-  function GoTo(link) 
-  {
-    var  v_session ;
-
-	v_session=TransitContext("restore","session","") ;
-
-     if(v_session=="") 
-     {
-        parent.frames["section"].location.assign("logon.php") ;
-     }
-     else 
-     {
-        parent.frames["section"].location.assign(link+"?Session="+v_session) ;
-     } 
-
-  }
 
   function ShowClient() 
   {
@@ -114,7 +99,7 @@ header("Content-type: text/html; charset=windows-1251") ;
 <body>
 
 <div class="menu">
-  <div class="fieldC">
+  <div class="Normal_CT">
     <br>
     <img src="images/NewStep.png">
   </div>
@@ -123,101 +108,88 @@ header("Content-type: text/html; charset=windows-1251") ;
     <li hidden id="ClientCard">
         <a class="menu_item"  href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                  if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
-                  else               parent.frames['section'].location.assign('client_card.php'+'?Session='+v_session) ; "
-         target="section" id="user_card_btn">Карта пациента</a>
-		
-	</li> 
+                  if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
+                  else               parent.frames['view'].location.assign('client_card.php'+'?Session='+v_session) ; "
+         target="view" id="user_card_btn">Карта пациента</a>
+    </li> 
 
-	<li hidden id="DoctorCard">
+    <li hidden id="DoctorCard">
         <a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                  if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
-                  else               parent.frames['section'].location.assign('doctor_card.php'+'?Session='+v_session) ; "
-         target="section" id="doctor_card_btn">Личный формуляр</a>
-
-	</li> 
-
-	<li hidden id="ClientsList">
+                  if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
+                  else               parent.frames['view'].location.assign('doctor_card.php'+'?Session='+v_session) ; "
+         target="view" id="doctor_card_btn">Личный формуляр</a>
+    </li> 
+    <li hidden id="ClientsList">
         <a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                  if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
-                  else               parent.frames['section'].location.assign('doctor_clients.php'+'?Session='+v_session) ; "
-         target="section" id="patients_btn">Пациенты</a>
-
-	</li> 
-
-	<li><a class="menu_item" href="javascript:
+                  if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
+                  else               parent.frames['view'].location.assign('doctor_clients_wrapper.php'+'?Session='+v_session) ; "
+         target="view" id="patients_btn">Пациенты</a>
+    </li> 
+    <li>
+        <a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                                parent.frames['section'].location.assign('doctors_list.php'+'?Session='+v_session) ; "
-         target="section" id="doctors_btn">Врачи и специалисты</a> 
-
-	</li>
-		 
+                                parent.frames['view'].location.assign('doctors_list.php'+'?Session='+v_session) ; "
+         target="view" id="doctors_btn">Врачи и специалисты</a> 
+    </li>
     <li hidden id="Messages">
         <a class="menu_item"  href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                  if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
-                  else               parent.frames['section'].location.assign('messages.php'+'?Session='+v_session) ; "
-         target="section" id="forum_btn">Сообщения</a>
-
-	</li>
-
-
-	<li>
-		<a class="menu_item" href="javascript:
+                  if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
+                  else               parent.frames['view'].location.assign('messages_wrapper.php'+'?Session='+v_session) ; "
+         target="view" id="forum_btn">Сообщения</a>
+    </li>
+    <li>
+	<a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                                parent.frames['section'].location.assign('deseases_registry.php'+'?Session='+v_session) ; "
-         target="section" id="ill_catalog_btn">Реестр заболеваний</a> 
-
-	</li>
-
-	<li>
-		<a class="menu_item" href="javascript:
+                                parent.frames['view'].location.assign('deseases_registry_wrapper.php'+'?Session='+v_session) ; "
+         target="view" id="ill_catalog_btn">Реестр заболеваний</a> 
+    </li>
+    <li>
+	<a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                                parent.frames['section'].location.assign('prescriptions_registry.php'+'?Session='+v_session) ; "
-         target="section" id="presiption_btn">Регистр назначений</a>
-		
-	</li>
-
+                                parent.frames['view'].location.assign('prescriptions_registry_wrapper.php'+'?Session='+v_session) ; "
+         target="view" id="presiption_btn">Регистр назначений</a>
+    </li>
     <li hidden id="PrescriptionsSets">
         <a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                  if(v_session=='')  parent.frames['section'].location.assign('logon.php') ;
-                  else               parent.frames['section'].location.assign('sets_registry.php'+'?Session='+v_session) ; "
-         target="section">Комплексы назначений</a></li>
-		 
-    <li><a class="menu_item" id="how_to_use_btn" href="help.php" target="section"> Помощь</a></li>
-
- 
-	<li> <a  class="menu_item" id="message_btn" href="javascript:
+                  if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
+                  else               parent.frames['view'].location.assign('sets_registry_wrapper.php'+'?Session='+v_session) ; "
+         target="view">Комплексы назначений</a>
+    </li>	 
+    <br>
+    <li>
+        <a class="menu_item" id="how_to_use_btn" href="help.php" target="view"> Помощь</a>
+    </li>
+    <li>
+        <a class="menu_item" id="message_btn" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                                parent.frames['section'].location.assign('callback_list.php'+'?Session='+v_session) ; "
-         target="section">Ваши пожелания</a> 
-		 
-	</li>
-
-
+                                parent.frames['view'].location.assign('callback_list_wrapper.php'+'?Session='+v_session) ; "
+         target="view">Ваши пожелания</a> 
+    </li>
   </ul>
 
   <table width="100%" id="Fields">
-    <thead>
-    </thead>
     <tbody>
-    <tr>
-      <td> <input type="hidden" name="glbSession"  id="glbSession"> </td>
-    </tr>
-    <tr>
-      <td> <input type="hidden" name="glbPassword" id="glbPassword"> </td>
-    </tr>
-    <tr>
-      <td> <input type="hidden" name="glbValue"    id="glbValue"> </td>
-    </tr>
-    <tr>
-      <td> <input type="hidden" name="glbCallBack" id="glbCallBack"> </td>
-    </tr>
+      <tr>
+        <td> <input type="hidden" name="glbSession"  id="glbSession"> </td>
+      </tr>
+      <tr>
+        <td> <input type="hidden" name="glbPassword" id="glbPassword"> </td>
+      </tr>
+      <tr>
+        <td> <input type="hidden" name="glbValue"    id="glbValue"> </td>
+      </tr>
+      <tr>
+        <td> <input type="hidden" name="glbCallBack" id="glbCallBack"> </td>
+      </tr>
     </tbody>
-    </table>
+  </table>
+
+  <div class="debug" id="DebugLog" hidden></div>
+
 <!-- 	<div id="SkypeButton_Call" class="skype">
 		<em/><em/>
 		 <script type="text/javascript">

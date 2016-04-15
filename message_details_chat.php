@@ -80,8 +80,8 @@ function ProcessDB() {
         else                  {
 				 echo "rcv_p_key='" .$fields[2]."' ;	\n" ;
 
-		if(strpos($fields[4], "UserType=Doctor;")!==false)  $receiver_type="Doctor" ;
-		else						    $receiver_type="Client" ;
+		if(strpos($fields[4], "Doctor;")!==false)  $receiver_type="Doctor" ;
+		else			        	   $receiver_type="Client" ;
 	}
      }
 

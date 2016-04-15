@@ -1,3 +1,7 @@
+.LeftMenu
+ {
+                        border : 0px solid black ; 
+}
 .Normal_CT  /* Обычный шрифт, центр-верх */
  {
                     text-align : center          ;

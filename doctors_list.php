@@ -321,7 +321,7 @@ function SuccessMsg() {
 
 	 v_session=TransitContext("restore","session","") ;
 
-	parent.frames["section"].location.assign("messages_chat_lr.php?Session="+v_session+"&Sender="+p_user) ;
+	location.assign("messages_chat_lr_wrapper.php?Session="+v_session+"&Sender="+p_user) ;
   } 
 
   function GoToAccess(p_user)
@@ -330,7 +330,7 @@ function SuccessMsg() {
 
 	 v_session=TransitContext("restore","session","") ;
 
-	parent.frames["section"].location.assign("doctor_access.php?Session="+v_session+"&Doctor="+p_user) ;
+	location.assign("doctor_access.php?Session="+v_session+"&Doctor="+p_user) ;
   } 
 
   function FormSpeciality(p_selected)

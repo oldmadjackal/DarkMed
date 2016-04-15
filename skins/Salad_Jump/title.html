@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                      "http://www.w3.org/TR/html4/loose.dtd" >
+
+<html>
+
+<head>
+
+<title>DarkMed</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+
+<style type="text/css">
+  @import url("common.css")
+</style>
+
+</head>
+
+<script type="text/javascript">
+function changeHiddenAuthBtns(v_session){
+    var exit_btn = document.getElementById("exit_btn");
+	var auth_btn = document.getElementById("auth_btn");
+	var reg_btn = document.getElementById("registration_btn");
+
+	
+    if(v_session == null || v_session==''){
+		auth_btn.style.display = "inline-block";
+	    reg_btn.style.display = "inline-block";
+		exit_btn.style.display = "none";
+		}
+	else{
+		exit_btn.style.display = "inline-block";
+		auth_btn.style.display = "none";
+	    reg_btn.style.display = "none";
+		}	
+}
+
+</script>
+
+	<div class="title">
+		<div class="title_text">Медицинская консультационная сеть "Новый Шаг"</div>
+		<em>
+		<div class="auth_in_title" >
+			<a class="menu_auth_item" href="registry.php" target="section" id="registration_btn">Регистрация</a> 
+			<em>
+			<a class="menu_auth_item "href="logon.php" target="section" id="auth_btn" >Вход</a> 
+			<em>	
+			<a class="menu_auth_item "href="logon.php" target="section" id="exit_btn" style= "display:none" onclick ="window.top.location.reload(true);">Выход</a> 
+			<em>	
+			
+		</div>
+                <hr>
+	</div>
+</body>
+
+</html>         

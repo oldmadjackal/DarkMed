@@ -11,6 +11,8 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
+  global  $glb_options_a ;
+
 //--------------------------- —читывание конфигурации
 
      $status=ReadConfig() ;
@@ -395,6 +397,7 @@ function SuccessMsg() {
 	accept_details=accept_details+words_2[0]+" " ;
 	accept_details=accept_details+Crypto_encode(words_2[1], password) ;
 	accept_details=accept_details+" " ;
+	accept_details=accept_details+Crypto_encode(words_2[2], password) ;
       }
     }
 

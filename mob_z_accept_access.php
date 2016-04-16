@@ -7,7 +7,7 @@ header("Content-type: text/html; charset=windows-1251") ;
   require("stdlib.php") ;
 
 //============================================== 
-//  Проверка и запись регистрационных в БД
+//  Работа с БД
 
 function ProcessDB() {
 
@@ -47,22 +47,73 @@ function ProcessDB() {
 
        $user_=$db->real_escape_string($user) ;
 
+//--------------------------- Извлечение атрибутов сообщения
+
+       $message_=$db->real_escape_string($message) ;
+
+                       $sql="Select type, sender".
+                            "  From messages ".
+	  		    " Where receiver='$user_'".
+			    "  and  id      = $message_" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+          FileLog("ERROR", "Select MESSAGES... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка извлечения данных сообщения") ;
+                         return ;
+    }
+    if($res->num_rows==0) {
+          FileLog("ERROR", "No such message detected... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере.<br>Детали: сообщение не найдено") ;
+                         return ;
+    }
+    
+	      $fields=$res->fetch_row() ;
+	              $res->close() ;
+
+                  $msg_type=$fields[0] ;
+                    $sender=$fields[1] ;
+
+//--------------------------- Развязка по типу сообщения
+
+   if($msg_type=="CLIENT_ACCESS_INVITE")
+   {
+           $owner=$sender ;
+   }
+   else
+   if($msg_type=="CLIENT_PRESCRIPTIONS_ALERT")
+   {
+           $owner=$user_ ;
+   }
+   else
+   {
+          FileLog("ERROR", "No such message detected... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере.<br>Детали: несоотвествующий тип сообщения") ;
+                         return ;
+   }
+
+           $owner_=$owner ;
+   
 //--------------------------- Регистрация новых доступов
 //- - - - - - - - - - - - - - Перебор страниц, по которым предоставлен доступ
 	$words=explode(" ", $details) ;
 
-    for($i=0 ; $i<count($words) ; $i=$i+2)
+    for($i=0 ; $i<count($words) ; $i=$i+3)
     {
        if($words[$i]=="")  break ;
 
-          $page   =$words[$i  ] ;
-          $key    =$words[$i+1] ;
-          $page_  =$db->real_escape_string($page) ;
-          $key_   =$db->real_escape_string($key) ;
+          $page  =$words[$i  ] ;
+          $key_1 =$words[$i+1] ;
+          $key_2 =$words[$i+2] ;
+          $page_ =$db->real_escape_string($page) ;
+          $key_1_=$db->real_escape_string($key_1) ;
+          $key_2_=$db->real_escape_string($key_2) ;
 //- - - - - - - - - - - - - - Проверка повторного задания доступа
                        $sql="Select page ".
                             "from  `access_list` ".
-                            "where `Owner`='$user_'".
+                            "where `Owner`='$owner_'".
                             " and  `Login`='$user_'".
                             " and  `Page` ='$page_'" ;
         $res=$db->query($sql) ;
@@ -75,14 +126,14 @@ function ProcessDB() {
      }
      if($res->num_rows!=0) {
 			      $res->free() ;
-        FileLog("", "Access already granted: ".$user.":".$page." for ".$user) ;
+        FileLog("", "Access already granted: ".$owner.":".$page." for ".$user) ;
                                  continue ;
      }
 //- - - - - - - - - - - - - - Создание записи о доступе
-                       $sql="Insert into `access_list`".
-                            "(`Owner`, `Login`, `Page`,  `Crypto`) ".
+                       $sql="Insert into access_list".
+                            "(owner, login, page, crypto, ext_key) ".
                             "values".
-                            "('$user_','$user_','$page_','$key_')" ;
+                            "('$owner_','$user_','$page_','$key_1_','$key_2_')" ;
         $res=$db->query($sql) ;
      if($res===false) {
                FileLog("ERROR", "Insert ACCESS_LIST... : ".$db->error) ;
@@ -92,12 +143,52 @@ function ProcessDB() {
                            return ;
      }
 
-        FileLog("", "Access successfully granted: ".$user.":".$page." for ".$user) ;
+        FileLog("", "Access successfully granted: ".$owner.":".$page." for ".$user) ;
 //- - - - - - - - - - - - - - Перебор страниц, по которым предоставлен доступ
     }
-//--------------------------- Установка на сообщение метки "Прочитано"
+//--------------------------- Создание страницы заметок о клиенте
+    do
+    {
+//- - - - - - - - - - - - - - Проверка наличия страницы заметок о клиенте
+                        $sql="Select client ".
+                             "from   doctor_notes ".
+                             "where  owner ='$user_'".
+                             " and   client='$owner_'" ;
+        $res=$db->query($sql) ;
+     if($res===false) {
+          FileLog("ERROR", "Select DOCTOR_NOTES... : ".$db->error) ;
+                       $db->rollback() ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка проверки повторного создания страницы заметок") ;
+                         break ;
+     }
 
-       $message_=$db->real_escape_string($message) ;
+     if($res->num_rows!=0) {
+        FileLog("", "Notes page already created for ".$owner) ;
+	  	              $res->free() ;
+                                 break ;
+     }
+
+	  	              $res->free() ;
+//- - - - - - - - - - - - - - Создание страницы заметок о клиенте
+                       $sql="Insert into doctor_notes".
+                            "(Owner, Client) ".
+                            "values".
+                            "('$user_','$owner_')" ;
+        $res=$db->query($sql) ;
+     if($res===false) {
+               FileLog("ERROR", "Insert DOCTOR_NOTES... : ".$db->error) ;
+                       $db->rollback() ;
+                       $db->close() ;
+              ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка создания страницы заметок") ;
+                           break ;
+     }
+
+        FileLog("", "Notes page successfully created for ".$owner) ;
+//- - - - - - - - - - - - - - Создание страницы заметок о клиенте
+    } while(false) ;
+//- - - - - - - - - - - - - -
+//--------------------------- Установка на сообщение метки "Прочитано"
 
                      $sql="Update messages ".
                           "   Set `read`='Y' ".

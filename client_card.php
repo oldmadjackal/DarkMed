@@ -419,7 +419,7 @@ function SuccessMsg() {
 
          v_session=TransitContext("restore","session","") ;
 
-        location.assign("pages_access.php"+"?Session="+v_session) ;
+        location.assign("pages_access_wrapper.php"+"?Session="+v_session) ;
   } 
 
 <?php

@@ -113,9 +113,10 @@ function RegistryDB() {
 
 //--------------------------- Изменение конфигурации главного меню
 
-   if($user_type=="Doctor")  echo  "location.assign('mob_menu_doctor.php') ;	\n" ;
-   else                      echo  "location.assign('mob_menu_client.php') ;	\n" ;
+                             echo  "TransitContext('save', 'user', '".$options."') ;	\n" ;       
 
+   if($user_type=="Doctor")  echo  "location.assign('mob_menu_doctor.php') ;	\n" ;       
+   else                      echo  "location.assign('mob_menu_client.php') ;	\n" ;
 
 //--------------------------- Завершение
 

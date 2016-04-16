@@ -12,6 +12,7 @@ function TransitContext(p_action, p_context, p_text)
     if(p_context=="session" )  context.document.getElementById("glbSession" ).value=p_text ;
     if(p_context=="value"   )  context.document.getElementById("glbValue"   ).value=p_text ;
     if(p_context=="callback")  context.document.getElementById("glbCallBack").value=p_text ;
+    if(p_context=="user"    )  context.document.getElementById("glbUser"    ).value=p_text ;
   }
   else
   {
@@ -19,6 +20,7 @@ function TransitContext(p_action, p_context, p_text)
     if(p_context=="session" )  return(context.document.getElementById("glbSession" ).value) ;
     if(p_context=="value"   )  return(context.document.getElementById("glbValue"   ).value) ;
     if(p_context=="callback")  return(context.document.getElementById("glbCallBack").value) ;
+    if(p_context=="user"    )  return(context.document.getElementById("glbUser"    ).value) ;
 
        window.alert("Unknown p_context in TransitContext function") ;
   }

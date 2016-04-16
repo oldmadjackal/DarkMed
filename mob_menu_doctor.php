@@ -9,11 +9,11 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 <head>
 
-<title>DarkMed-Mobile Client Menu</title>
+<title>DarkMed-Mobile Doctor Menu</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("mob_common.css")
+  @import url("mob_common.css") ;
 </style>
 
 <script type="text/javascript">
@@ -65,32 +65,8 @@ header("Content-type: text/html; charset=windows-1251") ;
               <a href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['section'].location.assign('mob_logon.php') ;
-                  else               parent.frames['section'].location.assign('mob_client_card.php'+'?Session='+v_session) ; "
-               target="section">КАРТА ПАЦИЕНТА</a></li> 
-          <br>
-      </td>
-    </tr>
-    <tr>
-      <td width="10%"> </td>
-      <td>
-          <li id="ClientData">
-              <a href="javascript:
-                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                  if(v_session=='')  parent.frames['section'].location.assign('mob_logon.php') ;
-                  else               parent.frames['section'].location.assign('mob_client_data.php'+'?Session='+v_session) ; "
-               target="section">ОБСЛЕДОВАНИЯ И АНАЛИЗЫ</a></li> 
-          <br>
-      </td>
-    </tr>
-    <tr>
-      <td width="10%"> </td>
-      <td>
-          <li id="ClientPrescriptions">
-              <a href="javascript:
-                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                  if(v_session=='')  parent.frames['section'].location.assign('mob_logon.php') ;
-                  else               parent.frames['section'].location.assign('mob_client_prescr.php'+'?Session='+v_session) ; "
-               target="section">НАЗНАЧЕНИЯ</a></li> 
+                  else               parent.frames['section'].location.assign('doctor_card.php'+'?Session='+v_session) ; "
+               target="section">ФОРМУЛЯР ВРАЧА</a></li> 
           <br>
       </td>
     </tr>
@@ -103,6 +79,18 @@ header("Content-type: text/html; charset=windows-1251") ;
                   if(v_session=='')  parent.frames['section'].location.assign('mob_logon.php') ;
                   else               parent.frames['section'].location.assign('mob_messages.php'+'?Session='+v_session) ; "
                target="section">СООБЩЕНИЯ</a></li> 
+          <br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%"> </td>
+      <td>
+          <li id="Messages">
+              <a href="javascript:
+                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
+                  if(v_session=='')  parent.frames['section'].location.assign('mob_logon.php') ;
+                  else               parent.frames['section'].location.assign('mob_doctor_clients.php'+'?Session='+v_session) ; "
+               target="section">ПАЦИЕНТЫ</a></li> 
           <br>
       </td>
     </tr>

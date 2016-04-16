@@ -91,10 +91,19 @@ function SuccessMsg() {
      parent.frames['section'].location.assign("mob_messages.php"+"?Session="+v_session) ;
   }
 
-  function GoToMenu() 
+  function GoToMenu()
   {
-     parent.frames['section'].location.assign('mob_menu_client.php') ;
+    var  v_user ;
+    var  v_menu ;
+
+	 v_user=TransitContext("restore","user","") ;
+
+     if(v_user.indexOf("Doctor;")>=0)  v_menu='mob_menu_doctor.php' ;
+     else                              v_menu='mob_menu_client.php' ;
+
+      parent.frames['section'].location.assign(v_menu);
   }
+
 
   function GoToNextPage() 
   {

@@ -196,6 +196,8 @@ function SuccessMsg() {
     var  i_title ;
     var  i_creator ;
     var  i_remark ;
+    var  i_pres_list ;
+    var  i_pres_title ;
     var  i_set ;
     var  i_error ;
     var  creator ;
@@ -221,6 +223,8 @@ function SuccessMsg() {
        i_creator=document.getElementById("Creator") ;
        i_remark =document.getElementById("Remark") ;
        i_set    =document.getElementById("Prescriptions") ;
+       i_pres_list =document.getElementById("List") ;
+       i_pres_tiles=document.getElementById("Tiles") ;
        i_error  =document.getElementById("Error") ;
 
 	a_plist_id    =new Array() ;
@@ -241,16 +245,13 @@ function SuccessMsg() {
        i_remark.innerHTML=Crypto_decode(i_remark.innerHTML, page_key) ;
 
        for(i in a_plist_id) {
-             prescr_id    =Crypto_decode(a_plist_id    [i], page_key) ;
-             prescr_name  =Crypto_decode(a_plist_name  [i], page_key) ;
-             prescr_remark=Crypto_decode(a_plist_remark[i], page_key) ;
-
-          AddListRow(i, prescr_id, prescr_name, prescr_remark, a_plist_type[i], a_plist_ref[i]) ;
+             a_plist_id    [i]=Crypto_decode(a_plist_id    [i], page_key) ;
+             a_plist_name  [i]=Crypto_decode(a_plist_name  [i], page_key) ;
+             a_plist_remark[i]=Crypto_decode(a_plist_remark[i], page_key) ;
        }
 
-	 v_session=TransitContext("restore","session","") ;
-	parent.frames["details"].location.replace("mob_client_prescr_footer.php?Session="+v_session) ;
-
+                ShowPrescriptions() ;
+       
          return true ;
   }
 
@@ -268,30 +269,138 @@ function SuccessMsg() {
                          return true ;
   } 
 
-  function AddListRow(p_order, p_id, p_name, p_remark, p_type, p_ref)
+  function ShowPrescriptions() 
+  {
+       
+    if(i_pres_tiles.checked==true)  presentation="Tiles" ;
+    else	                    presentation="List" ;
+
+       for(i in a_plist_id) {
+      	    i_row=document.getElementById("Row_"+a_plist_id[i]) ;
+  	 if(i_row!=null)  i_set.removeChild(i_row) ;
+       }
+
+       for(i in a_plist_id)
+         if(presentation=="Tiles")
+                  AddListRow_tiles(i, a_plist_id[i], a_plist_name[i], a_plist_remark[i], a_plist_type[i], a_plist_ref[i]) ;
+         else     AddListRow_list (i, a_plist_id[i], a_plist_name[i], a_plist_remark[i], a_plist_type[i], a_plist_ref[i]) ;
+
+  }
+
+  function AddListRow_tiles(p_order, p_id, p_name, p_remark, p_type, p_ref)
+  {
+     var  i_row_new ;
+     var  i_col_new ;
+     var  i_txt_new ;
+     var  i_elm_new ;
+     var  i_frm_new ;
+     var  i_shw_new ;
+     var  i_msr_new ;
+     var  i_msr_list ;
+     var  style ;
+     var  msr_flag ;
+     var  col ;
+
+
+		  i_row_new = document.createElement("tr") ;
+		  i_row_new . className = "table" ;
+		  i_row_new . id        = "Row_"+p_id ;
+
+     if(p_type=="measurement") {  msr_flag=true ;
+                                     style="tableM" ;  }
+     else                      {  msr_flag=false ;
+                                     style="table" ;   }
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+		  i_txt_new = document.createTextNode(p_order) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		  i_row_new . appendChild(i_col_new) ;
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+		  i_col_new . id = p_id ;
+  if(p_id!="0")   i_col_new . onclick  = function(e) {  ShowDetails(this.id) ;  } ;
+  if(p_id!="0")   i_txt_new = document.createTextNode(p_name) ;
+  else		  i_txt_new = document.createTextNode(p_remark) ;
+		  i_col_new . appendChild(i_txt_new) ;
+
+  if(p_id!="0") {
+		  i_elm_new = document.createElement("br") ;
+		  i_col_new . appendChild(i_elm_new) ;
+		  i_elm_new = document.createElement("br") ;
+		  i_col_new . appendChild(i_elm_new) ;
+		  i_txt_new = document.createTextNode(p_remark) ;
+		  i_col_new . appendChild(i_txt_new) ;
+		}
+
+		  i_row_new . appendChild(i_col_new) ;
+
+		  i_col_new = document.createElement("td") ;
+		  i_col_new . className = style ;
+  if(msr_flag ) {
+		  i_elm_new = document.createElement("br") ;
+		  i_col_new . appendChild(i_elm_new) ;
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="button" ;
+		  i_msr_new . value  ="Занести данные" ;
+		  i_msr_new . id     = p_ref ;
+		  i_msr_new . onclick= function(e) {  CheckMeasurements(this.id) ;  }
+		  i_col_new . appendChild(i_msr_new) ;
+		}
+  else          { 
+		  i_frm_new = document.createElement("iframe") ;
+		  i_frm_new . src         ="prescription_pilot.php?Id="+p_id ;
+		  i_frm_new . seamless    = true ;
+		  i_frm_new . height      ="202" ;
+		  i_frm_new . scrolling   ="no" ;
+		  i_frm_new . frameborder ="0" ;
+		  i_frm_new . marginheight="0" ;
+		  i_frm_new . marginwidth ="0" ;
+		  i_col_new . appendChild(i_frm_new) ;
+		}
+
+		  i_row_new . appendChild(i_col_new) ;
+
+    if(msr_flag) 
+    {
+         i_msr_list=document.getElementById("MeasurementsList") ;
+      if(i_msr_list.hidden==true)  i_msr_list.hidden=false ;
+    }
+
+		  i_set.appendChild(i_row_new) ;
+
+    return ;         
+  } 
+
+  function AddListRow_list(p_order, p_id, p_name, p_remark, p_type, p_ref)
   {
      var  i_row_new ;
      var  i_col_new ;
      var  i_txt_new ;
      var  i_msr_new ;
      var  i_msr_list ;
-     var  measurement ;
+     var  style ;
+     var  msr_flag ;
 
 
-     if(p_type=="measurement")  measurement=true ;
-     else                       measurement=false ;
+     if(p_type=="measurement") {  msr_flag=true ;
+                                     style="tableM" ;  }
+     else                      {  msr_flag=false ;
+                                     style="table" ;   }
 
 	i_row_new = document.createElement("tr") ;
-	i_row_new . className = "table" ;
+	i_row_new . className = style ;
+        i_row_new . id        = "Row_"+p_id ;
 
 	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
+	i_col_new . className = style ;
 	i_txt_new = document.createTextNode(p_order) ;
 	i_col_new . appendChild(i_txt_new) ;
 	i_row_new . appendChild(i_col_new) ;
 
 	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
+	i_col_new . className = style ;
   if(p_id!="0")
 	i_txt_new = document.createTextNode(p_name) ;
   else	i_txt_new = document.createTextNode(p_remark) ;
@@ -300,7 +409,7 @@ function SuccessMsg() {
 	i_row_new . appendChild(i_col_new) ;
 
 	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
+	i_col_new . className = style ;
   if(p_id!="0") {
 	i_txt_new = document.createTextNode(p_remark) ;
 	i_col_new . appendChild(i_txt_new) ;
@@ -310,13 +419,15 @@ function SuccessMsg() {
 	i_msr_new . value  ="Занести данные" ;
 	i_msr_new . id     ='Measurement_'+ p_order ;
 	i_msr_new . onclick= function(e) {  CheckMeasurements(p_ref) ;  }
-  if(measurement)
+  if(msr_flag) {
+	i_txt_new = document.createElement("br") ;
+	i_col_new . appendChild(i_txt_new) ;
 	i_col_new . appendChild(i_msr_new) ;
+  }
 	i_row_new . appendChild(i_col_new) ;
-
 	i_set     . appendChild(i_row_new) ;
 
-  if(measurement) 
+  if(msr_flag) 
   {
 	i_msr_list=document.getElementById("MeasurementsList") ;
      if(i_msr_list.hidden==true)  i_msr_list.hidden=false ;
@@ -345,7 +456,7 @@ function SuccessMsg() {
 
 	 v_session=TransitContext("restore","session","") ;
 
-	location.assign("mob_messages_chat.php?Session="+v_session+"&Sender="+creator) ;
+	location.replace("mob_chat.php?Session="+v_session+"&Sender="+creator) ;
   }
 
   function CheckMeasurements(p_ref)
@@ -373,11 +484,7 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
@@ -385,16 +492,14 @@ function SuccessMsg() {
         <input hidden type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
       <td class="title"> 
-        <b>СТРАНИЦА НАЗНАЧЕНИЙ (ПРОСМОТР)</b>
+        <b id="Title"></b>
       </td> 
     </tr>
     </tbody>
   </table>
 
   <div class="error" id="Error"></div>
-  <form onsubmit="return SendFields();" method="POST" id="Form">
 
-  <b><div class="fieldC" id="Title"></div></b>
   <br>
   <div class="fieldC">
     <span><b>Врач: </b></span><span id="Creator"></span>
@@ -412,16 +517,25 @@ function SuccessMsg() {
     <br>
   </div>
 
-  <table width="100%">
-    <thead>
-    </thead>
-    <tbody  id="Prescriptions">
+  <table>
+    <tbody>
+      <tr>
+        <td width="10%"> 
+        <td width="10%"><input type="radio" style="transform: scale(4)" name="Type[]" id="List" checked onclick=ShowPrescriptions()></td> 
+        <td> Список назначений</td>
+      </tr>
+      <tr>
+        <td width="10%"> 
+        <td width="10%"><input type="radio" style="transform: scale(4)" name="Type[]" id="Tiles" onclick=ShowPrescriptions()></td> 
+        <td> 'Плитка' назначений</td>
+      </tr>
     </tbody>
   </table>
 
-  </form>
-
-</div>
+  <table width="100%">
+    <tbody  id="Prescriptions">
+    </tbody>
+  </table>
 
 </body>
 

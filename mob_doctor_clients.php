@@ -471,7 +471,7 @@ function SuccessMsg() {
          words=elem.split(':') ;
       if(words[1]==p_client)
       {
-                 url="client_prescr_view.php" ;
+                 url="mob_client_prescr_view.php" ;
 
           i_link_new=document.createElement("a") ;
           i_link_new.href=url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;

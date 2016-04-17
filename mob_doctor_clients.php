@@ -23,12 +23,31 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                        $session=$_GET ["Session"] ;
-  if(!isset($session))  $session=$_POST["Session"] ;
+                               $session   =$_GET ["Session"] ;
 
-  FileLog("START", "Session:".$session) ;
+  if(isset($_GET ["Client"]))  $ext_client=$_GET ["Client"] ;
+
+  if(isset($_POST["Client"]))
+  {         
+                               $client    =$_POST["Client"] ;
+                               $category  =$_POST["Category"] ;
+                               $remark    =$_POST["Remark"] ;
+  }
+
+        FileLog("START", "Session:".$session) ;
+
+  if(isset($ext_client))
+        FileLog("",      " ExtClient:".$ext_client) ;
+
+  if(isset($client))
+  {
+        FileLog("",      "    Client:".$client) ;
+        FileLog("",      "  Category:".$category) ;
+        FileLog("",      "    Remark:".$remark) ;
+  }
 
 //--------------------------- Подключение БД
+
      $db=DbConnect($error) ;
   if($db===false) {
                     ErrorMsg($error) ;
@@ -45,6 +64,45 @@ function ProcessDB() {
 
        $user_=$db->real_escape_string($user ) ;
 
+//--------------------------- Приведение данных
+
+  if(isset($client))
+  {
+          $client_  =$db->real_escape_string($client) ;
+          $category_=$db->real_escape_string($category) ;
+          $remark_  =$db->real_escape_string($remark) ;
+  }
+//--------------------------- Сохранение данных со страницы
+
+  if(isset($client))
+  {
+                       $sql="Update doctor_notes".
+                            " Set   category='$category_'".
+                            "      ,remark  ='$remark_'".
+                            " Where owner='$user' and client='$client_'" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+             FileLog("ERROR", "Update DOCTOR_NOTES... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных") ;
+                         return ;
+    }
+
+          $db->commit() ;
+
+        FileLog("", "Doctor notes saved successfully") ;
+     SuccessMsg() ;
+  }
+//--------------------------- Указание конкретного клиента
+
+  if(isset($ext_client) ||
+     isset($client)       ) {
+
+       if(!isset($ext_client))   $ext_client=$client ;
+     
+        echo  "  ext_client='".$ext_client."' ;  \n  " ;
+  }
 //--------------------------- Получение основного ключа шифрования
 
                        $sql="Select crypto ".
@@ -69,7 +127,7 @@ function ProcessDB() {
 
 //--------------------------- Формирование списка пациентов
 
-                     $sql="Select  distinct a.owner, a2.crypto, c.name_f, c.name_i, c.name_o, n.category".
+                     $sql="Select  distinct a.owner, a2.crypto, c.name_f, c.name_i, c.name_o, n.category, n.remark".
 			  "  From             `access_list`      a".
                           "        Inner join `client_page_main` c on c.owner=a.owner".
                           "        Inner join `doctor_notes` n on n.owner=a.login and n.client=a.owner".
@@ -99,6 +157,7 @@ function ProcessDB() {
        echo     "  a_client_i  [client]=\"".$fields[3]."\" ;	\n" ;
        echo     "  a_client_o  [client]=\"".$fields[4]."\" ;	\n" ;
        echo     "  a_client_cat[client]=\"".$fields[5]."\" ;	\n" ;
+       echo     "  a_client_rem[client]=\"".$fields[6]."\" ;	\n" ;
      }
   }
 
@@ -197,9 +256,16 @@ function SuccessMsg() {
 <!--
 
     var  i_clients ;
+    var  i_details ;
+    var  i_editor ;
+    var  i_category ;
+    var  i_remark ;
+    var  i_client ;
     var  i_error ;
     var  password ;
+    var  main_key ;
     var  page_key ;
+    var  ext_client ;
     var  user ;
     var  user_opt ;
     var  a_client_key ;
@@ -207,6 +273,7 @@ function SuccessMsg() {
     var  a_client_i ;
     var  a_client_o ;
     var  a_client_cat ;
+    var  a_client_rem ;
     var  a_client_desc ;
     var  a_page_key ;
     var  a_page_title ;
@@ -214,7 +281,8 @@ function SuccessMsg() {
     var  a_prsc_title ;
     var  a_prsc_creator ;
 
-    var  client_prv ;
+    var  v_session ;
+
 
   function FirstField() 
   {
@@ -222,8 +290,16 @@ function SuccessMsg() {
     var  page ;
     var  page_key ;
 
-       i_clients=document.getElementById("Clients") ;
-       i_error  =document.getElementById("Error") ;
+
+    	 v_session=TransitContext("restore","session","") ;
+
+       i_clients =document.getElementById("Clients") ;
+       i_details =document.getElementById("Details") ;
+       i_editor  =document.getElementById("Editor") ;
+       i_client  =document.getElementById("Client") ;
+       i_category=document.getElementById("Category") ;
+       i_remark  =document.getElementById("Remark") ;
+       i_error   =document.getElementById("Error") ;
 
        password=TransitContext("restore", "password", "") ;
 
@@ -233,14 +309,13 @@ function SuccessMsg() {
              a_client_o    =new Array() ;
              a_client_cat  =new Array() ;
              a_client_desc =new Array() ;
+             a_client_rem  =new Array() ;
 
              a_page_key    =new Array() ;
              a_page_title  =new Array() ;
              a_prsc_key    =new Array() ;
              a_prsc_title  =new Array() ;
              a_prsc_creator=new Array() ;
-
-               client_prv ="NONE" ;
 
 <?php
             ProcessDB() ;
@@ -251,6 +326,7 @@ function SuccessMsg() {
     for(var elem in a_client_key)
     {
                a_client_cat[elem]=Crypto_decode(a_client_cat[elem], main_key) ;
+               a_client_rem[elem]=Crypto_decode(a_client_rem[elem], main_key) ;
 
 	if(a_client_key[elem]!="")
         {
@@ -286,11 +362,14 @@ function SuccessMsg() {
             a_prsc_title[elem]=Crypto_decode(a_prsc_title[elem], page_key) ;
     }
 
-    for(var elem in a_client_desc)
-    {
-         AddNewClient(elem) ;
-    }
+    for(var elem in a_client_desc)  AddNewClient(elem) ;
 
+     parent.frames["details"].location.replace("mob_doctor_clients_footer.php?Session="+v_session) ;
+
+     i_clients.focus() ;
+
+     if(ext_client!=null)  ShowPages(ext_client) ;
+     
          return true ;
   }
 
@@ -305,6 +384,10 @@ function SuccessMsg() {
 
      if(error_text!="")  return false ;
 
+       i_category.value=Crypto_encode(i_category.value, main_key) ;
+       i_remark  .value=Crypto_encode(i_remark  .value, main_key) ;
+
+
                          return true ;         
   } 
 
@@ -312,35 +395,24 @@ function SuccessMsg() {
   {
      var  i_row_new ;
      var  i_col_new ;
-     var  i_lnk_new ;
-     var  i_dev_new ;
      var  i_txt_new ;
 
-
+     
        i_row_new          =document.createElement("tr") ;
        i_row_new.className="table" ;
-
-       i_lnk_new          =document.createElement("a") ;
-       i_lnk_new.id       =p_client ;
-       i_lnk_new.href     ="#" ;
-       i_lnk_new.onclick  =function(e) { ShowPages(this.id) ; } ;
-       i_txt_new          =document.createTextNode(a_client_desc[p_client]) ;
-       i_lnk_new.appendChild(i_txt_new) ;
+       i_row_new.id       ="Client_" + p_client ;
+       i_row_new.onclick  =function(e) { ShowPages(p_client) ; } ;
 
        i_col_new          =document.createElement("td") ;
        i_col_new.className="table" ;
-       i_col_new.appendChild(i_lnk_new) ;
+       i_txt_new          =document.createTextNode(a_client_desc[p_client]) ;
+       i_col_new.appendChild(i_txt_new) ;
        i_row_new.appendChild(i_col_new) ;
 
-       i_txt_new          =document.createTextNode(a_client_cat[p_client]) ;
-       i_dev_new          =document.createElement("dev") ;
-       i_dev_new.id       =p_client+"_category" ;
-       i_dev_new.appendChild(i_txt_new) ;
-
        i_col_new          =document.createElement("td") ;
-       i_col_new.id       =p_client+"_actions" ;
        i_col_new.className="table" ;
-       i_col_new.appendChild(i_dev_new) ;
+       i_txt_new          =document.createTextNode(a_client_cat[p_client]) ;
+       i_col_new.appendChild(i_txt_new) ;
        i_row_new.appendChild(i_col_new) ;
 
        i_clients.appendChild(i_row_new) ;
@@ -348,50 +420,28 @@ function SuccessMsg() {
     return ;         
   } 
 
-
   function ShowPages(p_client) 
   {
-    var  i_client ;
+    var  i_list ;
     var  i_link_new ;
-    var  i_view_new ;
-    var  i_devv_new ;
     var  i_text_new ;
     var  i_roww_new ;
-    var  i_list_new ;
     var  url ;
 
 
-    if(client_prv==p_client)  return ;
+             ext_client=p_client ;
 
-    if(client_prv!="NONE")
-    {
-       i_list_new=document.getElementById(client_prv+"_pages") ;
-       i_client  =document.getElementById(client_prv) ;
-       i_client  .removeChild(i_list_new) ;
-       i_list_new=document.getElementById(client_prv+"_prescriptions") ;
-       i_client  =document.getElementById(client_prv+"_actions") ;
-       i_client  .removeChild(i_list_new) ;
-    }
+       i_clients.hidden=true ;
+       i_details.hidden=false ;
 
-              v_session=TransitContext("restore","session","") ;
+       document.getElementById("FormTitle"   ).innerHTML=a_client_desc[p_client] ;
+       document.getElementById("CategoryView").innerHTML=a_client_cat [p_client] ;
+       document.getElementById("RemarkView"  ).innerHTML=a_client_rem [p_client] ;
+                                    i_category.value    =a_client_cat [p_client] ;
+                                    i_remark  .value    =a_client_rem [p_client] ;
+                                    i_client  .value    =              p_client ;
 
-       i_client        =document.getElementById(p_client) ;
-       i_list_new      =document.createElement("ul") ;
-       i_list_new.id   =p_client+"_pages" ;
-       i_list_new.class="level2" ;
-
-	  i_link_new        =document.createElement("a") ;
-          i_link_new.id     =p_client+"_messages" ;
-          i_link_new.href   ="messages_chat_lr.php?Session="+v_session+"&Sender="+p_client ;
-          i_text_new        =document.createTextNode("Переписка") ;
-          i_link_new.appendChild(i_text_new) ;
-
-	  i_roww_new        =document.createElement("li") ;
-          i_roww_new.appendChild(i_link_new) ;
-          i_list_new.appendChild(i_roww_new) ;
-
-	  i_roww_new        =document.createElement("br") ;
-          i_list_new.appendChild(i_roww_new) ;
+       i_list=document.getElementById("ClientsPages") ;
 
     for(var elem in a_page_title)
     {
@@ -401,89 +451,55 @@ function SuccessMsg() {
         if(words[0]=="0")  url="client_card.php" ;
         else               url="client_page.php" ;
 
-	 i_link_new        =document.createElement("a") ;
+	  i_link_new        =document.createElement("a") ;
           i_link_new.id     =elem ;
           i_link_new.href   =url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
           i_text_new        =document.createTextNode(a_page_title[elem]) ;
           i_link_new.appendChild(i_text_new) ;
 
-	 i_roww_new        =document.createElement("li") ;
+	  i_roww_new        =document.createElement("li") ;
           i_roww_new.appendChild(i_link_new) ;
 
-          i_list_new.appendChild(i_roww_new) ;
+          i_list    .appendChild(i_roww_new) ;
       }
     }
 
-	i_client  .appendChild(i_list_new) ;
-
-	i_client        =document.getElementById(p_client+"_actions") ;
-	i_devv_new      =document.createElement("dev") ;
-	i_devv_new.id   =p_client+"_category" ;
-	i_client  .appendChild(i_devv_new) ;
-
-	i_list_new      =document.createElement("ul") ;
-	i_list_new.id   =p_client+"_prescriptions" ;
-	i_list_new.class="level2" ;
-
-    if(user_opt.indexOf("Doctor")>=0)
-    {
-	i_link_new        =document.createElement("a") ;
-	i_link_new.id     =p_client+"_add_prescription" ;
-	i_link_new.href   ="client_prescr_edit.php?Session="+v_session+"&Owner="+p_client+"&NewPage=1" ;
-	i_text_new        =document.createTextNode("Новое назначение") ;
-	i_link_new.appendChild(i_text_new) ;
-
-
-	i_roww_new        =document.createElement("li") ;
-	i_roww_new.appendChild(i_link_new) ;
-	i_list_new.appendChild(i_roww_new) ;
-    }
-
-	i_roww_new        =document.createElement("br") ;
-	i_list_new.appendChild(i_roww_new) ;
+       i_list=document.getElementById("PrescriptionsPages") ;
 
     for(var elem in a_prsc_title)
     {
          words=elem.split(':') ;
       if(words[1]==p_client)
       {
-        if(user==a_prsc_creator[elem])  url="client_prescr_edit.php" ;
-        else                            url="client_prescr_view.php" ;
+                 url="client_prescr_view.php" ;
 
-          i_link_new        =document.createElement("a") ;
-          i_link_new.id     =elem ;
-          i_link_new.href   =url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
-          i_text_new        =document.createTextNode(a_prsc_title[elem]) ;
+          i_link_new=document.createElement("a") ;
+          i_link_new.href=url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
+          i_text_new=document.createTextNode(a_prsc_title[elem]) ;
           i_link_new.appendChild(i_text_new) ;
 
-	  i_roww_new        =document.createElement("li") ;
+	  i_roww_new=document.createElement("li") ;
           i_roww_new.appendChild(i_link_new) ;
 
-       if(user_opt.indexOf("Doctor")>=0)
-       {
-                url="client_prescr_view.php" ;
-
-          i_view_new        =document.createElement("a") ;
-          i_view_new.id     =elem ;
-          i_view_new.href   =url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
-          i_text_new        =document.createTextNode(" (просмотр)") ;
-          i_view_new.appendChild(i_text_new) ;
-
-          i_roww_new.appendChild(i_view_new) ;
-       }
-
-          i_list_new.appendChild(i_roww_new) ;
+          i_list    .appendChild(i_roww_new) ;
       }
     }
+    
+     parent.frames["details"].location.replace("mob_doctor_clients_footer.php?Session="+v_session+"&GoBack="+p_client) ;
 
-       i_client  .appendChild(i_list_new) ;
-
-     parent.frames["details"].location.assign("doctor_notes.php"+
-                                              "?Session="+v_session+
-                                              "&Client="+p_client) ;
-
-     client_prv=p_client ;
+    return ;
   }
+
+  function GoToMail()
+  {
+	parent.frames["section"].location.replace("mob_chat.php?Session="+v_session+"&Sender="+ext_client) ;
+  } 
+
+  function Edit()
+  {
+       i_details.hidden=true ;
+       i_editor .hidden=false ;
+  } 
 
 <?php
   require("common.inc") ;
@@ -501,28 +517,22 @@ function SuccessMsg() {
 </noscript>
 
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" value="?"        onclick=GoToHelp()     id="GoToHelp"> 
         <input type="button" value="!" hidden onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
       <td class="title"> 
-        <b>СПИСОК ПАЦИЕНТОВ</b>
+        <b id="FormTitle">СПИСОК ПАЦИЕНТОВ</b>
       </td> 
     </tr>
     </tbody>
   </table>
 
   <br>
-  <form onsubmit="return SendFields();" method="POST">
-  </form>
 
   <table class="table" width="100%">
-    <thead>
-    </thead>
     <tbody id="Clients">
     <tr>
       <td class="field"> </td>
@@ -530,6 +540,48 @@ function SuccessMsg() {
     </tr>
     </tbody>
   </table>
+
+
+  <div hidden id="Details"> 
+
+    <div class="fieldC"> 
+      <input type="button" value="Править"   onclick="Edit();">
+      <input type="button" value="Переписка" onclick="GoToMail();">
+      <br>
+      <br>
+      <div id="CategoryView"></div>
+      <br>
+      <div><i id="RemarkView"></i></div>
+      <hr>
+      <div><b>Данные клиента</b></div>
+      <ul id="ClientsPages"></ul>
+      <hr>
+      <div><b>Назначения</b></div>
+      <ul id="PrescriptionsPages"></ul>
+    </div>
+  
+  </div>
+
+  <form onsubmit="return SendFields();" method="POST">
+  
+  <div hidden id="Editor"> 
+
+    <div class="fieldC"> 
+      <input type="hidden" name="Client"     id="Client">
+      <input type="submit" value="Сохранить" id="Save">
+      <br>
+      <br>
+      <div><b>Краткий комментарий</b></div>
+      <textarea cols=32 rows=3 maxlength=512 wrap="soft" name="Category" id="Category"> </textarea>
+      <br>
+      <br>
+      <div><b>Заметки</b></div>
+      <textarea cols=32 rows=7 maxlength=512 wrap="soft" name="Remark" id="Remark"> </textarea>
+    </div>
+  
+  </div>
+
+  </form>
 
 </body>
 

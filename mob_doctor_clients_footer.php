@@ -21,9 +21,21 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                        $session=$_GET ["Session"] ;
+                               $session=$_GET["Session"] ;
+  if(isset($_GET["GoBack"]))   $goback =$_GET["GoBack"] ;
 
-  FileLog("START", "    Session:".$session) ;
+        FileLog("START", "    Session:".$session) ;
+
+  if(isset($goback))
+        FileLog("",      "     GoBack:".$goback) ;
+
+//--------------------------- Подготовка кнопки "Карточка"
+
+   if(isset($goback)) {
+
+        echo  "  goback='".$goback."' ;  \n" ;
+        echo  "  document.getElementById('GoBackButton').hidden=false ;  \n" ;           
+   }
 
 //--------------------------- Завершение
 
@@ -70,6 +82,8 @@ function SuccessMsg() {
 <!--
 
     var  i_error ;
+    
+    var  goback ;
 
   function FirstField() 
   {
@@ -88,24 +102,21 @@ function SuccessMsg() {
 
          v_session=TransitContext("restore","session","") ;
 
-     parent.frames['section'].location.replace("mob_doctors_list.php"+"?Session="+v_session) ;
+     parent.frames['section'].location.replace("mob_doctor_clients.php"+"?Session="+v_session) ;
   }
 
   function GoToMenu() 
   {
-    var  v_user ;
-    var  v_menu ;
-
-	 v_user=TransitContext("restore","user","") ;
-
-     if(v_user.indexOf("Doctor;")>=0)  v_menu='mob_menu_doctor.php' ;
-     else                              v_menu='mob_menu_client.php' ;
-
-      parent.frames['section'].location.replace(v_menu);
+     parent.frames['section'].location.replace('mob_menu_doctor.php') ;
   }
 
-  function GoToNextPage() 
+  function GoBack() 
   {
+    var  v_session ;
+
+         v_session=TransitContext("restore","session","") ;
+         
+     parent.frames['section'].location.replace("mob_doctor_clients.php?Session="+v_session+"&Client="+goback) ;
   }
 
 <?php
@@ -135,6 +146,7 @@ function SuccessMsg() {
        <input class="G_bttn" type="button" value="Меню" onclick=GoToMenu()>
       </td> 
       <td width="34%">
+       <input class="R_bttn" type="button" value="Карточка" onclick=GoBack() hidden id="GoBackButton">
       </td> 
     </tr>
     </tbody>

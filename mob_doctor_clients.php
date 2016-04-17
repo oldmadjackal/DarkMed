@@ -448,8 +448,8 @@ function SuccessMsg() {
          words=elem.split(':') ;
       if(words[1]==p_client)
       {
-        if(words[0]=="0")  url="client_card.php" ;
-        else               url="client_page.php" ;
+        if(words[0]=="0")  url="mob_client_card.php" ;
+        else               url="mob_client_page_view.php" ;
 
 	  i_link_new        =document.createElement("a") ;
           i_link_new.id     =elem ;

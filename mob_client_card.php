@@ -257,8 +257,6 @@ function SuccessMsg() {
        i_name_o.value=Crypto_decode(i_name_o.value, page_key) ;
        i_remark.value=Crypto_decode(i_remark.value, page_key) ;
 
-     parent.frames['details'].location.replace('mob_footer_menu.html') ;
-
          return true ;
   }
 

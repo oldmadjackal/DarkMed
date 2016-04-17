@@ -871,7 +871,7 @@ function SuccessMsg() {
     }
 
 	 v_session=TransitContext("restore","session","") ;
-	parent.frames["details"].location.replace("mob_client_page_footer.php?Session="+v_session) ;
+	parent.frames["processor"].location.replace("z_clear_tmp.php?Session="+v_session) ;
 
          return true ;
   }

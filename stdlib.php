@@ -58,7 +58,7 @@ function ReadConfig()
             ini_set("log_errors",     "On") ;
 
             ini_set("SMTP",           $cfg_email_smtp) ;
-            ini_set("sendmail_from",  $cfg_email_from) ;
+            ini_set("sendmail_from",  $glb_cfg_email_from) ;
 
    return true ;
 }
@@ -150,14 +150,14 @@ function PrepareImagePath($section, $object, $element, $ext)
              $path.="/".$section ;
 
    if(is_dir($path)==false) {
-              $status=mkdir($path, 0777) ;
+              $status=mkdir($path, 0722) ;
            if($status==false)  return("") ;
                             }
 
              $path.="/".$object ;
 
    if(is_dir($path)==false) {
-              $status=mkdir($path, 0777) ;
+              $status=mkdir($path, 0722) ;
            if($status==false)  return("") ;
                             }
 
@@ -177,7 +177,7 @@ function PrepareTmpFolder($session)
              $path.="/".$session ;
 
    if(is_dir($path)==false) {
-              $status=mkdir($path, 0777) ;
+              $status=mkdir($path, 0722) ;
            if($status==false)  return("") ;
                             }
 

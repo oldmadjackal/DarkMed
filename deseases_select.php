@@ -21,14 +21,11 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                         $session =$_GET ["Session"] ;
-  if(!isset($session ))  $session =$_POST["Session"] ;
                          $deseases=$_GET ["Deseases"] ;
   if(!isset($deseases))  $deseases=$_POST["Deseases"] ;
                          $groups  =$_GET ["Groups"] ;
 
-  FileLog("START", "    Session:".$session) ;
-  FileLog("",      "   Deseases:".$deseases) ;
+  FileLog("START", "   Deseases:".$deseases) ;
   FileLog("",      "     Groups:".$groups) ;
 
 //--------------------------- Подключение БД
@@ -37,22 +34,6 @@ function ProcessDB() {
   if($db===false) {
                     ErrorMsg($error) ;
                          return ;
-  }
-//--------------------------- Идентификация сессии
-
-  if(!isset($session))  $session="" ;
-
-                        $options="" ;
-
-  if($session!="") {
-
-       $user=DbCheckSession($db, $session, $options, $error) ;
-
-    if($user===false) {
-                       $db->close() ;
-                    ErrorMsg($error) ;
-                         return ;
-    }
   }
 //---------------------------------------- Режим выбора групп
 

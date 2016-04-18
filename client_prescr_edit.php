@@ -37,6 +37,7 @@ function ProcessDB() {
                            $title=$_POST["Title"] ;
                           $remark=$_POST["Remark"] ;
                     $presentation=$_POST["Presentation"] ;
+                        $deseases=$_POST["Deseases"] ;
                            $count=$_POST["Count"] ;
   }
 
@@ -488,6 +489,47 @@ function ProcessDB() {
 
 	              $res->close() ;
 
+//--------------------------- Получение ключа шифрования врача
+
+                       $sql="Select crypto ".
+                            "  From access_list".
+                            " Where owner='$user_' ".
+                            "  and  login='$user_' ".
+                            "  and  page =  0 " ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+          FileLog("ERROR", "Select ACCESS_LIST... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка определения ключа врача") ;
+                         return ;
+    }
+
+	      $fields=$res->fetch_row() ;
+	              $res->close() ;
+
+      echo     "   note_key='".$fields[0]."' ;	\n" ;
+
+//--------------------------- Извлечение диагноза
+
+  if(!isset($deseases))
+  {          
+                       $sql="Select deseases".
+                            " From  doctor_notes".
+                            " Where owner='$user_' and client='$owner_'" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+          FileLog("ERROR", "Select DOCTOR_NOTES... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка извлечения диагноза") ;
+                         return ;
+    }
+
+	      $fields=$res->fetch_row() ;
+	              $res->close() ;
+
+                   $deseases=$fields[0] ;
+  }
+
 //--------------------------- Извлечение данных страницы
 
                        $sql="Select `check`, title, remark, published, presentation".
@@ -546,11 +588,12 @@ function ProcessDB() {
 
 //--------------------------- Отображение данных на странице
 
-      echo     "  i_page  .value='".$page_.  "' ; \n" ;
-      echo     "  i_check .value='".$check. "' ; \n" ;
-      echo     "  i_title .value='".$title. "' ; \n" ;
-      echo     "  i_remark.value='".$remark."' ; \n" ;
-      echo     "  i_update.value='update' ;	\n" ;
+      echo     "  i_page    .value='".$page_.   "' ; \n" ;
+      echo     "  i_check   .value='".$check.   "' ; \n" ;
+      echo     "  i_title   .value='".$title.   "' ; \n" ;
+      echo     "  i_remark  .value='".$remark.  "' ; \n" ;
+      echo     "  i_deseases.value='".$deseases."' ; \n" ;
+      echo     "  i_update  .value='update' ;	\n" ;
 
   if($presentation=="TILES")
   {
@@ -647,8 +690,10 @@ function SuccessMsg() {
     var  i_letter ;
     var  i_incopy ;
     var  i_error ;
+    var  i_deseases ;
     var  password ;
     var  page_key ;
+    var  note_key ;
     var  page_owner ;
     var  msg_key ;
     var  check_key ;
@@ -663,6 +708,9 @@ function SuccessMsg() {
   {
     var  prescr_id ;
     var  prescr_remark ;
+    var  dss_list ;
+    var  words ;
+
 
 
        i_table       =document.getElementById("Fields") ;
@@ -673,6 +721,7 @@ function SuccessMsg() {
        i_remark      =document.getElementById("Remark") ;
        i_pres_list   =document.getElementById("Presentation-List") ;
        i_pres_tiles  =document.getElementById("Presentation-Tiles") ;
+       i_deseases    =document.getElementById("Deseases") ;
        i_measurements=document.getElementById("Measurements") ;
        i_id          =document.getElementById("Id") ;
        i_count       =document.getElementById("Count") ;
@@ -780,6 +829,23 @@ function SuccessMsg() {
     {
        msg_key=Crypto_decode(msg_key, password) ;
     }
+
+               note_key=Crypto_decode(note_key, password) ;
+       i_deseases.value=Crypto_decode(i_deseases.value, note_key) ;
+
+        dss_list=i_deseases.value.split("@") ;
+
+                 i_deseases.value="" ;
+
+    for(i=0 ; i<dss_list.length ; i++) {
+
+         if(dss_list[i]=="")  break ;
+
+                                     words=dss_list[i].split("#") ;
+           SetDeseaseSelection(true, words[0], words[1]) ;
+                                       }
+
+        i_deseases.value=i_deseases.value.trim() ;
 
          return true ;
   }
@@ -1328,6 +1394,50 @@ function SuccessMsg() {
       location.assign("client_prescr_view.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
   }
 
+  function SetDeseaseSelection(p_checked, p_id, p_name)
+  {
+     var  i_dss_list ;
+     var  i_row_new ;
+     var  i_col_new ;
+     var  i_txt_new ;
+     var  v_id ;
+
+                  v_id ="Desease_"+p_id ;
+       i_deseases.value=" "+i_deseases.value+" " ;
+
+       i_dss_list= document.getElementById("Deseases_list") ;
+
+   if(p_checked==false)
+   {
+     i_deseases.value=i_deseases.value.replace(" "+p_id+" ", " ").trim() ;
+
+     i_dss_list.removeChild(document.getElementById(v_id)) ;
+         return ;
+   }
+
+   if(i_deseases.value.indexOf(" "+p_id+" ")<0)
+   {
+       i_deseases.value+=p_id ;
+   }
+       i_deseases.value =i_deseases.value.trim() ;
+
+       i_row_new = document.createElement("tr") ;
+       i_row_new . className = "table" ;
+       i_row_new . id        =  v_id ;
+
+       i_col_new = document.createElement("td") ;
+       i_col_new . className = "tableL" ;
+       i_col_new . id        =  "DssName_"+p_id ;
+       i_txt_new = document.createTextNode(p_name) ;
+       i_col_new . appendChild(i_txt_new) ;
+       i_col_new . onclick= function(e) { window.open("desease_view.php?Id="+p_id) ; } ;
+       i_row_new . appendChild(i_col_new) ;
+
+       i_dss_list.insertBefore(i_row_new, null) ;
+
+    return ;         
+  } 
+
 <?php
   require("common.inc") ;
 ?>
@@ -1343,8 +1453,8 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
+<form onsubmit="return SendFields();" method="POST" id="Form">
+ 
   <table width="90%">
     <thead>
     </thead>
@@ -1361,8 +1471,7 @@ function SuccessMsg() {
     </tbody>
   </table>
 
-  <div><br></div>
-  <form onsubmit="return SendFields();" method="POST" id="Form">
+  <br>
 
   <table width="100%">
     <thead>
@@ -1427,25 +1536,38 @@ function SuccessMsg() {
         <div>Представление назначений для пациента:</div>
         <div> <input type="radio" name="Presentation" value="LIST"  id="Presentation-List" checked>Списoк               </div>
         <div> <input type="radio" name="Presentation" value="TILES" id="Presentation-Tiles"       >"Плиткa" с картинками</div>
+        <br>
+        <div class="fieldL">
+          <input type="button" value="Добавить/удалить заболевания" onclick=LinkDesease()>
+          <input type="hidden" name="Deseases" id="Deseases">
+        </div> 
+        <table width="100%">
+          <thead>
+          </thead>
+          <tbody  id="Deseases_list">
+          </tbody>
+        </table>
       </td>
     </tr>
+
     </tbody>
   </table>
-  
+ 
   <table width="100%">
     <thead>
     </thead>
     <tbody  id="Prescriptions">
     </tbody>
   </table>
+  </div>
 
-      <input type="button" value="Добавить назначение" onclick=AddNewRow()>
-      <br>
-      <br>
-      <dev>Комплексы назначений:</dev>
-      <select id="SetsList"></select>
-      <br>
-      <br>
+  <input type="button" value="Добавить назначение" onclick=AddNewRow()>
+  <br>
+  <br>
+  <dev>Комплексы назначений:</dev>
+  <select id="SetsList"></select>
+  <br>
+  <br>
 
     <select hidden id="Category"         ></select>
     <select hidden id="C_exercise"       ></select>
@@ -1459,8 +1581,6 @@ function SuccessMsg() {
     <select hidden id="C_unregistered"   ></select>
 
   </form>
-
-</div>
 
 </body>
 

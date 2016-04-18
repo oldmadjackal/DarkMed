@@ -264,7 +264,7 @@ function SuccessMsg() {
              a_plist_remark[i]=Crypto_decode(a_plist_remark[i], page_key) ;
        }
 
-           ShowPrescriptions("Tiles") ;
+           ShowPrescriptions() ;
 
          return true ;
   }

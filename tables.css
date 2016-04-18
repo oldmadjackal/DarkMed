@@ -41,6 +41,12 @@
                   padding-left : 1ex             ; 
                  padding-right : 1ex             ; 
 }
+.TableGap  /* Строка рзрыва */
+{
+                        border : 0px solid black ; 
+                  padding-left : 1ex             ; 
+                 padding-right : 1ex             ; 
+}
 .TableRowLBrawn_LC  /* Строка с фоном светло-коричневого цвета, лево-центр */
 {
                     text-align : left             ;

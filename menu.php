@@ -32,6 +32,10 @@ header("Content-type: text/html; charset=windows-1251") ;
 
        i_elem       =document.getElementById("ClientCard") ;
        i_elem.hidden= false ;
+	   i_elem       =document.getElementById("Analyses") ;
+       i_elem.hidden= false ;
+	   i_elem       =document.getElementById("Prescriptions") ;
+       i_elem.hidden= false ;
        i_elem       =document.getElementById("DoctorCard") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("ClientsList") ;
@@ -47,6 +51,10 @@ header("Content-type: text/html; charset=windows-1251") ;
     var  i_elem ;
 
        i_elem       =document.getElementById("ClientCard") ;
+       i_elem.hidden= true ;
+	   i_elem       =document.getElementById("Analyses") ;
+       i_elem.hidden= true ;
+	   i_elem       =document.getElementById("Prescriptions") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("DoctorCard") ;
        i_elem.hidden= false ;
@@ -64,6 +72,10 @@ header("Content-type: text/html; charset=windows-1251") ;
 
        i_elem       =document.getElementById("ClientCard") ;
        i_elem.hidden= true ;
+	   i_elem       =document.getElementById("Analyses") ;
+       i_elem.hidden= true ;
+	   i_elem       =document.getElementById("Prescriptions") ;
+       i_elem.hidden= true ;
        i_elem       =document.getElementById("DoctorCard") ;
        i_elem.hidden= false ;
        i_elem       =document.getElementById("ClientsList") ;
@@ -79,6 +91,10 @@ header("Content-type: text/html; charset=windows-1251") ;
     var  i_elem ;
 
        i_elem       =document.getElementById("ClientCard") ;
+       i_elem.hidden= true ;
+	   i_elem       =document.getElementById("Analyses") ;
+       i_elem.hidden= true ;
+	   i_elem       =document.getElementById("Prescriptions") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("DoctorCard") ;
        i_elem.hidden= true ;
@@ -111,6 +127,22 @@ header("Content-type: text/html; charset=windows-1251") ;
                   if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
                   else               parent.frames['view'].location.assign('client_card.php'+'?Session='+v_session) ; "
          target="view" id="user_card_btn">Карта пациента</a>
+    </li> 
+	
+	<li hidden id="Analyses">
+        <a class="menu_item" href="javascript:
+                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
+                  if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
+                  else               parent.frames['view'].location.assign('client_analises.php'+'?Session='+v_session) ; "
+         target="view" id="analyses_btn">Анализы и снимки</a>
+    </li> 
+	
+	<li hidden id="Prescriptions">
+        <a class="menu_item" href="javascript:
+                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
+                  if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
+                  else               parent.frames['view'].location.assign('client_prescriptions.php'+'?Session='+v_session) ; "
+         target="view" id="prescriptions_btn">Назначения</a>
     </li> 
 
     <li hidden id="DoctorCard">

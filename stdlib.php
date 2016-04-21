@@ -100,8 +100,11 @@ function ShowLog($text)
 
 function FileLog($category, $text) 
 {
+  global  $glb_log_off ;
   global  $glb_script ;
   global  $glb_cfg_log_file ;
+
+  if($glb_log_off===true)  return ;  
 
           $timestamp=date("Y-m-d H:i:s")."  " ;
           $script   =substr($glb_script."                    ", 0, 25)."  " ;

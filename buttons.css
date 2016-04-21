@@ -56,6 +56,8 @@
     left: -6px;
     background: url("images/login-item.png");
 	background-size: 100% 100%;
+	position:absolute;
+
 }
 
 #exit_btn:before {
@@ -70,6 +72,7 @@
     left: -6px;
     background: url("images/logout-icon.png");
 	background-size: 100% 100%;
+	position:absolute;
 }
 
 #registration_btn:before {
@@ -84,6 +87,8 @@
     left: -6px;
     background: url("images/add-new-user-item.png");
 	background-size: 100% 100%;
+	position:absolute;
+
 }
 
 #doctors_btn:before {

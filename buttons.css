@@ -38,3 +38,216 @@
                    font-weight : bold            ; 
               background-color : white           ; 
 }
+
+#login_submit:hover {
+    background-color: #ffffff;
+}
+
+
+#auth_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    line-height: 22px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/login-item.png");
+	background-size: 100% 100%;
+}
+
+#exit_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    line-height: 22px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/logout-icon.png");
+	background-size: 100% 100%;
+}
+
+#registration_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    line-height: 22px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/add-new-user-item.png");
+	background-size: 100% 100%;
+}
+
+#doctors_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/doctors-item.png");
+	background-size: 100% 100%;
+}
+
+#ill_catalog_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/illness-item.png");
+	background-size: 100% 100%;
+}
+
+#presiption_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/preceptions-item.png");
+	background-size: 100% 100%;
+}
+
+#how_to_use_btn{
+	color:#FFFFFF;
+	text-shadow: 0 0 2px #000; 
+	-moz-text-shadow: 0 0 2px #000;
+	-webkit-text-shadow: 0 0 2px #000;
+}
+#how_to_use_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/help-item.png");
+	background-size: 100% 100%;
+}
+
+#message_btn{
+	color:#FFFFFF;
+	text-shadow: 0 0 2px #000; 
+	-moz-text-shadow: 0 0 2px #000;
+	-webkit-text-shadow: 0 0 2px #000;
+}
+#message_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/messages-item.png");
+    background-size: 100% 100%;
+}
+
+#forum_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/forum-icon-item.png");
+    background-size: 100% 100%;
+}
+#patients_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/users-icon-item.png");
+    background-size: 100% 100%;
+}
+#user_card_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/user-icon-item.png");
+    background-size: 100% 100%;
+}
+#doctor_card_btn:before {
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/doctor-card-icon.png");
+    background-size: 100% 100%;
+}
+
+
+#analyses_btn:before{    
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/analyses_btn_icon.png");
+    background-size: 100% 100%;
+}
+
+#prescriptions_btn:before{    
+    content: "\0000a0";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    margin: 0 4px -6px -4px;
+    position: relative;
+    top: 1px;
+    left: -6px;
+    background: url("images/prescriptions_btn_icon.png");
+    background-size: 100% 100%;
+}
+
+

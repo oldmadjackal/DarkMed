@@ -427,9 +427,15 @@ function SuccessMsg() {
 
     if(user_opt.indexOf("Doctor")>=0)
     {
+            url="client_prescr_edit_wrapper.php" ;
+            
 	i_link_new        =document.createElement("a") ;
 	i_link_new.id     =p_client+"_add_prescription" ;
-	i_link_new.href   ="client_prescr_edit.php?Session="+v_session+"&Owner="+p_client+"&NewPage=1" ;
+        i_link_new.href   ="javascript:"
+                          +"parent.parent.frames['view'].location.assign('"
+                          +url+"?Session="+v_session+"&Owner="+p_client+"&NewPage=1"
+                          +"') ; " ;
+
 	i_text_new        =document.createTextNode("Новое назначение") ;
 	i_link_new.appendChild(i_text_new) ;
 
@@ -447,12 +453,15 @@ function SuccessMsg() {
          words=elem.split(':') ;
       if(words[1]==p_client)
       {
-        if(user==a_prsc_creator[elem])  url="client_prescr_edit.php" ;
+        if(user==a_prsc_creator[elem])  url="client_prescr_edit_wrapper.php" ;
         else                            url="client_prescr_view.php" ;
 
           i_link_new        =document.createElement("a") ;
           i_link_new.id     =elem ;
-          i_link_new.href   =url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0] ;
+          i_link_new.href   ="javascript:"
+                            +"parent.parent.frames['view'].location.assign('"
+                            +url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0]
+                            +"') ; " ;
           i_text_new        =document.createTextNode(a_prsc_title[elem]) ;
           i_link_new.appendChild(i_text_new) ;
 

@@ -21,33 +21,33 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                         $session=$_GET ["Session"] ;
-  if(!isset($session ))  $session=$_POST["Session"] ;
+                                  $session=$_GET ["Session"] ;
+                                    $owner=$_GET ["Owner"] ;
 
-                        $new_page=$_GET ["NewPage"] ;
-                           $owner=$_GET ["Owner"] ;
+  if( isset($_GET ["NewPage"]))  $new_page=$_GET ["NewPage"] ;
 
-                            $page=$_GET ["Page"] ;
-  if(!isset($page    ))     $page=$_POST["Page"] ;
+  if( isset($_GET ["Page"]   ))      $page=$_GET ["Page"] ;
+  else
+  if( isset($_POST["Page"]   ))      $page=$_POST["Page"] ;
 
-                          $update=$_POST["Update"] ;
-  if(isset($update   )) {
-                          $crypto=$_POST["Crypto"] ;
-                           $check=$_POST["Check"] ;
-                           $title=$_POST["Title"] ;
-                          $remark=$_POST["Remark"] ;
-                    $presentation=$_POST["Presentation"] ;
-                        $deseases=$_POST["Deseases"] ;
-                           $count=$_POST["Count"] ;
+  if( isset($_POST["Update"] ))    $update=$_POST["Update"] ;
+  if( isset($update          )) {
+                                   $crypto=$_POST["Crypto"] ;
+                                    $check=$_POST["Check"] ;
+                                    $title=$_POST["Title"] ;
+                                   $remark=$_POST["Remark"] ;
+                             $presentation=$_POST["Presentation"] ;
+                                 $deseases=$_POST["Deseases"] ;
+                                    $count=$_POST["Count"] ;
   }
 
-                         $publish=$_POST["Publish"] ;
-  if(isset($publish)    &&
-           $publish=="1"  ) {
-                         $publish=$_POST["Publish"] ;
-                          $invite=$_POST["Invite"] ;
-                          $letter=$_POST["Letter"] ;
-                          $incopy=$_POST["InCopy"] ;
+  if( isset($_POST["Publish"]))   $publish=$_POST["Publish"] ;
+  if( isset($publish)    &&
+            $publish=="1"  ) {
+                                  $publish=$_POST["Publish"] ;
+                                   $invite=$_POST["Invite"] ;
+                                    $letter=$_POST["Letter"] ;
+                                    $incopy=$_POST["InCopy"] ;
   }
 
              $a_prescr=array() ;
@@ -72,9 +72,15 @@ function ProcessDB() {
      }
   }
 
+  if(isset($_POST["AfterSave"])) $after_save=$_POST["AfterSave"] ;
+
     FileLog("START", "      Session:".$session) ;
-    FileLog("",      "      NewPage:".$new_page) ;
     FileLog("",      "        Owner:".$owner) ;
+
+  if(isset($new_page))
+    FileLog("",      "      NewPage:".$new_page) ;
+    
+  if(isset($page))
     FileLog("",      "         Page:".$page) ;
 
   if(isset($update)) {
@@ -101,6 +107,11 @@ function ProcessDB() {
    for($i=0 ; $i<$prescr_count ; $i++) 
     FileLog("",      "Prescription:".$a_prescr[$i]." ".$a_name[$i]." ".$a_remark[$i]." ".$a_ref[$i]) ;
   }
+//--------------------------- Умолчания
+
+  if(!isset($publish   ))  $publish   ="0" ;
+  if(!isset($after_save))  $after_save="false" ;
+
 //--------------------------- Подключение БД
 
      $db=DbConnect($error) ;
@@ -150,35 +161,9 @@ function ProcessDB() {
     }
 
   }
-//--------------------------- Извлечение списка типов назначений
-
-                     $sql="Select code, name".
-			  "  From ref_prescriptions_types".
-			  " Where language='RU'" ;
-     $res=$db->query($sql) ;
-  if($res===false) {
-          FileLog("ERROR", "Select REF_PRESCRIPTIONS_TYPES... : ".$db->error) ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса справочника типов назначений") ;
-                         return ;
-  }
-  else
-  {  
-     for($i=0 ; $i<$res->num_rows ; $i++)
-     {
-	      $fields=$res->fetch_row() ;
-
-       echo "                      i_category.length++ ;				\n" ;
-       echo "   i_category.options[i_category.length-1].text	='".$fields[1]."' ;	\n" ;
-       echo "   i_category.options[i_category.length-1].value	='".$fields[0]."' ;	\n" ;
-     }
-  }
-
-     $res->close() ;
-
 //--------------------------- Извлечение Регистра назначений
 
-                     $sql="Select id, type, name".
+                     $sql="Select id, type".
 			  "  From prescriptions_registry".
                           " Where type<>'dummy'".
                           " Order by name" ;
@@ -196,10 +181,6 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 
        echo "   a_prescriptions['".$fields[0]."']='".$fields[1]."' ;	\n" ;
-
-       echo "                              i_c_".$fields[1].".length++ ;				\n" ;
-       echo "   i_c_".$fields[1].".options[i_c_".$fields[1].".length-1].text ='".$fields[2]."' ;	\n" ;
-       echo "   i_c_".$fields[1].".options[i_c_".$fields[1].".length-1].value='".$fields[0]."' ;	\n" ;
      }
   }
 
@@ -232,6 +213,26 @@ function ProcessDB() {
   }
 
      $res->close() ;
+
+//--------------------------- Получение ключа шифрования врача
+
+                       $sql="Select crypto ".
+                            "  From access_list".
+                            " Where owner='$user_' ".
+                            "  and  login='$user_' ".
+                            "  and  page =  0 " ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+          FileLog("ERROR", "Select ACCESS_LIST... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка определения ключа врача") ;
+                         return ;
+    }
+
+	      $fields=$res->fetch_row() ;
+	              $res->close() ;
+
+      echo     "   note_key='".$fields[0]."' ;	\n" ;
 
 //--------------------------- Отображение пустой новой страницы
 
@@ -489,26 +490,6 @@ function ProcessDB() {
 
 	              $res->close() ;
 
-//--------------------------- Получение ключа шифрования врача
-
-                       $sql="Select crypto ".
-                            "  From access_list".
-                            " Where owner='$user_' ".
-                            "  and  login='$user_' ".
-                            "  and  page =  0 " ;
-       $res=$db->query($sql) ;
-    if($res===false) {
-          FileLog("ERROR", "Select ACCESS_LIST... : ".$db->error) ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка определения ключа врача") ;
-                         return ;
-    }
-
-	      $fields=$res->fetch_row() ;
-	              $res->close() ;
-
-      echo     "   note_key='".$fields[0]."' ;	\n" ;
-
 //--------------------------- Извлечение диагноза
 
   if(!isset($deseases))
@@ -560,7 +541,7 @@ function ProcessDB() {
 
       echo     "  i_count.value='0'	;\n" ;
 
-                     $sql="Select prescription_id, remark, if(`type` is null or `type`='', '', concat(`type`,':',if(reference=0,id,reference)))".
+                     $sql="Select prescription_id, name, remark, if(`type` is null or `type`='', '', concat(`type`,':',if(reference=0,id,reference)))".
 			  "  From prescriptions_pages".
                           " Where owner='$owner_'".
                           "  and  page = $page_".
@@ -579,8 +560,9 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 
        echo "   a_plist_id    [".$i."]='".$fields[0]."' ;	\n" ;
-       echo "   a_plist_remark[".$i."]='".$fields[1]."' ;	\n" ;
-       echo "   a_plist_ref   [".$i."]='".$fields[2]."' ;	\n" ;
+       echo "   a_plist_name  [".$i."]='".$fields[1]."' ;	\n" ;
+       echo "   a_plist_remark[".$i."]='".$fields[2]."' ;	\n" ;
+       echo "   a_plist_ref   [".$i."]='".$fields[3]."' ;	\n" ;
      }
   }
 
@@ -588,12 +570,13 @@ function ProcessDB() {
 
 //--------------------------- Отображение данных на странице
 
-      echo     "  i_page    .value='".$page_.   "' ; \n" ;
-      echo     "  i_check   .value='".$check.   "' ; \n" ;
-      echo     "  i_title   .value='".$title.   "' ; \n" ;
-      echo     "  i_remark  .value='".$remark.  "' ; \n" ;
-      echo     "  i_deseases.value='".$deseases."' ; \n" ;
-      echo     "  i_update  .value='update' ;	\n" ;
+      echo     "  i_page      .value='".$page_.   "' ; \n" ;
+      echo     "  i_check     .value='".$check.   "' ; \n" ;
+      echo     "  i_title     .value='".$title.   "' ; \n" ;
+      echo     "  i_remark    .value='".$remark.  "' ; \n" ;
+      echo     "  i_deseases  .value='".$deseases."' ; \n" ;
+      echo     "  i_update    .value='update' ;	\n" ;
+      echo     "  i_after_save.value='".$after_save."' ; \n" ;
 
   if($presentation=="TILES")
   {
@@ -664,14 +647,16 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
 <script type="text/javascript">
 <!--
 
-    var  i_table ;    
     var  i_page ;
     var  i_check ;
     var  i_crypto ;
@@ -680,6 +665,7 @@ function SuccessMsg() {
     var  i_presentation_list ;
     var  i_presentation_tiles ;
     var  i_measurements ;
+    var  i_sets_list ;
     var  i_id ;
     var  i_count ;
     var  i_update ;
@@ -689,8 +675,9 @@ function SuccessMsg() {
     var  i_invite ;
     var  i_letter ;
     var  i_incopy ;
-    var  i_error ;
     var  i_deseases ;
+    var  i_after_save ;
+    var  i_error ;
     var  password ;
     var  page_key ;
     var  note_key ;
@@ -701,19 +688,23 @@ function SuccessMsg() {
 
     var  a_prescriptions ;
     var  a_plist_id ;
+    var  a_plist_name ;
     var  a_plist_remark ;
     var  a_plist_ref ;
+
+    var  s_prescription_list="" ;
+
+    var  a_names=["Order","ShowOrder","Id","Category","ShowName","Name","Remark","Reference","Insert","Details","Delete","LiftUp"] ;
+
 
   function FirstField() 
   {
     var  prescr_id ;
+    var  prescr_name ;
     var  prescr_remark ;
-    var  dss_list ;
     var  words ;
 
 
-
-       i_table       =document.getElementById("Fields") ;
        i_page        =document.getElementById("Page") ;
        i_check       =document.getElementById("Check") ;
        i_crypto      =document.getElementById("Crypto") ;
@@ -733,6 +724,7 @@ function SuccessMsg() {
        i_invite      =document.getElementById("Invite") ;
        i_letter      =document.getElementById("Letter") ;
        i_incopy      =document.getElementById("InCopy") ;
+       i_after_save  =document.getElementById("AfterSave") ;
        i_error       =document.getElementById("Error") ;
 
 			    i_sets_list.length++ ;
@@ -742,51 +734,9 @@ function SuccessMsg() {
 
 	a_prescriptions=new Array() ;
 	a_plist_id     =new Array() ;
+	a_plist_name   =new Array() ;
 	a_plist_remark =new Array() ;
 	a_plist_ref    =new Array() ;
-
-	i_category=document.getElementById("Category") ;
-			   i_category.length++ ;
-	i_category.options[i_category.length-1].text ='' ;
-	i_category.options[i_category.length-1].value='dummy' ;
-
-	i_c_exercise       =document.getElementById("C_exercise"       ) ;
-	i_c_exploration    =document.getElementById("C_exploration"    ) ;
-	i_c_measurement    =document.getElementById("C_measurement"    ) ;
-	i_c_operation      =document.getElementById("C_operation"      ) ;
-	i_c_others         =document.getElementById("C_others"         ) ;
-	i_c_pharmacotherapy=document.getElementById("C_pharmacotherapy") ;
-	i_c_test           =document.getElementById("C_test"           ) ;
-	i_c_treatment      =document.getElementById("C_treatment"      ) ;
-	i_c_unregistered   =document.getElementById("C_unregistered"   ) ;
-
-			            i_c_exercise.length++ ;
-	i_c_exercise       .options[i_c_exercise.length   -1].text ='' ;
-	i_c_exercise       .options[i_c_exercise.length   -1].value='0' ;
-			            i_c_exploration.length++ ;
-	i_c_exploration    .options[i_c_exploration.length-1].text ='' ;
-	i_c_exploration    .options[i_c_exploration.length-1].value='0' ;
-			            i_c_measurement.length++ ;
-	i_c_measurement    .options[i_c_measurement.length-1].text ='' ;
-	i_c_measurement    .options[i_c_measurement.length-1].value='0' ;
-			            i_c_operation.length++ ;
-	i_c_operation      .options[i_c_operation.length-1].text ='' ;
-	i_c_operation      .options[i_c_operation.length-1].value='0' ;
-			            i_c_others.length++ ;
-	i_c_others         .options[i_c_others.length-1].text ='' ;
-	i_c_others         .options[i_c_others.length-1].value='0' ;
-			            i_c_pharmacotherapy.length++ ;
-	i_c_pharmacotherapy.options[i_c_pharmacotherapy.length-1].text ='' ;
-	i_c_pharmacotherapy.options[i_c_pharmacotherapy.length-1].value='0' ;
-			            i_c_test.length++ ;
-	i_c_test           .options[i_c_test.length-1].text ='' ;
-	i_c_test           .options[i_c_test.length-1].value='0' ;
-			            i_c_treatment.length++ ;
-	i_c_treatment      .options[i_c_treatment.length-1].text ='' ;
-	i_c_treatment      .options[i_c_treatment.length-1].value='0' ;
-			            i_c_unregistered.length++ ;
-	i_c_unregistered   .options[i_c_unregistered.length-1].text ='' ;
-	i_c_unregistered   .options[i_c_unregistered.length-1].value='0' ;
 
        i_title.focus() ;
 
@@ -816,11 +766,12 @@ function SuccessMsg() {
 
        i_s_key.value =Crypto_decode(i_s_key .value, password) ;
 
-       for(i in a_plist_id) {
+       for(var i in a_plist_id) {
              prescr_id    =Crypto_decode(a_plist_id    [i], page_key) ;
+             prescr_name  =Crypto_decode(a_plist_name  [i], page_key) ;
              prescr_remark=Crypto_decode(a_plist_remark[i], page_key) ;
 
-          AddListRow(prescr_id, 'UNKNOWN', prescr_remark, a_plist_ref[i]) ;
+          AddListRow(prescr_id, 'UNKNOWN', prescr_name, prescr_remark, a_plist_ref[i], 0) ;
        }
 
     }
@@ -833,19 +784,19 @@ function SuccessMsg() {
                note_key=Crypto_decode(note_key, password) ;
        i_deseases.value=Crypto_decode(i_deseases.value, note_key) ;
 
-        dss_list=i_deseases.value.split("@") ;
-
-                 i_deseases.value="" ;
+                    dss_ids ="" ;
+                    dss_list=i_deseases.value.split("@") ;
 
     for(i=0 ; i<dss_list.length ; i++) {
 
          if(dss_list[i]=="")  break ;
 
-                                     words=dss_list[i].split("#") ;
-           SetDeseaseSelection(true, words[0], words[1]) ;
+                         words =dss_list[i].split("#") ;
+                       dss_ids+=" "+words[0] ;
                                        }
 
-        i_deseases.value=i_deseases.value.trim() ;
+     if(i_after_save.value!="true")
+        parent.frames["details"].location.replace("prescriptions_select.php?Deseases="+dss_ids.trim()+"&Selected="+s_prescription_list) ;
 
          return true ;
   }
@@ -855,11 +806,8 @@ function SuccessMsg() {
      var  error_text ;
 
 	error_text=""
-
-       i_table.rows[1].cells[0].style.color="black"   ;
-     
+    
      if(i_title.value=="") {
-       i_table.rows[1].cells[0].style.color="red"   ;
              error_text=error_text+"<br>Не задано поле 'Заголовок'" ;
      }
 
@@ -918,80 +866,23 @@ function SuccessMsg() {
 	 i_name  =document.getElementById("Name_"        +i) ;
 	 i_ref   =document.getElementById("Reference_"   +i) ;
 
-	 i_name  .value=i_prescr.options[i_prescr.selectedIndex].text ;
-
       if(i_ref.value=="")
-       if(i_categ.options[i_categ.selectedIndex].value=="measurement")
-	 i_ref   .value=i_categ.options[i_categ.selectedIndex].value ;
+       if(i_categ.value=="measurement")	 
+               i_ref   .value=i_categ.value ;
 
 	 i_id    .value=Crypto_encode(i_id    .value, page_key) ;
 	 i_name  .value=Crypto_encode(i_name  .value, page_key) ;
 	 i_remark.value=Crypto_encode(i_remark.value, page_key) ;
      }    
 
+        i_deseases.value="" ;
+
+        i_after_save.value="true" ;
+
                          return true ;
   } 
 
-  function SetCategory(p_id, p_category)
-  {
-     var  id_id ;
-     var  prescription_id ;
-     var  i_prescription ;
-     var  i_template ;
-
-           
-          id_id            =p_id.replace("Category","Id") ;
-          prescription_id  =p_id.replace("Category","Prescription") ;
-  	i_prescription     =document.getElementById(prescription_id) ;
-  	i_template         =document.getElementById("C_"+p_category).cloneNode(true) ;
-        i_template.id      =prescription_id ;
-        i_template.hidden  =false ;
-        i_template.onchange=function(e) {                 this.options[0].disabled=true ;
-                                          SetPrescription(this.id, this.options[this.selectedIndex].value) ;  } ;
-        i_prescription.parentNode.replaceChild(i_template, i_prescription) ;
-
-  	   document.getElementById(id_id).value='0' ;
-
-     if(p_category=="exercise")
-     {
-            i_pres_list .checked=false ;
-            i_pres_tiles.checked=true ;             
-     }
-     else
-     {
-            i_pres_list .checked=true ;
-            i_pres_tiles.checked=false ;
-     }
-           
-    return ;         
-  } 
-
-  function SetPrescription(p_id, p_prescription)
-  {
-     var  v_session ;
-     var  v_form ;
-     var  id_id ;
-     var  show_id ;
-     var  i_id ;
-     var  i_show ;
-
-           
-       id_id      =p_id.replace("Prescription","Id") ;
-  	i_id      =document.getElementById(id_id) ;
-        i_id.value=p_prescription ;
-
-          show_id      =p_id.replace("Prescription","Details") ;
-  	i_show         =document.getElementById(show_id) ;
-        i_show.disabled=false ;
-
-	 v_session=TransitContext("restore","session","") ;
-            v_form="prescription_details_any.php" ;
-	parent.frames["details"].location.assign(v_form+"?Session="+v_session+"&Id="+p_prescription) ;
-
-    return ;         
-  } 
-
-  function AddListRow(p_id, p_category, p_remark, p_reference)
+  function AddListRow(p_id, p_category, p_name, p_remark, p_reference, p_order)
   {
      var  i_set ;
      var  i_row_new ;
@@ -1003,9 +894,15 @@ function SuccessMsg() {
      var  i_shw_new ;
      var  i_del_new ;
      var  i_upp_new ;
+     var  i_ins_new ;
      var  num_new ;
      var  fixed ; 
 
+     if(p_id!='0')
+     {
+        if(s_prescription_list=="")  s_prescription_list =    p_id ;
+        else                         s_prescription_list+=","+p_id ;
+     }
 
      if(p_id=='0')  p_category='unregistered' ;
 
@@ -1020,224 +917,219 @@ function SuccessMsg() {
      if(p_reference.indexOf(":")>=0)  fixed=true ;
      else                             fixed=false ;
 
-       num_new=parseInt(i_count.value)+1 ;
-                        i_count.value=num_new ;
-
-       i_cat_new = document.getElementById("Category").cloneNode(true) ;
-       i_cat_new . id      ='Category_'+num_new ;
-       i_cat_new . hidden  = false ;
-       i_cat_new . disabled=fixed ;
-       i_cat_new . onchange= function(e) {                      this.options[0].disabled=true ;
-                                           SetCategory(this.id, this.options[this.selectedIndex].value) ;  } ;
-       i_cat_new.options[0].disabled=true ;
-       i_cat_new.options[0].selected=false ;
-
-     for(i=1 ; i<i_cat_new.length ; i++)
-       if(i_cat_new.options[i].value==p_category)  i_cat_new.options[i].selected=true ;
-
-       i_prc_new         =document.getElementById("C_"+p_category).cloneNode(true) ;
-       i_prc_new.id      ='Prescription_'+num_new ;
-       i_prc_new.hidden  =false ;
-       i_prc_new.disabled=fixed ;
-       i_prc_new.onchange=function(e) {                 this.options[0].disabled=true ;
-                                         SetPrescription(this.id, this.options[this.selectedIndex].value) ;  } ;
-
-       i_prc_new.options[0].disabled=true ;
-       i_prc_new.options[0].selected=false ;
-
-     for(i=1 ; i<i_prc_new.length ; i++)
-       if(i_prc_new.options[i].value==p_id)  i_prc_new.options[i].selected=true ;
+     if(p_order==0)
+     {
+         num_new=parseInt(i_count.value)+1 ;
+                          i_count.value=num_new ;
 
        i_set     = document.getElementById("Prescriptions") ;
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+     }
+     else
+     {
+                num_new=p_order ;
+                
+       i_row_new = document.getElementById("NewRow") ;
+     }
+
+       i_row_new . className = "Table_LT" ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
+       
+       i_fld_new = document.createElement("div") ;
+       i_fld_new . id       ='ShowOrder_'+ num_new ;
+       i_txt_new = document.createTextNode(num_new) ;
+       i_fld_new . appendChild(i_txt_new) ;
+       i_col_new . appendChild(i_fld_new) ;
+
        i_fld_new = document.createElement("input") ;
        i_fld_new . id       ='Order_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . disabled = true ;
-       i_fld_new . style.textAlign="right" ;
-       i_fld_new . size     =  1 ;
+       i_fld_new . type     ="hidden" ;
        i_fld_new . value    = num_new ;
        i_col_new . appendChild(i_fld_new) ;
+
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
+
        i_fld_new = document.createElement("input") ;
        i_fld_new . id       ='Id_'+ num_new ;
        i_fld_new . name     ='Id_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . hidden   = true ;
+       i_fld_new . type     ="hidden" ;
        i_fld_new . value    = p_id ;
        i_col_new . appendChild(i_fld_new) ;
-       i_col_new . appendChild(i_cat_new) ;
-       i_row_new . appendChild(i_col_new) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_col_new . appendChild(i_prc_new) ;
+       i_fld_new = document.createElement("input") ;
+       i_fld_new . id       ='Category_'+ num_new ;
+       i_fld_new . type     ="hidden" ;
+       i_fld_new . value    = p_category ;
+       i_col_new . appendChild(i_fld_new) ;
+
        i_fld_new = document.createElement("input") ;
        i_fld_new . id       ='Name_'+ num_new ;
        i_fld_new . name     ='Name_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . hidden   = true ;
+       i_fld_new . type     ="hidden" ;
+       i_fld_new . value    = p_name ;
        i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("br") ;
+
+       i_fld_new = document.createElement("div") ;
+       i_fld_new . className = "Bold_LT" ;
+       i_fld_new . id        = "ShowName_"+num_new ;
+       i_txt_new = document.createTextNode(p_name) ;
+       i_fld_new . appendChild(i_txt_new) ;
+  if(p_id!='0' || p_order!=0)
+  {
+       i_txt_new = document.createElement("br") ;
+       i_fld_new . appendChild(i_txt_new) ;
+  }
        i_col_new . appendChild(i_fld_new) ;
+
        i_fld_new = document.createElement("input") ;
        i_fld_new . id       ='Remark_'+ num_new ;
        i_fld_new . name     ='Remark_'+ num_new ;
        i_fld_new . type     ="text" ;
-       i_fld_new . size     =  80 ;
+       i_fld_new . size     =  60 ;
        i_fld_new . value    = p_remark ;
+       i_fld_new . onchange = function(e) {  this.parentNode.parentNode.id="" ;  }
        i_col_new . appendChild(i_fld_new) ;
+
        i_fld_new = document.createElement("input") ;
        i_fld_new . id       ='Reference_'+ num_new ;
        i_fld_new . name     ='Reference_'+ num_new ;
        i_fld_new . type     ="hidden" ;
        i_fld_new . value    = p_reference ;
        i_col_new . appendChild(i_fld_new) ;
+       
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LC" ;
+
        i_shw_new = document.createElement("input") ;
        i_shw_new . type   ="button" ;
-       i_shw_new . value  ="Подробнее" ;
+       i_shw_new . className ="DetailsButton" ;
+       i_shw_new . value  ="?" ;
        i_shw_new . id     ='Details_'+ num_new ;
        i_shw_new . onclick= function(e) {  ShowDetails(this.id) ;  }
-
      if(p_id=='0')
        i_shw_new . disabled= true ;
 
        i_del_new = document.createElement("input") ;
-       i_del_new . type   ="button" ;
-       i_del_new . value  ="Удалить" ;
-       i_del_new . id     ='Delete_'+ num_new ;
-       i_del_new . onclick= function(e) {  DeleteRow(this.id) ;  }
+       i_del_new . type      ="button" ;
+       i_del_new . className ="DeleteButton" ;
+       i_del_new . value     ="X" ;
+       i_del_new . id        ='Delete_'+ num_new ;
+       i_del_new . onclick   = function(e) {  DeleteRow(this.id) ;  }
+       
        i_upp_new = document.createElement("input") ;
        i_upp_new . type   ="button" ;
-       i_upp_new . value  ="Вверх" ;
+       i_upp_new . className ="UpButton" ;
+       i_upp_new . value  ="^" ;
        i_upp_new . id     ='LiftUp_'+ num_new ;
        i_upp_new . onclick= function(e) {  LiftUpRow(this.id) ;  }
+       
+       i_ins_new = document.createElement("input") ;
+       i_ins_new . type   ="button" ;
+       i_ins_new . className ="InsertButton" ;
+       i_ins_new . value  ="+" ;
+       i_ins_new . id     ='Insert_'+ num_new ;
+       i_ins_new . onclick= function(e) {  InsertNewRow(this.id) ;  }
+       
+       i_col_new . appendChild(i_ins_new) ;
        i_col_new . appendChild(i_upp_new) ;
        i_col_new . appendChild(i_del_new) ;
        i_col_new . appendChild(i_shw_new) ;
        i_row_new . appendChild(i_col_new) ;
 
+     if(p_order==0)
        i_set     . appendChild(i_row_new) ;
 
-    return ;         
+    return(num_new) ;
   } 
 
-  function AddNewRow()
+  function InsertNewRow(p_id)
   {
-     var  i_set ;
-     var  i_row_new ;
-     var  i_col_new ;
-     var  i_cat_new ;
-     var  i_fld_new ;
-     var  i_txt_new ;
-     var  i_shw_new ;
-     var  i_del_new ;
-     var  i_upp_new ;
-     var  num_new ;
 
-       num_new=parseInt(i_count.value)+1 ;
-                        i_count.value=num_new ;
+    var  i_del  ;
+    var  i_col  ;
+    var  i_row  ;
+    var  i_list  ;
+    var  i_row  ;
+    var  i_row_new  ;
+    var  top  ;
 
-       i_cat_new = document.getElementById("Category").cloneNode(true) ;
-       i_cat_new . id      ='Category_'+ num_new ;
-       i_cat_new . hidden  = false ;
-       i_cat_new . onchange= function(e) {                      this.options[0].disabled=true ;
-                                           SetCategory(this.id, this.options[this.selectedIndex].value) ;  } ;
+    
+    if(document.getElementById("NewRow")!=null)
+    {
+      alert("Сначала удалите ранее добавленную пустую строку") ;
+        return ;
+    }
 
-       i_set     = document.getElementById("Prescriptions") ;
+	 i_elm =document.getElementById(p_id.replace("Insert","Order")) ;
+           top =parseInt(i_elm.value) ;         
+        bottom =parseInt(i_count.value) ;
+
+         i_del =document.getElementById(p_id) ;
+         i_col =   i_del.parentNode ;
+         i_row =   i_col.parentNode ;
+         i_list=   i_row.parentNode ;
+
+     for(i=bottom ; i>=top ; i--)
+     for(j in a_names) {
+			           i_elm      =document.getElementById(a_names[j]+"_"+i) ;
+			           i_elm.id   =a_names[j]+"_"+(i+1) ;
+			           i_elm.name =a_names[j]+"_"+(i+1) ;
+      if(a_names[j]=="Order"    )  i_elm.value= i+1 ;
+      if(a_names[j]=="ShowOrder")  i_elm.innerHTML=i+1 ;
+                       }  
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . id ="NewRow" ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Order_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . disabled = true ;
-       i_fld_new . style.textAlign="right" ;
-       i_fld_new . size     =  1 ;
-       i_fld_new . value    = num_new ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_row_new . appendChild(i_col_new) ;
+       i_list.insertBefore(i_row_new, i_row) ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Id_'+ num_new ;
-       i_fld_new . name     ='Id_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . hidden   = true ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_col_new . appendChild(i_cat_new) ;
-       i_row_new . appendChild(i_col_new) ;
+          i_count.value=parseInt(i_count.value)+1 ;
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_fld_new = document.createElement("select") ;
-       i_fld_new . disabled = true ;
-       i_fld_new . id       ='Prescription_'+ num_new ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Name_'+ num_new ;
-       i_fld_new . name     ='Name_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . hidden   = true ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("br") ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Remark_'+ num_new ;
-       i_fld_new . name     ='Remark_'+ num_new ;
-       i_fld_new . type     ="text" ;
-       i_fld_new . size     =  80 ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_fld_new = document.createElement("input") ;
-       i_fld_new . id       ='Reference_'+ num_new ;
-       i_fld_new . name     ='Reference_'+ num_new ;
-       i_fld_new . type     ="hidden" ;
-       i_col_new . appendChild(i_fld_new) ;
-       i_row_new . appendChild(i_col_new) ;
+     AddListRow(0, "", "", "", "", top) ;
+  }
 
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
-       i_shw_new = document.createElement("input") ;
-       i_shw_new . type    ="button" ;
-       i_shw_new . value   ="Подробнее" ;
-       i_shw_new . id      ='Details_'+ num_new ;
-       i_shw_new . disabled= true ;
-       i_shw_new . onclick = function(e) {  ShowDetails(this.id) ;  }
-       i_del_new = document.createElement("input") ;
-       i_del_new . type   ="button" ;
-       i_del_new . value  ="Удалить" ;
-       i_del_new . id     ='Delete_'+ num_new ;
-       i_del_new . onclick= function(e) {  DeleteRow(this.id) ;  }
-       i_upp_new = document.createElement("input") ;
-       i_upp_new . type   ="button" ;
-       i_upp_new . value  ="Вверх" ;
-       i_upp_new . id     ='LiftUp_'+ num_new ;
-       i_upp_new . onclick= function(e) {  LiftUpRow(this.id) ;  }
-       i_col_new . appendChild(i_upp_new) ;
-       i_col_new . appendChild(i_del_new) ;
-       i_col_new . appendChild(i_shw_new) ;
-       i_row_new . appendChild(i_col_new) ;
+  function AddSelectedRow(p_id, p_category, p_name)
+  {
+    var  order ;
+    var  new_row ;
 
-       i_set     . appendChild(i_row_new) ;
+
+       new_row=document.getElementById("NewRow") ;
+
+    if(new_row!=null)
+    {
+                  elems=new_row.getElementsByTagName('td')[0].getElementsByTagName('input') ;
+       for(i=0; i<elems.length; i++)               
+         if(elems[i].id.substr(0, 6)=="Order_") {  order=elems[i].id.substr(6) ;  break ;  } 
+ 
+         document.getElementById("Id_"      +order).value    =p_id  ;
+         document.getElementById("Category_"+order).value    =p_category  ;
+         document.getElementById("Name_"    +order).value    =p_name ;
+         document.getElementById("ShowName_"+order).innerHTML=p_name ;
+         
+      if(s_prescription_list=="")  s_prescription_list =    p_id ;
+      else                         s_prescription_list+=","+p_id ;
+
+             new_row.id="" ;
+    }
+    else
+    {
+       order=AddListRow(p_id, "UNKNOWN", p_name, "", "", 0) ;
+    }
+
+      document.getElementById("Remark_"+order).focus() ;
 
     return ;         
   } 
 
+  
   function DeleteRow(p_id)
   {
     var  i_ref  ;
@@ -1249,7 +1141,6 @@ function SuccessMsg() {
     var  reply  ;
     var  top  ;
     var  bottom  ;
-    var  a_names ;
 
 
 	 i_ref =document.getElementById(p_id.replace("Delete","Reference")) ;
@@ -1270,14 +1161,13 @@ function SuccessMsg() {
 
          i_list.removeChild(i_row) ;
 
-       a_names=["Order","Id","Category","Prescription","Name","Remark","Reference","Details","Delete","LiftUp"] ;
-
      for(i=top+1 ; i<=bottom ; i++) {
      for(j in a_names) {
-			       i_elm      =document.getElementById(a_names[j]+"_"+i) ;
-			       i_elm.id   =a_names[j]+"_"+(i-1) ;
-			       i_elm.name =a_names[j]+"_"+(i-1) ;
-      if(a_names[j]=="Order")  i_elm.value= i-1 ;
+			           i_elm          =document.getElementById(a_names[j]+"_"+i) ;
+			           i_elm.id       =a_names[j]+"_"+(i-1) ;
+			           i_elm.name     =a_names[j]+"_"+(i-1) ;
+      if(a_names[j]=="Order"    )  i_elm.value    = i-1 ;
+      if(a_names[j]=="ShowOrder")  i_elm.innerHTML= i-1 ;
                        }  
                                     } 
 
@@ -1294,7 +1184,6 @@ function SuccessMsg() {
     var  i_row_2 ;
     var  i_list  ;
     var  i_elm  ;
-    var  a_names ;
     var  down ;
     var  up ;
 
@@ -1317,8 +1206,6 @@ function SuccessMsg() {
 
          i_list.insertBefore(i_row_2, i_row_1) ;
 
-       a_names=["Order","Id","Category","Prescription","Name","Remark","Reference","Details","Delete","LiftUp"] ;
-
      for(j in a_names) {
 			 i_row_1      =document.getElementById(a_names[j]+"_"+up  ) ;
 			 i_row_2      =document.getElementById(a_names[j]+"_"+down) ;
@@ -1327,10 +1214,14 @@ function SuccessMsg() {
 			 i_row_2.id   = a_names[j]+"_"+up ;
 			 i_row_2.name = a_names[j]+"_"+up ;
                           
-      if(a_names[j]=="Order") {
+      if(a_names[j]=="Order"   ) {
                          i_row_1.value=down ;
                          i_row_2.value=up  ;
-                              }
+                                  }
+      if(a_names[j]=="ShowOrder") {
+                         i_row_1.innerHTML=down ;
+                         i_row_2.innerHTML=up  ;
+                                  }
                        }  
 
      return ;
@@ -1343,14 +1234,10 @@ function SuccessMsg() {
     var  v_session ;
     var  v_form ;
 
-           
              id_id=p_id.replace("Details","Id") ;
   	      i_id=document.getElementById(id_id) ;
 
-	 v_session=TransitContext("restore","session","") ;
-	    v_form="prescription_details_any.php" ;
-
-	parent.frames["details"].location.assign(v_form+"?Id="+i_id.value) ;
+         window.open("prescription_view.php?Id="+i_id.value) ;
 
     return ;         
   } 
@@ -1363,14 +1250,9 @@ function SuccessMsg() {
       i_sets_list.options[0].disabled=true ;
 
 	 v_session=TransitContext("restore","session","") ;
-	    v_form="set_details_any.php" ;
+	    v_form="set_view.php?ShortForm=true&Select=true" ;
 
-	parent.frames["details"].location.assign(v_form+"?Session="+v_session+"&Id="+p_id) ;
-  } 
-
-  function TestFrame(p_id, p_remark)
-  {
-	alert("Test "+p_id+" "+p_remark) ;
+	parent.frames["details"].location.assign(v_form+"&Session="+v_session+"&Id="+p_id) ;
   } 
 
   function ShowMeasurements()
@@ -1379,7 +1261,7 @@ function SuccessMsg() {
 
 	 v_session=TransitContext("restore","session","") ;
 
-      location.assign("measurements_view.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
+      parent.location.assign("measurements_view.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
   }
 
   function GoToViewMode()
@@ -1391,52 +1273,16 @@ function SuccessMsg() {
 
 	 v_session=TransitContext("restore","session","") ;
 
-      location.assign("client_prescr_view.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
+      parent.location.assign("client_prescr_view.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
   }
 
-  function SetDeseaseSelection(p_checked, p_id, p_name)
+  function ExtCallBack()
   {
-     var  i_dss_list ;
-     var  i_row_new ;
-     var  i_col_new ;
-     var  i_txt_new ;
-     var  v_id ;
+       i_sets_list.value='0' ;
 
-                  v_id ="Desease_"+p_id ;
-       i_deseases.value=" "+i_deseases.value+" " ;
+     parent.frames["details"].location.replace("prescriptions_select.php?Deseases="+dss_ids.trim()+"&Selected="+s_prescription_list) ;
+  }
 
-       i_dss_list= document.getElementById("Deseases_list") ;
-
-   if(p_checked==false)
-   {
-     i_deseases.value=i_deseases.value.replace(" "+p_id+" ", " ").trim() ;
-
-     i_dss_list.removeChild(document.getElementById(v_id)) ;
-         return ;
-   }
-
-   if(i_deseases.value.indexOf(" "+p_id+" ")<0)
-   {
-       i_deseases.value+=p_id ;
-   }
-       i_deseases.value =i_deseases.value.trim() ;
-
-       i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
-       i_row_new . id        =  v_id ;
-
-       i_col_new = document.createElement("td") ;
-       i_col_new . className = "tableL" ;
-       i_col_new . id        =  "DssName_"+p_id ;
-       i_txt_new = document.createTextNode(p_name) ;
-       i_col_new . appendChild(i_txt_new) ;
-       i_col_new . onclick= function(e) { window.open("desease_view.php?Id="+p_id) ; } ;
-       i_row_new . appendChild(i_col_new) ;
-
-       i_dss_list.insertBefore(i_row_new, null) ;
-
-    return ;         
-  } 
 
 <?php
   require("common.inc") ;
@@ -1456,15 +1302,13 @@ function SuccessMsg() {
 <form onsubmit="return SendFields();" method="POST" id="Form">
  
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>СТРАНИЦА НАЗНАЧЕНИЙ</b>
       </td> 
     </tr>
@@ -1472,47 +1316,47 @@ function SuccessMsg() {
   </table>
 
   <br>
-
+   
   <table width="100%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
-      <td>
-    
-  <table width="100%" id="Fields">
-    <thead>
-    </thead>
-    <tbody>
-    <tr>
-      <td class="field"> </td>
+      <td class="Normal_LT"> </td>
       <td> 
         <input type="submit" value="Сохранить" id="Save1"> 
         <input type="checkbox" value="1" name="Publish" id="Publish"> Передать пациенту
       </td>
     </tr>
     <tr>
-      <td class="field"> </td>
-      <td> <div class="error" id="Error"></div> </td>
+      <td> </td>
+      <td> <div class="Error_CT" id="Error"></div> </td>
     </tr>
     <tr>
-      <td class="field"> Заголовок </td>
+      <td class="Normal_RT"> Заголовок </td>
       <td> <input type="text" size=60 name="Title" id="Title"> </td>
     </tr>
     <tr>
-      <td class="field"> Примечание </td>
+      <td class="Normal_RT"> Примечание </td>
       <td> 
         <textarea cols=60 rows=7 wrap="soft" name="Remark" id="Remark"></textarea>
       </td>
     </tr>
     <tr>
-      <td class="field"> </td>
+      <td></td>
       <td> 
         <input type="button" hidden value="Результаты контрольных измерений" id="Measurements" onclick=ShowMeasurements()> 
       </td>
     </tr>
     <tr>
-      <td class="field"> </td>
+      <td></td>
+      <td> 
+        <input type="button" value="Перейти в режим просмотра пациентом" id="View" onclick="GoToViewMode()"> 
+        <div>Представление назначений для пациента:</div>
+        <div> <input type="radio" name="Presentation" value="LIST"  id="Presentation-List" checked>Списoк               </div>
+        <div> <input type="radio" name="Presentation" value="TILES" id="Presentation-Tiles"       >"Плиткa" с картинками</div>
+      </td> 
+    </tr>
+    <tr>
+      <td> </td>
       <td>
         <input type="hidden" name="Page"       id="Page"> 
         <input type="hidden" name="Check"      id="Check"> 
@@ -1525,60 +1369,27 @@ function SuccessMsg() {
         <input type="hidden" name="InCopy"     id="InCopy">
         <input type="hidden" name="Id"         id="Id">
         <input type="hidden" name="Count"      id="Count">
+        <input type="hidden" name="Deseases"   id="Deseases">
+        <input type="hidden" name="AfterSave"  id="AfterSave">
       </td>
     </tr>
     </tbody>
   </table>
 
-      </td>
-      <td class="fieldL">
-        <input type="button" value="Перейти в режим просмотра пациентом" id="View" onclick="GoToViewMode()"> 
-        <div>Представление назначений для пациента:</div>
-        <div> <input type="radio" name="Presentation" value="LIST"  id="Presentation-List" checked>Списoк               </div>
-        <div> <input type="radio" name="Presentation" value="TILES" id="Presentation-Tiles"       >"Плиткa" с картинками</div>
-        <br>
-        <div class="fieldL">
-          <input type="button" value="Добавить/удалить заболевания" onclick=LinkDesease()>
-          <input type="hidden" name="Deseases" id="Deseases">
-        </div> 
-        <table width="100%">
-          <thead>
-          </thead>
-          <tbody  id="Deseases_list">
-          </tbody>
-        </table>
-      </td>
-    </tr>
-
-    </tbody>
-  </table>
+  <br>
  
-  <table width="100%">
-    <thead>
-    </thead>
+  <table>
     <tbody  id="Prescriptions">
     </tbody>
   </table>
+  
+  <br>
+  <div class="Normal_CT">
+    <div>Комплексы назначений:</div>
+    <select id="SetsList"></select>
   </div>
-
-  <input type="button" value="Добавить назначение" onclick=AddNewRow()>
   <br>
   <br>
-  <dev>Комплексы назначений:</dev>
-  <select id="SetsList"></select>
-  <br>
-  <br>
-
-    <select hidden id="Category"         ></select>
-    <select hidden id="C_exercise"       ></select>
-    <select hidden id="C_exploration"    ></select>
-    <select hidden id="C_measurement"    ></select>
-    <select hidden id="C_operation"      ></select>
-    <select hidden id="C_others"         ></select>
-    <select hidden id="C_pharmacotherapy"></select>
-    <select hidden id="C_test"           ></select>
-    <select hidden id="C_treatment"      ></select>
-    <select hidden id="C_unregistered"   ></select>
 
   </form>
 

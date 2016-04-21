@@ -2,7 +2,8 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Prescriptions_selector.php" ;
+   $glb_script ="Prescriptions_selector.php" ;
+   $glb_log_off=true ;
 
   require("stdlib.php") ;
 
@@ -44,18 +45,31 @@ function ProcessDB() {
    else                           $type    =   "dummy" ;
 
    if(isset($_POST["Selected"]))  $selected=$_POST["Selected"] ;
-   else                           $selected=$_GET ["Selected"] ;
+   else                         
+   if(isset($_GET ["Selected"]))  $selected=$_GET ["Selected"] ;
    
-                                  $common  =$_POST["Common"] ;
-                                  $exclude =$_POST["Exclude"] ;
+   if(isset($_POST["Exclude" ]))  $exclude =$_POST["Exclude"] ;
+   if(isset($_POST["Common"  ]))  $common  =$_POST["Common"] ;
 
-  FileLog("START", "    Type:".$type) ;
-  FileLog("",      "Deseases:".$deseases) ;
-  FileLog("",      "  Common:".$common) ;
-  FileLog("",      "Selected:".$selected) ;
-  FileLog("",      " Exclude:".$exclude) ;
+      FileLog("START", "    Type:".$type) ;
+      FileLog("",      "Deseases:".$deseases) ;
+
+  if(isset($selected))
+      FileLog("",      "Selected:".$selected) ;
+
+  if(isset($common ))
+      FileLog("",      "  Common:".$common) ;
+
+  if(isset($exclude))
+      FileLog("",      " Exclude:".$exclude) ;
 
         $sys_deseases=$deseases ;
+
+//--------------------------- Умолчания
+
+  if(!isset($selected))  $selected="" ;
+  if(!isset($common  ))  $common  ="false" ;
+  if(!isset($exclude ))  $exclude ="false" ;
 
 //--------------------------- Подключение БД
 
@@ -305,9 +319,9 @@ function ShowPrescriptions() {
        echo  "  <input type='button' class='AddButton' value='<<' onclick=UsePrescription('".$sys_prs_id[$i]."')> \n" ;
        echo  " </td> \n" ;
        echo  " <td> \n" ;
-       echo  "  <img src='".$sys_prs_icon[$i]."' height=30> \n" ; 
+       echo  "   <img src='".$sys_prs_icon[$i]."' height=30> \n" ; 
+       echo  "   <div id='Type_".$sys_prs_id[$i]."' hidden>".$sys_prs_type[$i]."</div>\n" ;
        echo  " </td> \n" ;
-
        echo  " <td class='".$class."' id='".$sys_prs_id[$i]."'> \n" ;
        echo  htmlspecialchars(stripslashes($sys_prs_name[$i]), ENT_COMPAT, "windows-1251") ;
        echo  " </td> \n" ;
@@ -446,6 +460,11 @@ function InfoMsg($text) {
 
          return true ;
   }
+  
+  function SendFields() 
+  {
+       return true ;         
+  } 
 
   function SetType(p_selected)
   {
@@ -580,9 +599,10 @@ function InfoMsg($text) {
 
     if(i_exclude.checked)  document.getElementById('Row_'+p_id).hidden=true ;
    
-    v_name=document.getElementById(p_id).innerHTML ;
+    v_type=document.getElementById("Type_"+p_id).innerHTML ;
+    v_name=document.getElementById(        p_id).innerHTML ;
 
-     parent.frames['section'].AddSelectedRow(p_id, v_name) ;
+     parent.frames['section'].AddSelectedRow(p_id, v_type, v_name) ;
   }
 
   function HideSelected() 
@@ -668,17 +688,13 @@ function InfoMsg($text) {
 
   <form onsubmit="return SendFields();" method="POST">
 
-  <table>
-    <thead>
-    </thead>
+  <table width="100%">
     <tbody>
     <tr>
       <td id="Column1"> 
     
   <table class="Normal_CT" width="100%">
     <thead>
-    </thead>
-    <tbody>
     <tr>
       <td>
          <select name="Type" id="Type" placeholder="Выбирете категорию" > 
@@ -689,8 +705,6 @@ function InfoMsg($text) {
       <td>
         <input type="checkbox" name="Common" id="Common" value="true">Не отнесенные к каким-либо заболеваниям
         <table width="100%">
-          <thead>
-          </thead>
           <tbody  id="Deseases_list">
           </tbody>
         </table>
@@ -736,8 +750,6 @@ function InfoMsg($text) {
       <td id="SelectDeseases" hidden>
         <input type="button" value="Обратно" onclick=CallBack()>
         <table width="100%">
-          <thead>
-          </thead>
           <tbody id="AllDeseases">
 <?php
             ShowDeseases() ;

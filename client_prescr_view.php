@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Client_prescr_view.php" ;
+   $glb_script ="Client_prescr_view.php" ;
 
   require("stdlib.php") ;
 
@@ -197,7 +197,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
@@ -344,7 +347,7 @@ function SuccessMsg() {
                       }
 
 		  i_row_new = document.createElement("tr") ;
-		  i_row_new . className = "table" ;
+		  i_row_new . className = "Table_LT" ;
 		  i_row_new . id        = "Row_"+s_id ;
 
    for(col=0 ; col<s_tail ; col++)
@@ -358,10 +361,10 @@ function SuccessMsg() {
 			  s_ref   =p_ref ;
                 }
 
-     if(s_type=="measurement") {  msr_flag=true ;
-                                     style="tableM" ;  }
-     else                      {  msr_flag=false ;
-                                     style="table" ;   }
+     if(s_type=="measurement") {  msr_flag= true ;
+                                     style="TableMeasurement_LT" ;  }
+     else                      {  msr_flag= false ;
+                                     style="Table_LT" ;             }
 
 		  i_col_new = document.createElement("td") ;
 		  i_col_new . className = style ;
@@ -442,10 +445,10 @@ function SuccessMsg() {
 
      if(p_order==0)  return ;
 
-     if(p_type=="measurement") {  msr_flag=true ;
-                                     style="tableM" ;  }
-     else                      {  msr_flag=false ;
-                                     style="table" ;   }
+     if(p_type=="measurement") {  msr_flag= true ;
+                                     style="TableMeasurement_LT" ;  }
+     else                      {  msr_flag= false ;
+                                     style="Table_LT" ;             }
 
 		  i_row_new = document.createElement("tr") ;
 		  i_row_new . className = style ;
@@ -546,30 +549,27 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>СТРАНИЦА НАЗНАЧЕНИЙ (ПРОСМОТР)</b>
       </td> 
     </tr>
     </tbody>
   </table>
 
-  <div class="error" id="Error"></div>
+  <div class="Error_CT" id="Error"></div>
+
   <form onsubmit="return SendFields();" method="POST" id="Form">
 
-  <b><div class="fieldC" id="Title"></div></b>
+  <b><div class="Normal_CT" id="Title"></div></b>
   <br>
-  <div class="fieldC">
+  <div class="Normal_CT">
     <span><b>Врач: </b></span>
     <span id="Creator"></span>
     <input type="button" value="Кто это?" onclick=WhoIsIt()>
@@ -579,7 +579,7 @@ function SuccessMsg() {
   <div left=5m id="Remark"></div> 
   <br>
 
-  <table width="100%">
+  <table>
     <thead>
     </thead>
     <tbody>
@@ -608,8 +608,6 @@ function SuccessMsg() {
   </table>
 
   </form>
-
-</div>
 
 </body>
 

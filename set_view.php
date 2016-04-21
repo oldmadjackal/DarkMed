@@ -2,7 +2,8 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Set_view.php" ;
+   $glb_script ="Set_view.php" ;
+   $glb_log_off= true ;
 
   require("stdlib.php") ;
 
@@ -21,11 +22,24 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                        $session=$_GET ["Session"] ;
-                         $get_id=$_GET ["Id"] ;
+                                 $session   =$_GET["Session"] ;
+                                 $get_id    =$_GET["Id"] ;
+  if(isset($_GET["ShortForm"]))  $short_form=$_GET["ShortForm"] ;
+  if(isset($_GET["Select"   ]))  $select    =$_GET["Select"] ;
+                         
+       FileLog("START", "    Session:".$session) ;
+       FileLog("",      "     Get_Id:".$get_id) ;
 
-    FileLog("START", "    Session:".$session) ;
-    FileLog("",      "     Get_Id:".$get_id) ;
+  if(isset($short_form))
+       FileLog("",      "  ShortForm:".$short_form) ;
+
+  if(isset($select))
+       FileLog("",      "     Select:".$select) ;
+
+//--------------------------- Умолчания
+
+  if(!isset($short_form))  $short_form="false" ;
+  if(!isset($select    ))  $select    ="false" ;
 
 //--------------------------- Подключение БД
 
@@ -150,8 +164,10 @@ function ProcessDB() {
   }
 //--------------------------- Вывод данных на страницу
 
-      echo     "  i_name       .innerHTML='".$name       ."' ;\n" ;
-      echo     "  i_description.innerHTML='".$description."' ;\n" ;
+      echo     "    short_form           = ".$short_form ." ; \n" ;
+      echo     "    select               = ".$select     ." ; \n" ;
+      echo     "  i_name       .innerHTML='".$name       ."' ; \n" ;
+      echo     "  i_description.innerHTML='".$description."' ; \n" ;
 
 //--------------------------- Завершение
 
@@ -165,8 +181,8 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;       \n" ;
+    echo  "i_error.innerHTML  ='".$text."' ; \n" ;
     echo  "return ;" ;
 }
 
@@ -175,8 +191,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;" ;
+    echo  "i_error.style.color='green' ;                     \n" ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ; \n" ;
 }
 //============================================== 
 ?>
@@ -215,6 +231,9 @@ function SuccessMsg() {
     var  a_plist_name ;
     var  a_plist_remark ;
 
+    var  short_form=false ;
+    var  select    =false ;
+
 
   function FirstField() 
   {
@@ -240,6 +259,8 @@ function SuccessMsg() {
 
        i_description.innerHTML=i_description.innerHTML.replace(nl,"<br>") ;
 
+    if(select)  document.getElementById("Select").hidden=false ;
+            
         ShowPrescriptions() ;
 
          return true ;
@@ -301,14 +322,19 @@ function SuccessMsg() {
                   i_col_new . appendChild(i_txt_new) ;
                   i_row_new . appendChild(i_col_new) ;
 
+ if(short_form==false)
+ {
                   i_col_new = document.createElement("td") ;
                   i_col_new . className = v_style ;
                   i_txt_new = document.createTextNode(p_tname) ;
                   i_col_new . appendChild(i_txt_new) ;
                   i_row_new . appendChild(i_col_new) ;
+ }
 
                   i_col_new = document.createElement("td") ;
                   i_col_new . className = v_style ;
+		  i_col_new . id = p_id ;
+  if(p_id!="0")   i_col_new . onclick  = function(e) {  ShowDetails(this.id) ;  } ;
   if(p_id!='0')   i_txt_new = document.createTextNode(p_name) ;
   else            i_txt_new = document.createTextNode(p_remark) ;
                   i_col_new . appendChild(i_txt_new) ;
@@ -319,19 +345,6 @@ function SuccessMsg() {
   if(p_id!='0') {
                   i_txt_new = document.createTextNode(p_remark) ;
                   i_col_new . appendChild(i_txt_new) ;
-                }
-                  i_row_new . appendChild(i_col_new) ;
-
-                  i_col_new = document.createElement("td") ;
-                  i_col_new . className = v_style ;
-                  i_col_new . width     = "3%" ;
-  if(p_id!='0') {
-                  i_shw_new = document.createElement("input") ;
-                  i_shw_new . type   ="button" ;
-                  i_shw_new . value  ="Подробнее" ;
-                  i_shw_new . id     ='Details_'+ p_order ;
-                  i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
-                  i_col_new . appendChild(i_shw_new) ;
                 }
                   i_row_new . appendChild(i_col_new) ;
 
@@ -374,7 +387,8 @@ function SuccessMsg() {
 			  s_remark[s_num]=p_remark ;
 			           s_num++  ;
 
-                  if(p_order%3!=0)  return ;
+                  if(short_form   ==false &&
+                         p_order%3!=   0    )  return ;
                       }
 
 		  i_row_new = document.createElement("tr") ;
@@ -425,7 +439,8 @@ function SuccessMsg() {
 		  i_col_new . className = v_style ;
   if(msr_flag ) {
 		}
-  else          { 
+  else
+  if(v_id!="0") {
 		  i_frm_new = document.createElement("iframe") ;
 		  i_frm_new . src         ="prescription_pilot.php?Id="+s_id[col] ;
 		  i_frm_new . seamless    = true ;
@@ -501,6 +516,20 @@ function SuccessMsg() {
     return ;         
   } 
 
+  function ExtReturn()
+  {
+      parent.frames['section'].ExtCallBack() ;
+  }
+
+  function ExtSelect()
+  {
+     for(i in a_plist_id) {
+          parent.frames['section'].AddListRow(a_plist_id[i], a_plist_type[i], a_plist_name[i], a_plist_remark[i], "", 0) ;
+                          }
+                          
+      parent.frames['section'].ExtCallBack() ;
+  }
+
 <?php
   require("common.inc") ;
 ?>
@@ -530,15 +559,21 @@ function SuccessMsg() {
     </tbody>
   </table>
 
-  <table width="100%" >
+  <table>
     <tbody>
     <tr>
       <td> <div class="Error_CT" id="Error"></div> </td>
     </tr>
+    <tr id="Select" hidden>
+      <td class="Normal_CT">
+        <input type="button" class="GreenButton" value="Выбрать"   onclick=ExtSelect()> 
+        <input type="button"                     value="Вернуться" onclick=ExtReturn()> 
+      </td>
+    </tr>
     <tr>
     <td class="table">
 
-  <table width="100%">
+  <table>
     <tbody>
     <tr>
       <td class="Normal_RT"> <b>Название</b> </td>
@@ -555,6 +590,8 @@ function SuccessMsg() {
   </table>
 
       </td>
+    </tr>
+    <tr>
       <td class="table">
         <table width="100%">
           <tbody  id="Deseases_list">
@@ -567,7 +604,7 @@ function SuccessMsg() {
 
   <br>
   
-  <table width="100%" id="Fields">
+  <table>
     <tbody>
       <tr>
         <td width="30%"></td>
@@ -580,7 +617,7 @@ function SuccessMsg() {
 
   <br>
 
-  <table width="100%">
+  <table>
     <tbody  id="Prescriptions">
     </tbody>
   </table>

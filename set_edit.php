@@ -402,7 +402,7 @@ function SuccessMsg() {
 
 	error_text="" ;
      
-     if(i_name.value==''     )  error_text="Название комплекса должно быть задано" ;
+     if(i_name.value=='')  error_text="Название комплекса должно быть задано" ;
 
        i_error.style.color="red" ;
        i_error.innerHTML  = error_text ;
@@ -413,7 +413,7 @@ function SuccessMsg() {
 
            i_after_save.value="true" ;
 
-                         return true ;         
+       return true ;         
   } 
 
   function AddListRow(p_id, p_name, p_remark, p_order)
@@ -520,18 +520,21 @@ function SuccessMsg() {
        i_del_new . value     ="X" ;
        i_del_new . id        ='Delete_'+ num_new ;
        i_del_new . onclick   = function(e) {  DeleteRow(this.id) ;  }
+       
        i_upp_new = document.createElement("input") ;
        i_upp_new . type   ="button" ;
        i_upp_new . className ="UpButton" ;
        i_upp_new . value  ="^" ;
        i_upp_new . id     ='LiftUp_'+ num_new ;
        i_upp_new . onclick= function(e) {  LiftUpRow(this.id) ;  }
+       
        i_ins_new = document.createElement("input") ;
        i_ins_new . type   ="button" ;
        i_ins_new . className ="InsertButton" ;
        i_ins_new . value  ="+" ;
        i_ins_new . id     ='Insert_'+ num_new ;
        i_ins_new . onclick= function(e) {  InsertNewRow(this.id) ;  }
+       
        i_col_new . appendChild(i_ins_new) ;
        i_col_new . appendChild(i_upp_new) ;
        i_col_new . appendChild(i_del_new) ;
@@ -590,7 +593,7 @@ function SuccessMsg() {
      AddListRow(0, "", "", top) ;
   }
 
-  function AddSelectedRow(p_id, p_name)
+  function AddSelectedRow(p_id, p_type, p_name)
   {
     var  order ;
     var  new_row ;
@@ -645,10 +648,10 @@ function SuccessMsg() {
 
      for(i=top+1 ; i<=bottom ; i++) {
      for(j in a_names) {
-			           i_elm      =document.getElementById(a_names[j]+"_"+i) ;
-			           i_elm.id   =a_names[j]+"_"+(i-1) ;
-			           i_elm.name =a_names[j]+"_"+(i-1) ;
-      if(a_names[j]=="Order"    )  i_elm.value= i-1 ;
+			           i_elm          =document.getElementById(a_names[j]+"_"+i) ;
+			           i_elm.id       =a_names[j]+"_"+(i-1) ;
+			           i_elm.name     =a_names[j]+"_"+(i-1) ;
+      if(a_names[j]=="Order"    )  i_elm.value    = i-1 ;
       if(a_names[j]=="ShowOrder")  i_elm.innerHTML=i-1 ;
                        }  
                                     } 
@@ -696,10 +699,10 @@ function SuccessMsg() {
 			 i_row_2.id   = a_names[j]+"_"+up ;
 			 i_row_2.name = a_names[j]+"_"+up ;
                           
-      if(a_names[j]=="Order") {
+      if(a_names[j]=="Order"   ) {
                          i_row_1.value=down ;
                          i_row_2.value=up  ;
-                              }
+                                  }
       if(a_names[j]=="ShowOrder") {
                          i_row_1.innerHTML=down ;
                          i_row_2.innerHTML=up  ;

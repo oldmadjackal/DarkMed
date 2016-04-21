@@ -41,7 +41,7 @@
                   padding-left : 1ex             ; 
                  padding-right : 1ex             ; 
 }
-.TableGap  /* Строка рзрыва */
+.TableGap  /* Строка/колонка разрыва */
 {
                         border : 0px solid black ; 
                   padding-left : 1ex             ; 

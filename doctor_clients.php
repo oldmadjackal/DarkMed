@@ -462,6 +462,9 @@ function SuccessMsg() {
                             +"parent.parent.frames['view'].location.assign('"
                             +url+"?Session="+v_session+"&Owner="+p_client+"&Page="+words[0]
                             +"') ; " ;
+
+         if(a_prsc_title[elem]=="")  a_prsc_title[elem]="Unknown" ;
+
           i_text_new        =document.createTextNode(a_prsc_title[elem]) ;
           i_link_new.appendChild(i_text_new) ;
 

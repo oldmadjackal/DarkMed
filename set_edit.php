@@ -365,6 +365,7 @@ function SuccessMsg() {
     var  i_deseases ;
     var  i_after_save ;
     var  i_error ;
+    var  v_session ;
 
     var  s_prescription_list="" ;
 
@@ -382,6 +383,8 @@ function SuccessMsg() {
 	i_deseases   =document.getElementById("Deseases") ;
 	i_after_save =document.getElementById("AfterSave") ;
 	i_error      =document.getElementById("Error") ;
+
+            v_session=TransitContext("restore","session","") ;
 
 <?php
             ProcessDB() ;
@@ -745,9 +748,6 @@ function SuccessMsg() {
 
   function GoToPreview()
   {
-     var  v_session ;
-
-            v_session=TransitContext("restore","session","") ;
         window.open("set_view.php?Session="+v_session+"&Id="+i_id.value) ;          
   }
   

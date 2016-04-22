@@ -3,24 +3,26 @@
 
 function TransitContext(p_action, p_context, p_text)
 {
-                     context=parent.frames["menu"] ;
-  if(context==null)  context=parent.parent.frames["menu"] ;
+  var  kernel ;
+
+                    kernel=parent.frames["menu"] ;
+  if(kernel==null)  kernel=parent.parent.frames["menu"] ;
 
   if(p_action=="save")
   {
-    if(p_context=="password")  context.document.getElementById("glbPassword").value=p_text ;
-    if(p_context=="session" )  context.document.getElementById("glbSession" ).value=p_text ;
-    if(p_context=="value"   )  context.document.getElementById("glbValue"   ).value=p_text ;
-    if(p_context=="callback")  context.document.getElementById("glbCallBack").value=p_text ;
-    if(p_context=="user"    )  context.document.getElementById("glbUser"    ).value=p_text ;
+    if(p_context=="password")  kernel.document.getElementById("glbPassword").value=p_text ;
+    if(p_context=="session" )  kernel.document.getElementById("glbSession" ).value=p_text ;
+    if(p_context=="value"   )  kernel.document.getElementById("glbValue"   ).value=p_text ;
+    if(p_context=="callback")  kernel.document.getElementById("glbCallBack").value=p_text ;
+    if(p_context=="user"    )  kernel.document.getElementById("glbUser"    ).value=p_text ;
   }
   else
   {
-    if(p_context=="password")  return(context.document.getElementById("glbPassword").value) ;
-    if(p_context=="session" )  return(context.document.getElementById("glbSession" ).value) ;
-    if(p_context=="value"   )  return(context.document.getElementById("glbValue"   ).value) ;
-    if(p_context=="callback")  return(context.document.getElementById("glbCallBack").value) ;
-    if(p_context=="user"    )  return(context.document.getElementById("glbUser"    ).value) ;
+    if(p_context=="password")  return(kernel.document.getElementById("glbPassword").value) ;
+    if(p_context=="session" )  return(kernel.document.getElementById("glbSession" ).value) ;
+    if(p_context=="value"   )  return(kernel.document.getElementById("glbValue"   ).value) ;
+    if(p_context=="callback")  return(kernel.document.getElementById("glbCallBack").value) ;
+    if(p_context=="user"    )  return(kernel.document.getElementById("glbUser"    ).value) ;
 
        window.alert("Unknown p_context in TransitContext function") ;
   }

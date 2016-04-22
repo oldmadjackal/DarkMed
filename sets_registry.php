@@ -203,7 +203,7 @@ function SuccessMsg() {
 					    var  v_form ;
 						 v_session=TransitContext("restore","session","") ;
 									      v_form="set_edit_wrapper.php" ;
- 						          location.assign(v_form+"?Session="+v_session+
+ 						          parent.location.assign(v_form+"?Session="+v_session+
                                                                                  "&Id="+p_id) ;
 					} ;
        i_col_new . appendChild(i_edt_new) ;
@@ -220,7 +220,7 @@ function SuccessMsg() {
 
          v_session=TransitContext("restore","session","") ;
 
-        location.assign("set_edit.php"+"?Session="+v_session) ;
+        parent.location.assign("set_edit.php"+"?Session="+v_session) ;
   } 
 
   function SetReadOnly() 

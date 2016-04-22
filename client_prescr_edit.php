@@ -234,6 +234,28 @@ function ProcessDB() {
 
       echo     "   note_key='".$fields[0]."' ;	\n" ;
 
+//--------------------------- Извлечение диагноза
+
+  if(!isset($deseases))
+  {          
+                       $sql="Select deseases".
+                            " From  doctor_notes".
+                            " Where owner='$user_' and client='$owner_'" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+          FileLog("ERROR", "Select DOCTOR_NOTES... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка извлечения диагноза") ;
+                         return ;
+    }
+
+	      $fields=$res->fetch_row() ;
+	              $res->close() ;
+
+                   $deseases=$fields[0] ;
+                   
+      echo     "  i_deseases.value='".$deseases."' ; \n" ;
+  }
 //--------------------------- Отображение пустой новой страницы
 
   if( isset($new_page) &&
@@ -490,27 +512,6 @@ function ProcessDB() {
 
 	              $res->close() ;
 
-//--------------------------- Извлечение диагноза
-
-  if(!isset($deseases))
-  {          
-                       $sql="Select deseases".
-                            " From  doctor_notes".
-                            " Where owner='$user_' and client='$owner_'" ;
-       $res=$db->query($sql) ;
-    if($res===false) {
-          FileLog("ERROR", "Select DOCTOR_NOTES... : ".$db->error) ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка извлечения диагноза") ;
-                         return ;
-    }
-
-	      $fields=$res->fetch_row() ;
-	              $res->close() ;
-
-                   $deseases=$fields[0] ;
-  }
-
 //--------------------------- Извлечение данных страницы
 
                        $sql="Select `check`, title, remark, published, presentation".
@@ -574,7 +575,6 @@ function ProcessDB() {
       echo     "  i_check     .value='".$check.   "' ; \n" ;
       echo     "  i_title     .value='".$title.   "' ; \n" ;
       echo     "  i_remark    .value='".$remark.  "' ; \n" ;
-      echo     "  i_deseases  .value='".$deseases."' ; \n" ;
       echo     "  i_update    .value='update' ;	\n" ;
       echo     "  i_after_save.value='".$after_save."' ; \n" ;
 
@@ -787,13 +787,13 @@ function SuccessMsg() {
                     dss_ids ="" ;
                     dss_list=i_deseases.value.split("@") ;
 
-    for(i=0 ; i<dss_list.length ; i++) {
+    for(var i=0 ; i<dss_list.length ; i++) {
 
          if(dss_list[i]=="")  break ;
 
-                         words =dss_list[i].split("#") ;
-                       dss_ids+=" "+words[0] ;
-                                       }
+                     words =dss_list[i].split("#") ;
+                   dss_ids+=" "+words[0] ;
+                                           }
 
      if(i_after_save.value!="true")
         parent.frames["details"].location.replace("prescriptions_select.php?Deseases="+dss_ids.trim()+"&Selected="+s_prescription_list) ;

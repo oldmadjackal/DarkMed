@@ -28,6 +28,22 @@ function ProcessDB() {
     FileLog("START", "Session:".$session) ;
     FileLog("",      "  Owner:".$owner) ;
     FileLog("",      "   Page:".$page) ;
+    
+           $values_cheched=0 ;
+
+  foreach($_POST as $key => $value) 
+   if(substr($key, 0, 6)=="Value_")
+   {
+     if($value!="")
+     {
+              $values_checked=1 ;
+              
+                  $reference =$_POST["Reference_".substr($key, 6)] ;
+        $a_values[$reference]=$value ;
+
+        FileLog("", "Measurement ".$reference."=".$value) ;        
+     }
+   }
 
 //--------------------------- Подключение БД
 
@@ -50,6 +66,52 @@ function ProcessDB() {
           $user_   =$db->real_escape_string($user ) ;
           $page_   =$db->real_escape_string($page ) ;
 
+//--------------------------- Сохранение введенных данных
+
+  if($values_checked)
+  {
+//- - - - - - - - - - Определение идентификатора страницы
+                     $sql="Select id".
+			  "  From client_pages".
+                          " Where owner='$owner_'".
+                          "  and  page = $page_" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select CLIENT_PAGES(ID)... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса идентификатора назначения") ;
+                         return ;
+  }
+	 $fields=$res->fetch_row() ;
+                 $res->close() ;
+
+	$page_id=$fields[0] ;
+//- - - - - - - - - - - - - - Сохранение введенных данных
+     foreach($a_values as $key => $value) 
+     {
+          $key_  =$db->real_escape_string($key  ) ;
+          $value_=$db->real_escape_string($value) ;
+
+			   $sql="Insert into ".
+				"measurements( page_id,  measurement_id,  value  )".
+				"      values($page_id, $key_,          '$value_')" ;
+	   $res=$db->query($sql) ;
+	if($res===false) {
+               FileLog("ERROR", "Insert MEASUREMENTS... : ".$db->error) ;
+                       $db->rollback();
+                       $db->close() ;
+              ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка записи в базу данных") ;
+                           return ;
+        }
+
+     }
+//- - - - - - - - - - - - - - Возврат на страницу назначений
+          $db->commit() ;
+
+        FileLog("", "Measurements values saved successfully") ;
+     SuccessMsg() ;
+//- - - - - - - - - - - - - -
+  }
 //--------------------------- Извлечение ключа страницы
 
                        $sql="Select  crypto".
@@ -394,14 +456,33 @@ function SuccessMsg() {
 		  i_col_new = document.createElement("td") ;
 		  i_col_new . className = style ;
   if(msr_flag ) {
-		  i_elm_new = document.createElement("br") ;
-		  i_col_new . appendChild(i_elm_new) ;
 		  i_msr_new = document.createElement("input") ;
 		  i_msr_new . type   ="button" ;
 		  i_msr_new . value  ="Занести данные" ;
-		  i_msr_new . id     = s_ref ;
-		  i_msr_new . onclick= function(e) {  CheckMeasurements(this.id) ;  }
-		  i_col_new . appendChild(i_msr_new) ;
+		  i_msr_new . id     ='Measurement_'+ s_order ;
+		  i_msr_new . onclick= function(e) {  CheckMeasurement(this.id) ;  }
+                  i_col_new . appendChild(i_msr_new) ;
+
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="hidden" ;
+		  i_msr_new . value  = p_ref ;
+		  i_msr_new . id     ='Reference_'+ s_order ;
+		  i_msr_new . name   ='Reference_'+ s_order ;
+                  i_col_new . appendChild(i_msr_new) ;
+
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="text" ;
+		  i_msr_new . hidden = true ;
+		  i_msr_new . id     ='Value_'+ s_order ;
+		  i_msr_new . name   ='Value_'+ s_order ;
+                  i_col_new . appendChild(i_msr_new) ;
+
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="submit" ;
+		  i_msr_new . value  ="Сохранить" ;
+		  i_msr_new . hidden = true ;
+		  i_msr_new . id     ='Save_'+ s_order ;
+                  i_col_new . appendChild(i_msr_new) ;
 		}
   else          { 
 		  i_frm_new = document.createElement("iframe") ;
@@ -479,15 +560,40 @@ function SuccessMsg() {
 		 }
 		  i_row_new . appendChild(i_col_new) ;
 
+   if(msr_flag ) {
 		  i_col_new = document.createElement("td") ;
 		  i_col_new . className = style ;
+
 		  i_msr_new = document.createElement("input") ;
 		  i_msr_new . type   ="button" ;
 		  i_msr_new . value  ="Занести данные" ;
 		  i_msr_new . id     ='Measurement_'+ p_order ;
-		  i_msr_new . onclick= function(e) {  CheckMeasurements(p_ref) ;  }
-   if(msr_flag )  i_col_new . appendChild(i_msr_new) ;
+		  i_msr_new . onclick= function(e) {  CheckMeasurement(this.id) ;  }
+                  i_col_new . appendChild(i_msr_new) ;
+
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="hidden" ;
+		  i_msr_new . value  = p_ref ;
+		  i_msr_new . id     ='Reference_'+ p_order ;
+		  i_msr_new . name   ='Reference_'+ p_order ;
+                  i_col_new . appendChild(i_msr_new) ;
+
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="text" ;
+		  i_msr_new . hidden = true ;
+		  i_msr_new . id     ='Value_'+ p_order ;
+		  i_msr_new . name   ='Value_'+ p_order ;
+                  i_col_new . appendChild(i_msr_new) ;
+
+		  i_msr_new = document.createElement("input") ;
+		  i_msr_new . type   ="submit" ;
+		  i_msr_new . value  ="Сохранить" ;
+		  i_msr_new . hidden = true ;
+		  i_msr_new . id     ='Save_'+ p_order ;
+                  i_col_new . appendChild(i_msr_new) ;
+
 		  i_row_new . appendChild(i_col_new) ;
+                 }
 
 		  i_set     . appendChild(i_row_new) ;
 
@@ -523,14 +629,20 @@ function SuccessMsg() {
 	location.assign("messages_chat_lr.php?Session="+v_session+"&Sender="+creator) ;
   }
 
-  function CheckMeasurements(p_ref)
+  function CheckMeasurement(p_id)
+  {
+     document.getElementById(p_id                               ).hidden=true ;
+     document.getElementById(p_id.replace("Measurement","Save" )).hidden=false ;
+     document.getElementById(p_id.replace("Measurement","Value")).hidden=false ;
+  }
+
+  function CheckMeasurements()
   {
     var  v_session ;
 
 	 v_session=TransitContext("restore","session","") ;
 
-     if(p_ref==null) 	             location.replace("measurements_check.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
-     else   parent.frames["details"].location.replace("measurement_check_details.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num+"&Reference="+p_ref) ;
+       location.replace("measurements_check.php?Session="+v_session+"&Owner="+page_owner+"&Page="+page_num) ;
   }
 
 
@@ -590,7 +702,7 @@ function SuccessMsg() {
         </td>
         <td width="50%">
           <div hidden id="MeasurementsList">
-            <input type="button" value="Занести контрольные измерения" onclick=CheckMeasurements(null)>
+            <input type="button" value="Занести контрольные измерения" onclick=CheckMeasurements();>
           </div>
         </td>
       </tr>

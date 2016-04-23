@@ -30,10 +30,13 @@ function ProcessDB() {
     FileLog("",      "   Page:".$page) ;
 
            $values_checked=0 ;
+           $return        =0 ;
 
   foreach($_POST as $key => $value) 
    if(substr($key, 0, 6)=="Value_")
    {
+           $return=1 ;
+
      if($value!="") {  $a_values[substr($key, 6)]=$value ;
                                   $values_checked=  1 ;     }
 
@@ -105,10 +108,14 @@ function ProcessDB() {
 
         FileLog("", "Measurements values saved successfully") ;
      SuccessMsg() ;
-
-      echo     "  location.assign('client_prescr_view.php?Session=".$session."&Owner=".$owner."&Page=".$page."') ;	\n" ;
 //- - - - - - - - - - - - - -
   }
+//--------------------------- Возвращение на страницу назначений
+
+   if($return==1)
+   {
+      echo     "  location.assign('client_prescr_view.php?Session=".$session."&Owner=".$owner."&Page=".$page."') ;	\n" ;
+   }
 //--------------------------- Извлечение ключа страницы
 
                        $sql="Select  crypto".
@@ -211,7 +218,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
@@ -287,11 +297,11 @@ function SuccessMsg() {
 
 
 	i_row_new = document.createElement("tr") ;
-	i_row_new . className = "table" ;
+	i_row_new . className = "Table_LT" ;
 
 	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
-	i_col_new . width = "5%" ;
+	i_col_new . className = "Table_LT" ;
+//	i_col_new . width = "5%" ;
 	i_fld_new = document.createElement("input") ;
 	i_fld_new . id       ='Value_'+p_reference ;
 	i_fld_new . name     ='Value_'+p_reference ;
@@ -300,31 +310,27 @@ function SuccessMsg() {
 	i_row_new . appendChild(i_col_new) ;
 
 	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
+	i_col_new . className = "Table_LT" ;
+	i_col_new . onclick= function(e) {  ShowDetails(p_id) ;  }
 	i_txt_new = document.createTextNode(p_name) ;
 	i_col_new . appendChild(i_txt_new) ;
 	i_row_new . appendChild(i_col_new) ;
 
 	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
+	i_col_new . className = "Table_LT" ;
 	i_txt_new = document.createTextNode(p_remark) ;
 	i_col_new . appendChild(i_txt_new) ;
-	i_row_new . appendChild(i_col_new) ;
-
-	i_col_new = document.createElement("td") ;
-	i_col_new . className = "table" ;
-	i_shw_new = document.createElement("input") ;
-	i_shw_new . type   ="button" ;
-	i_shw_new . value  ="Подробнее" ;
-	i_shw_new . id     ='Details_'+ p_order ;
-	i_shw_new . onclick= function(e) {  ShowDetails(p_id) ;  }
-	i_col_new . appendChild(i_shw_new) ;
 	i_row_new . appendChild(i_col_new) ;
 
 	i_set     . appendChild(i_row_new) ;
 
     return ;         
   } 
+
+  function ShowDetails(p_id)
+  {
+    window.open("prescription_view.php?Id="+p_id) ;
+  }
 
   function ShowDetails(p_id)
   {
@@ -346,44 +352,36 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>ВВОД ДАННЫХ КОНТРОЛЬНЫХ ИЗМЕРЕНИЙ</b>
       </td> 
     </tr>
     </tbody>
   </table>
 
-  <div class="error" id="Error"></div>
+  <div class="Error_CT" id="Error"></div>
   <form onsubmit="return SendFields();" method="POST" id="Form">
 
   <br>
 
-  <table width="100%">
-    <thead>
-    </thead>
+  <table>
     <tbody  id="Prescriptions">
     </tbody>
   </table>
 
     <br>
-  <div class="fieldC">
-    <input type="submit" value="Сохранить">
+  <div class="Normal_CT">
+    <input type="submit" value="Сохранить/Вернуться">
   </div>
 
   </form>
-
-</div>
 
 </body>
 

@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Message_details_invite.php" ;
+   $glb_script="Message_details_access.php" ;
 
   require("stdlib.php") ;
 
@@ -255,23 +255,25 @@ function ProcessDB() {
         FileLog("", "Notes page successfully created for ".$owner) ;
 //- - - - - - - - - - - - - - Создание страницы заметок о клиенте
     } while(false) ;
-//- - - - - - - - - - - - - - Отметка о прочтении
-     if(strpos($action, "read")!==false)
-     {          
+//- - - - - - - - - - - - - - Отметка о прочтении и обработке
             $message_=$db->real_escape_string($message) ;
 
-                          $sql="Update messages ".
-                               "   Set `read`='Y' ".
-	                       " Where receiver='$user_'".
-	  		       "  and  id      = $message_" ;
-          $res=$db->query($sql) ;
-       if($res===false) {
+                        $sql ="Update messages ".
+                              "   Set `done`='Y' " ;
+
+     if(strpos($action, "read")!==false)
+                        $sql.="      ,`read`='Y' " ;
+
+                        $sql.=" Where receiver='$user_'".
+			      "  and  id      = $message_" ;
+        $res=$db->query($sql) ;
+     if($res===false) {
               FileLog("ERROR", "Update MESSAGES... : ".$db->error) ;
                                 $db->close() ;
              ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка изменения статуса сообщения") ;
                              return ;
        }
-     }
+//- - - - - - - - - - - - - -
 //- - - - - - - - - - - - - -
              $db->commit() ;
 
@@ -329,7 +331,7 @@ function SuccessMsg() {
 
 <head>
 
-<title>DarkMed Message details invite</title>
+<title>DarkMed Message details access</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
@@ -486,7 +488,7 @@ function SuccessMsg() {
 
   <form onsubmit="return SendFields();" method="POST">
 
-  <div class="Normal_CT"><b>Приглашение от пациента</b></div>
+  <div class="Normal_CT"><b>Информация от пациента</b></div>
   <br>
   <div class="Normal_CT">
     <div id="MsgSender"></div>

@@ -96,8 +96,8 @@ function ProcessDB() {
 
 	   $owner=$fields[1] ;
 
-	if(strpos($fields[5], "UserType=Doctor;")!==false)  $sender_type="Doctor" ;
-	else						    $sender_type="Client" ;
+	if(strpos($fields[5], "Client;")!==false)  $sender_type="Client" ;
+	else			                   $sender_type="Doctor" ;
 
       echo "    message_id          ='".$fields[0]."' ;					\n" ;
       echo "    sender_user         ='".$fields[1]."' ;					\n" ;
@@ -245,7 +245,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
@@ -339,7 +342,16 @@ function SuccessMsg() {
          v_session=TransitContext("restore","session","") ;
 
     window.open("doctor_view.php"+"?Session="+v_session+"&Owner="+sender_user) ;
-  } 
+  }
+
+  function GoToChat()
+  {
+     var  v_session ;
+
+       v_session=TransitContext("restore","session","") ;
+
+	parent.frames['section'].location.assign("messages_chat_lr.php?Session="+v_session+"&Sender="+sender_user) ;
+  }
 
 <?php
   require("common.inc") ;
@@ -356,29 +368,22 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-  <div class="error" id="Error"></div>
+  <div class="Error_CT" id="Error"></div>
 
   <form onsubmit="return SendFields();" method="POST">
 
-  <table border="0" width="100%" id="Fields">
-    <thead>
-    </thead>
-    <tbody>
-    <tr class="fieldL">
-      <td width="20%">
-         <b><dev>Сообщение</dev></b><br>
-         <dev id="MsgSender"> </dev><br>
-         <dev id="MsgSent"> </dev><br>
-         <input type="button" value="Кто это?" onclick=GoToView() id="WhoIsIt"></td>
-      </td>
-      <td width="2%">
-      </td>
-      <td width="73%">
-         <div id="MsgText"></div>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  <div class="Normal_CT"><b>Сообщение</b></div>
+  <br>
+  <div class="Normal_CT">
+    <div id="MsgSender"></div>
+    <input type="button" value="Кто это?"  id="WhoIsIt" onclick=GoToView()>
+    <input type="button" value="Переписка"              onclick=GoToChat()>
+  </div>
+  <br>
+  <div class="Normal_CT" id="MsgSent"> </div>
+  <br>         
+  <em><div id="MsgText"></div>
+  <br>
 
   </form>
 

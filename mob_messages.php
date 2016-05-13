@@ -334,6 +334,7 @@ function SuccessMsg() {
           details  =document.getElementById("Details_"+p_row).value ;
 
      if(message_type=="CLIENT_ACCESS_INVITE"      ||
+        message_type=="CLIENT_ACCESS_PAGES"       ||
 	message_type=="CLIENT_PRESCRIPTIONS_ALERT"  )
      {
 	document.getElementById("Accept").hidden=false ;

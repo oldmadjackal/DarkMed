@@ -205,7 +205,7 @@ function SuccessMsg() {
             ProcessDB() ;
 ?>
 
-	parent.frames["details"].location.assign("message_details_chat.php?Session="+session+
+	parent.frames["details"].location.replace("message_details_chat.php?Session="+session+
                                                                         "&Receiver="+partner+
                                                                          "&TopRead="+top_id) ;
 

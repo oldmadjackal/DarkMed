@@ -238,7 +238,11 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
+
 </style>
 
 <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
@@ -322,17 +326,18 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-  <div class="error" id="Error"></div>
+  <div class="Error_CT" id="Error"></div>
 
   <form onsubmit="return SendFields();" method="POST">
 
-  <b><dev id="Receiver"> </dev></b>
-  <input type="submit" value="Отправить">
-  <br>
+  <div class="Normal_CT"> 
+    <b><div id="Receiver"> </div></b>
 
-  <textarea cols=80 rows=4 wrap="soft" name="Text" id="Text"></textarea>
+    <textarea cols=46 rows=10 wrap="soft" name="Text" id="Text"></textarea>
 
-  <input type="hidden" name="Copy" id="Copy">
+    <input type="submit" value="Отправить">
+    <input type="hidden" name="Copy" id="Copy">
+  </div>
 
   </form>
 

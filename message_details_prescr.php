@@ -22,14 +22,20 @@ function ProcessDB() {
 
 //--------------------------- Извлечение параметров
 
-                        $session=$_GET ["Session"] ;
-                        $message=$_GET ["Message"] ;
+                                  $session=$_GET ["Session"] ;
+                                  $message=$_GET ["Message"] ;
+    if(isset($_GET ["Action" ]))  $action =$_GET ["Action" ] ;
 
-                        $details=$_POST["Details"] ;
+    if(isset($_POST["Details"]))  $details=$_POST["Details"] ;
 
-  FileLog("START", "    Session:".$session) ;
-  FileLog("",      "    Message:".$message) ;
-  FileLog("",      "    Details:".$details) ;
+                         FileLog("START", "    Session:".$session) ;
+                         FileLog("",      "    Message:".$message) ;
+    if(isset($action ))  FileLog("",      "     Action:".$action) ;
+    if(isset($details))  FileLog("",      "    Details:".$details) ;
+
+//--------------------------- Умолчания
+
+    if(!isset($action))  $action="none" ;
 
 //--------------------------- Подключение БД
 
@@ -74,7 +80,7 @@ function ProcessDB() {
 //--------------------------- Извлечение данных сообщения
 
                      $sql="Select m.id, m.sender, m.sent, m.text, m.details, u.sign_p_key,".
-                          "       d.name_f, d.name_i, d.name_o".
+                          "       d.name_f, d.name_i, d.name_o, m.done".
 			  "  From `messages` m, `ref_messages_types` t, users u, doctor_page_main d".
 			  " Where m.`receiver`='$user_'".
 			  "  and  m.`id`      = $message".
@@ -101,21 +107,23 @@ function ProcessDB() {
 
         FileLog("", "Message presented successfully") ;
 
-      echo "    message_id           =\"".$fields[0]."\" ;				\n" ;
-      echo "    sender_user          =\"".$fields[1]."\" ;				\n" ;
-      echo "    sender_key           =\"".$fields[5]."\" ;				\n" ;
-      echo "    details              =\"".$fields[4]."\" ;				\n" ;
+      echo "    message_id           ='".$fields[0]."' ;				\n" ;
+      echo "    sender_user          ='".$fields[1]."' ;				\n" ;
+      echo "    sender_key           ='".$fields[5]."' ;				\n" ;
+      echo "    details              ='".$fields[4]."' ;				\n" ;
       echo "    details              =Sign_decode(details, sender_key, receiver_key) ;	\n" ;
 
-      echo "  i_msg_sender .innerHTML=\"".$fields[1]."\" ;				\n" ;
-      echo "  i_msg_sent   .innerHTML=\"".$fields[2]."\" ;				\n" ;
-      echo "    text                 =\"".$fields[3]."\" ;				\n" ;
+      echo "  i_msg_sender .innerHTML='".$fields[1]."' ;				\n" ;
+      echo "  i_msg_sent   .innerHTML='".$fields[2]."' ;				\n" ;
+      echo "    text                 ='".$fields[3]."' ;				\n" ;
       echo "    text                 =Sign_decode(text, sender_key, receiver_key) ;	\n" ;
       echo "  i_msg_text   .innerHTML= text ;						\n" ;
 
-      echo "    d_name_f             =\"".$fields[6]."\" ;				\n" ;
-      echo "    d_name_i             =\"".$fields[7]."\" ;				\n" ;
-      echo "    d_name_o             =\"".$fields[8]."\" ;				\n" ;
+      echo "    d_name_f             ='".$fields[6]."' ;				\n" ;
+      echo "    d_name_i             ='".$fields[7]."' ;				\n" ;
+      echo "    d_name_o             ='".$fields[8]."' ;				\n" ;
+
+      echo "    msg_done             ='".$fields[9]."' ;				\n" ;
 
 //--------------------------- Регистрация новых доступов
 
@@ -168,10 +176,44 @@ function ProcessDB() {
         FileLog("", "Access successfully granted: ".$user.":".$page." for ".$user) ;
 //- - - - - - - - - - - - - - Перебор страниц, по которым предоставлен доступ
     }
+//- - - - - - - - - - - - - - Отметка о прочтении и обработке
+            $message_=$db->real_escape_string($message) ;
+
+                        $sql ="Update messages ".
+                              "   Set `done`='Y' " ;
+
+     if(strpos($action, "read")!==false)
+                        $sql.="      ,`read`='Y' " ;
+
+                        $sql.=" Where receiver='$user_'".
+			      "  and  id      = $message_" ;
+        $res=$db->query($sql) ;
+     if($res===false) {
+              FileLog("ERROR", "Update MESSAGES... : ".$db->error) ;
+                                $db->close() ;
+             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка изменения статуса сообщения") ;
+                             return ;
+       }
 //- - - - - - - - - - - - - -
              $db->commit() ;
 
               SuccessMsg() ;
+  }  
+//--------------------------- Автоматическая обработка
+
+  if($action!="none")
+  {
+//- - - - - - - - - - - - - - Первый проход
+     if(!isset($details)) 
+     {
+          echo "  execute='first' ;  \n" ;
+     }
+//- - - - - - - - - - - - - - Второй проход
+     else 
+     {
+          echo "  execute='second' ;  \n" ;
+     }
+//- - - - - - - - - - - - - -
   }
 //--------------------------- Завершение
 
@@ -213,7 +255,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
@@ -224,10 +269,12 @@ function SuccessMsg() {
     var  i_msg_sent ;
     var  i_msg_text ;
     var  i_details ;
+    var  i_accept ;
     var  i_error ;
     var  password ;
     var  message_id ;
     var  sender_user ;
+    var  execute ;
     var  a_pages_keys ;
 
   function FirstField() 
@@ -245,12 +292,15 @@ function SuccessMsg() {
        i_msg_sender =document.getElementById("MsgSender") ;
        i_msg_sent   =document.getElementById("MsgSent") ;
        i_msg_text   =document.getElementById("MsgText") ;
-       i_error      =document.getElementById("Error") ;
        i_details    =document.getElementById("Details") ;
+       i_accept     =document.getElementById("Accept") ;
+       i_error      =document.getElementById("Error") ;
 
        password=TransitContext("restore", "password", "") ;
 
         a_pages_keys=new Array() ;
+
+             execute="none" ;
 
 <?php
             ProcessDB() ;
@@ -268,6 +318,14 @@ function SuccessMsg() {
     }
 
        i_msg_sender.innerHTML=d_name_f+" "+d_name_i+" "+d_name_o ;
+
+    if(execute=="first" )  document.forms[0].submit() ;
+    else
+    if(execute=="second")  parent.frames['section'].ProcessNext() ;
+    else
+    {
+        if(msg_done=='Y')  i_accept.hidden=true ;
+    }
 
          return true ;
   }
@@ -308,6 +366,15 @@ function SuccessMsg() {
     window.open("doctor_view.php"+"?Session="+v_session+"&Owner="+sender_user) ;
   } 
 
+  function GoToChat()
+  {
+     var  v_session ;
+
+       v_session=TransitContext("restore","session","") ;
+
+	parent.frames['section'].location.assign("messages_chat_lr.php?Session="+v_session+"&Sender="+sender_user) ;
+  }
+
 <?php
   require("common.inc") ;
 ?>
@@ -323,30 +390,25 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-  <div class="error" id="Error"></div>
+  <div class="Error_CT" id="Error"></div>
 
   <form onsubmit="return SendFields();" method="POST">
 
-  <table border="0" width="100%" id="Fields">
-    <thead>
-    </thead>
-    <tbody>
-    <tr class="fieldL">
-      <td width="20%">
-         <b><dev>Сделано назначение</dev></b><br>
-         <dev id="MsgSender"> </dev><br>
-         <dev id="MsgSent"> </dev><br>
-         <input type="submit" value="Принять">
-         <input type="button" value="Кто это?" onclick=GoToView()></td>
-      </td>
-      <td width="2%">
-      </td>
-      <td width="73%">
-         <div id="MsgText"></div>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  <div class="Normal_CT"><b>Сделано назначение</b></div>
+  <br>
+  <div class="Normal_CT">
+    <div id="MsgSender"></div>
+    <input type="button" value="Кто это?"  onclick=GoToView()>
+    <input type="button" value="Переписка" onclick=GoToChat()>
+  </div>
+  <br>
+  <div class="Normal_CT" id="MsgSent"> </div>
+  <br>         
+  <em><div id="MsgText"></div>
+  <br>
+  <div class="Normal_CT">
+    <input type="submit" id="Accept" value="Принять">
+  </div>
 
   <input type="hidden" name="Details" id="Details">
 

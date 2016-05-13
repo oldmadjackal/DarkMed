@@ -137,7 +137,7 @@ function ErrorMsg($text) {
   @import url("mob_common.css")
 </style>
 
-<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js"></script>
+<script src="CryptoJS/rollups/tripledes.js"></script>
 <script type="text/javascript">
 <!--
 

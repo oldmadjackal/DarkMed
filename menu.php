@@ -159,18 +159,19 @@ header("Content-type: text/html; charset=windows-1251") ;
                   else               parent.frames['view'].location.assign('doctor_clients_wrapper.php'+'?Session='+v_session) ; "
          target="view" id="patients_btn">Пациенты</a>
     </li> 
-    <li>
-        <a class="menu_item" href="javascript:
-                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
-                                parent.frames['view'].location.assign('doctors_list.php'+'?Session='+v_session) ; "
-         target="view" id="doctors_btn">Врачи и специалисты</a> 
-    </li>
     <li hidden id="Messages">
         <a class="menu_item"  href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
                   else               parent.frames['view'].location.assign('messages_wrapper.php'+'?Session='+v_session) ; "
          target="view" id="forum_btn">Сообщения</a>
+    </li>
+    <br>
+    <li>
+        <a class="menu_item" href="javascript:
+                 var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
+                                parent.frames['view'].location.assign('doctors_list.php'+'?Session='+v_session) ; "
+         target="view" id="doctors_btn">Врачи и специалисты</a> 
     </li>
     <li>
 	<a class="menu_item" href="javascript:

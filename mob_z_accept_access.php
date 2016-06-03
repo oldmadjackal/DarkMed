@@ -21,13 +21,19 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                        $session=$_GET["Session"] ;
-                        $message=$_GET["Message"] ;
-                        $details=$_GET["Details"] ;
+                              $session=$_GET["Session"] ;
+                              $message=$_GET["Message"] ;
+                              $details=$_GET["Details"] ;          
+  if(isset($_GET["Action"]))  $action =$_GET["Action"] ;
 
-  FileLog("START", "    Session:".$session) ;
-  FileLog("",      "    Message:".$message) ;
-  FileLog("",      "    Details:".$details) ;
+                      FileLog("START", "    Session:".$session) ;
+                      FileLog("",      "    Message:".$message) ;
+                      FileLog("",      "    Details:".$details) ;
+  if(isset($action))  FileLog("",      "     Action:".$action) ;
+
+//--------------------------- Умолчания
+
+    if(!isset($action))  $action="none" ;
 
 //--------------------------- Подключение БД
 
@@ -77,7 +83,8 @@ function ProcessDB() {
 
 //--------------------------- Развязка по типу сообщения
 
-   if($msg_type=="CLIENT_ACCESS_INVITE")
+   if($msg_type=="CLIENT_ACCESS_INVITE" ||
+      $msg_type=="CLIENT_ACCESS_PAGES"    )
    {
            $owner=$sender ;
    }
@@ -88,7 +95,7 @@ function ProcessDB() {
    }
    else
    {
-          FileLog("ERROR", "No such message detected... : ".$db->error) ;
+          FileLog("ERROR", "Unknown message type detected... : ".$db->error) ;
                             $db->close() ;
          ErrorMsg("Ошибка на сервере.<br>Детали: несоотвествующий тип сообщения") ;
                          return ;
@@ -188,19 +195,28 @@ function ProcessDB() {
 //- - - - - - - - - - - - - - Создание страницы заметок о клиенте
     } while(false) ;
 //- - - - - - - - - - - - - -
-//--------------------------- Установка на сообщение метки "Прочитано"
+//--------------------------- Отметка о прочтении и обработке
 
-                     $sql="Update messages ".
-                          "   Set `read`='Y' ".
-			  " Where receiver='$user_'".
-			  "  and  id      = $message_" ;
-     $res=$db->query($sql) ;
-  if($res===false) {
-          FileLog("ERROR", "Update MESSAGES... : ".$db->error) ;
-                            $db->rollback() ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка изменения статуса сообщения") ;
-                         return ;
+                        $sql ="Update messages ".
+                              "   Set `done`='Y' " ;
+
+     if(strpos($action, "read")!==false)
+                        $sql.="      ,`read`='Y' " ;
+
+                        $sql.=" Where receiver='$user_'".
+			      "  and  id      = $message_" ;
+        $res=$db->query($sql) ;
+     if($res===false) {
+              FileLog("ERROR", "Update MESSAGES... : ".$db->error) ;
+                                $db->close() ;
+             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка изменения статуса сообщения") ;
+                             return ;
+       }
+//--------------------------- Автоматическая обработка
+
+  if($action!="none")
+  {
+          echo "  execute='second' ;  \n" ;
   }
 //--------------------------- Завершение
 
@@ -255,6 +271,7 @@ function SuccessMsg() {
 
     var  i_text ;
     var  i_error ;
+    var  execute ;
 
   function FirstField() 
   {
@@ -264,6 +281,8 @@ function SuccessMsg() {
 <?php
             ProcessDB() ;
 ?>
+
+    if(execute=="second")  parent.frames['section'].ProcessNext() ;
 
          return true ;
   }

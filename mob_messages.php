@@ -62,7 +62,7 @@ function ProcessDB() {
   {      
 	      $fields=$res->fetch_row() ;
 
-       echo "    receiver_key=\"".$fields[0]."\" ;			\n" ;
+       echo "    receiver_key='".$fields[0]."' ;			\n" ;
        echo "    receiver_key=Crypto_decode(receiver_key, password) ;	\n" ;
   }
 
@@ -75,7 +75,7 @@ function ProcessDB() {
   {
                      $sql="Select m.* from (".
 			  "Select m1.id, m1.sender, m1.type, t1.name, m1.text, m1.details, u1.sign_p_key,".
-			  "       c1.name_f, c1.name_i, c1.name_o, a1.crypto".
+			  "       c1.name_f, c1.name_i, c1.name_o, a1.crypto, m1.done".
 			  "  From messages m1 ".
                           "       inner join ref_messages_types t1 on t1.code =m1.type and t1.language='RU' ".
                           "       inner join users              u1 on u1.login=m1.sender ".
@@ -85,7 +85,7 @@ function ProcessDB() {
 			  "  and  m1.read is null".
 			  " union ".
 			  "Select m2.id, m2.sender, m2.type, t2.name, m2.text, m2.details, u2.sign_p_key,".
-			  "       d2.name_f, d2.name_i, d2.name_o, 'nocrypt'".
+			  "       d2.name_f, d2.name_i, d2.name_o, 'nocrypt', m2.done".
 			  "  From messages m2 ".
                           "       inner join ref_messages_types t2 on t2.code =m2.type and t2.language='RU' ".
                           "       inner join users              u2 on u2.login=m2.sender ".
@@ -98,7 +98,7 @@ function ProcessDB() {
   else
   {
                      $sql="Select m.id, m.sender, m.type, t.name, m.text, m.details, u.sign_p_key,".
-			  "       d.name_f, d.name_i, d.name_o, 'nocrypt'".
+			  "       d.name_f, d.name_i, d.name_o, 'nocrypt', m.done".
 			  "  From messages m ".
                           "       inner join ref_messages_types t on t.code=m.type and  t.language='RU' ".
                           "       inner join users u on u.login=m.sender ".
@@ -128,16 +128,24 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-       echo "  sender_key     ='".$fields[6]."' ;					\n" ;
-       echo "    msg_id       ='".$fields[0]."' ;					\n" ;
-       echo "    msg_sender_id='".$fields[1]."' ;					\n" ;
-       echo "    msg_type     ='".$fields[2]."' ;					\n" ;
-       echo "    msg_type_    ='".$fields[3]."' ;					\n" ;
-       echo "    msg_text     ='".$fields[4]."' ;					\n" ;
+       echo "  sender_key     ='".$fields[ 6]."' ;					\n" ;
+       echo "    msg_id       ='".$fields[ 0]."' ;					\n" ;
+       echo "    msg_sender_id='".$fields[ 1]."' ;					\n" ;
+       echo "    msg_type     ='".$fields[ 2]."' ;					\n" ;
+       echo "    msg_type_    ='".$fields[ 3]."' ;					\n" ;
+       echo "    msg_text     ='".$fields[ 4]."' ;					\n" ;
        echo "    msg_text     =Sign_decode(msg_text, sender_key, receiver_key) ;	\n" ;
-       echo "    msg_details  ='".$fields[5]."' ;					\n" ;
+       echo "    msg_details  ='".$fields[ 5]."' ;					\n" ;
        echo "    msg_details  =Sign_decode(msg_details, sender_key, receiver_key) ;	\n" ;
-       echo "    msg_sender   ='".$fields[1]."' ;					\n" ;
+       echo "    msg_sender   ='".$fields[ 1]."' ;					\n" ;
+       echo "    msg_done     ='".$fields[11]."' ;					\n" ;
+
+       echo "  a_msg_id     [".$i."]=msg_id  ;        \n" ;
+       echo "  a_msg_sender [".$i."]=msg_sender_id ;  \n" ;
+       echo "  a_msg_type   [".$i."]=msg_type ;       \n" ;
+       echo "  a_msg_text   [".$i."]=msg_text ;       \n" ;
+       echo "  a_msg_details[".$i."]=msg_details ;    \n" ;
+       echo "  a_msg_done   [".$i."]=msg_done ;       \n" ;
 
       if($fields[10]=="nocrypt")
       {
@@ -160,6 +168,34 @@ function ProcessDB() {
 
      $res->close() ;
 
+//--------------------------- Формирование списка установленных связей
+
+  if($glb_options_a["user"]=="Doctor"   ||
+     $glb_options_a["user"]=="Executor"   )
+  {
+                       $sql="Select distinct owner".
+	  		    "  From access_list ".
+			    " Where login='$user_'" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+          FileLog("ERROR", "Select ACCESS_LIST... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса списка установленных связей") ;
+                         return ;
+    }
+    else
+    {  
+
+      for($i=0 ; $i<$res->num_rows ; $i++)
+      {
+	      $fields=$res->fetch_row() ;
+
+        echo "  a_access['".$fields[0]."']='1' ;   \n" ;
+      }
+      
+         $res->close() ;
+    }
+  }
 //--------------------------- Завершение
 
      $db->close() ;
@@ -200,7 +236,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("mob_common.css")
+  @import url("mob_common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="CryptoJS/rollups/tripledes.js"></script>
@@ -215,7 +254,16 @@ function SuccessMsg() {
     var  message_type ;
     var  sender_id ;
     var  details ;
+    
+    var  a_msg_id  ;
+    var  a_msg_sender ;
+    var  a_msg_type  ;
+    var  a_msg_text  ;
+    var  a_msg_details  ;
+    var  a_msg_done  ;
+    var  a_access  ;
 
+    
   function FirstField() 
   {
     var  receiver_key ;
@@ -225,6 +273,14 @@ function SuccessMsg() {
        i_table   =document.getElementById("Fields") ;
        i_pages   =document.getElementById("Pages") ;
        i_error   =document.getElementById("Error") ;
+       
+       a_msg_id     =new Array() ;
+       a_msg_sender =new Array() ;
+       a_msg_type   =new Array() ;
+       a_msg_text   =new Array() ;
+       a_msg_details=new Array() ;
+       a_msg_done   =new Array() ;
+       a_access     =new Array() ;
 
        password=TransitContext("restore", "password", "") ;
 
@@ -233,6 +289,8 @@ function SuccessMsg() {
 ?>
 
      parent.frames['details'].location.replace('mob_messages_footer.php') ;
+
+          ProcessNext() ;
 
          return true ;
   }
@@ -246,7 +304,7 @@ function SuccessMsg() {
 
 
 	i_letter.value="" ;
-            error_text="Не задано ни одной страницы для доступа" ;
+            error_text="" ;
 
         i_error.style.color="red" ;
         i_error.innerHTML  = error_text ;
@@ -268,13 +326,13 @@ function SuccessMsg() {
        i_messages= document.getElementById("Messages") ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . className = "Table_LT" ;
        i_row_new . id        = "Row_"+p_row ;
        i_row_new . onclick   =function(e) {  SelectMessage(this.id.substr(4)) ;  } ;
 
        i_col_new = document.createElement("td") ;
        i_txt_new = document.createTextNode(p_sender) ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_col_new . appendChild(i_txt_new) ;
        i_row_new . appendChild(i_col_new) ;
 
@@ -303,7 +361,7 @@ function SuccessMsg() {
        i_col_new . appendChild(i_fld_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_txt_new = document.createTextNode(p_type_desc) ;
        i_col_new . appendChild(i_txt_new) ;
 
@@ -320,6 +378,122 @@ function SuccessMsg() {
     return ;         
   } 
 
+    var  msg_idx=-1 ;
+    var  a_msg_groups ;
+    var  action="none" ;
+
+  function ProcessNext()
+  {
+    var  v_session ;
+    var  v_form ;
+
+
+    if(msg_idx==-1)
+    {
+         a_msg_groups=new Array() ;
+    }
+
+    if(action.indexOf("read")>=0)
+    {
+       document.getElementById("Row_"+msg_idx).hidden=true ;
+    }
+    
+     for(msg_idx++ ; msg_idx<a_msg_id.length ; msg_idx++)
+     {
+                action="none" ;
+
+         if(a_msg_type[msg_idx]=="CLIENT_PRESCRIPTIONS_ALERT") 
+         {
+               if(a_msg_groups[a_msg_text[msg_idx]]==null)
+               {
+                  if(a_msg_done[msg_idx]!="Y")  action="execute" ;
+
+                    a_msg_groups[a_msg_text[msg_idx]]="1" ;                          
+               }
+               else
+               {
+                          action="execute,read" ;
+               }
+         }
+         if(a_msg_type[msg_idx]=="CLIENT_ACCESS_INVITE") 
+         {
+            if(a_access[a_msg_sender[msg_idx]]!=null)
+            {
+//                  action="execute" ;
+            }
+         }
+         if(a_msg_type[msg_idx]=="CLIENT_ACCESS_PAGES") 
+         {
+            if(a_access[a_msg_sender[msg_idx]]!=null)
+            {
+               if(a_msg_done[msg_idx]!="Y")  action="execute" ;
+            }
+         }
+
+         if(action!="none")
+         {
+                ProcessMessage(msg_idx, a_msg_id[msg_idx], a_msg_type[msg_idx], a_msg_details[msg_idx], action) ;
+
+                  i_error.style.color='blue' ;
+                  i_error.innerHTML  ='Подождите - идет автоматическая обработка полученных сообщений' ;
+
+                    return ;
+         }
+     }
+
+                  i_error.innerHTML='' ;
+  }
+
+      var  selected=null ; 
+  
+  function ProcessMessage(p_row, p_id, p_type, p_details, p_action)
+  {
+    var  v_session ;
+    var  v_url ;
+    var  accept_details ;
+    var  words_1 ;
+    var  words_2 ;
+    var  plus=new RegExp("\\+","g") ;
+
+
+   if(selected!=null)
+   {
+                    cols=selected.getElementsByTagName('td') ;
+     for(var i=0; i<cols.length; i++)  cols[i].className="Table_LT" ;
+   }
+
+                selected=document.getElementById("Row_"+p_row) ;
+                    cols=selected.getElementsByTagName('td') ;
+     for(var i=0; i<cols.length; i++)  cols[i].className="TableSelected_LT" ;
+
+       accept_details="" ;
+	words_1      =p_details.split(';') ;
+
+    for(var i=0 ; i<words_1.length ; i++)
+    {
+      if(words_1[i]!="") 
+      {
+	 words_2      =words_1[i].split(':') ;
+
+	accept_details=accept_details+words_2[0]+" " ;
+	accept_details=accept_details+Crypto_encode(words_2[1], password) ;
+	accept_details=accept_details+" " ;
+	accept_details=accept_details+Crypto_encode(words_2[2], password) ;
+      }
+    }
+
+	accept_details=accept_details.replace(plus,"%2B") ;
+
+ 	  v_session=TransitContext("restore","session","") ;
+
+              v_url="mob_z_accept_access.php?Session="+v_session+
+					   "&Message="+p_id+
+					   "&Details="+accept_details+
+                                           "&Action=" +p_action ;
+
+	parent.frames["processor"].location.assign(v_url) ;
+  }
+  
   function SelectMessage(p_row) 
   {
      for(i=0 ; i<messages_cnt ; i++)
@@ -337,17 +511,25 @@ function SuccessMsg() {
         message_type=="CLIENT_ACCESS_PAGES"       ||
 	message_type=="CLIENT_PRESCRIPTIONS_ALERT"  )
      {
-	document.getElementById("Accept").hidden=false ;
-	document.getElementById("Read"  ).hidden=true ;
+        if(a_msg_done[p_row]=='Y')
+        {
+           document.getElementById("Accept").hidden=true ;
+           document.getElementById("Read"  ).hidden=false ;
+        }
+        else
+        {
+           document.getElementById("Accept").hidden=false ;
+           document.getElementById("Read"  ).hidden=true ;
+        }
      }
      else
      {
-	document.getElementById("Accept").hidden=true ;
-	document.getElementById("Read"  ).hidden=false ;
+           document.getElementById("Accept").hidden=true ;
+           document.getElementById("Read"  ).hidden=false ;
      }
 
-	document.getElementById("Actions").hidden=false ;     
-	document.getElementById("Text"   ).hidden=false ;
+           document.getElementById("Actions").hidden=false ;     
+           document.getElementById("Text"   ).hidden=false ;
   }
 
   function ResetMessages() 

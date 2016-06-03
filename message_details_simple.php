@@ -382,7 +382,7 @@ function SuccessMsg() {
   <br>
   <div class="Normal_CT" id="MsgSent"> </div>
   <br>         
-  <em><div id="MsgText"></div>
+  <em><div class="Normal_CT" id="MsgText"></div>
   <br>
 
   </form>

@@ -11,23 +11,6 @@ header("Content-type: text/html; charset=windows-1251") ;
 
 function ProcessDB() {
 
-//--------------------------- Считывание конфигурации
-
-     $status=ReadConfig() ;
-  if($status==false) {
-          FileLog("ERROR", "ReadConfig()") ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка чтение конфигурационного файла") ;
-                         return ;
-  }
-//--------------------------- Извлечение параметров
-
-                        $session=$_GET ["Session"] ;
-
-  FileLog("START", "    Session:".$session) ;
-
-//--------------------------- Завершение
-
-        FileLog("STOP", "Done") ;
 }
 
 //============================================== 

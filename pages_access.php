@@ -54,6 +54,7 @@ function ProcessDB() {
           $user_=$db->real_escape_string($user) ;
 
 //--------------------------- Формирование списка специальностей
+
        $sql="Select code, name".
             "  From ref_doctor_specialities".
 	    " Where language='RU'" ;

@@ -30,6 +30,13 @@
                    font-weight : bold            ; 
                          color : red             ;
 }
+.Error_LT  /* Строка ошибки, лево-верх */
+ {
+                    text-align : left            ;
+                vertical-align : top             ;
+                   font-weight : bold            ; 
+                         color : red             ;
+}
 .FormTitle  /* Заголовок формы */
 {
                       position : static          ;

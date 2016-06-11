@@ -712,7 +712,7 @@ function SuccessMsg() {
 
 <head>
 
-<title>DarkMed Client Card</title>
+<title>DarkMed Client Page</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
@@ -852,13 +852,6 @@ function SuccessMsg() {
 
   function SetReadOnly() 
   {
-    var  i_form ;
-    var  i_pctrl ;
-
-       i_form  =document.getElementById("Form") ;
-       i_pctrl =document.getElementById("PageControl") ;
-       i_form  .removeChild(i_pctrl) ;
-
        i_title   .readOnly=true ;
        i_remark  .readOnly=true ;
        i_ext_type.disabled=true ;
@@ -1363,8 +1356,6 @@ function SuccessMsg() {
 <div class="inputF">
 
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
@@ -1372,18 +1363,13 @@ function SuccessMsg() {
         <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
       <td class="title"> 
-        <b>ДОПОЛНИТЕЛЬНЫЙ РАЗДЕЛ ПАЦИЕНТА</b>
+        <b>СНИМКИ, РЕЗУЛЬТАТЫ АНАЛИЗОВ И ИССЛЕДОВАНИЙ</b>
       </td> 
     </tr>
     </tbody>
   </table>
 
   <form onsubmit="return SendFields();" method="POST"  enctype="multipart/form-data" id="Form">
-
-  <ul class="menu" id="PageControl">
-    <li><a href="#" onclick=NewPage()  target="_self">Создать новый раздел</a></li> 
-    <li><a href="#" onclick=MainPage() target="_self">Вернуться в карточку пациента</a></li> 
-  </ul>
 
   <table width="100%" id="Fields">
     <thead>

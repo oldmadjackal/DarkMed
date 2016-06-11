@@ -319,7 +319,7 @@ function SuccessMsg() {
 
        i_msg_sender.innerHTML=d_name_f+" "+d_name_i+" "+d_name_o ;
 
-    if(execute=="first" )  document.forms[0].submit() ;
+    if(execute=="first" ) {  SendFields() ; document.forms[0].submit() ;  }
     else
     if(execute=="second")  parent.frames['section'].ProcessNext() ;
     else

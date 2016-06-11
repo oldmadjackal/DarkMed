@@ -418,7 +418,7 @@ function SuccessMsg() {
        i_msg_sender.innerHTML=c_name_f+" "+c_name_i+" "+c_name_o ;
     }
 
-    if(execute=="first" )  document.forms[0].submit() ;
+    if(execute=="first" ) {  SendFields() ; document.forms[0].submit() ;  }
     else
     if(execute=="second")  parent.frames['section'].ProcessNext() ;
     else

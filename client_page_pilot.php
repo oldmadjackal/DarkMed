@@ -104,7 +104,7 @@ function ProcessDB() {
 
 //--------------------------- Отображение данных на странице
 
-//      echo     "  i_check .value='".$check. "' ;\n" ;
+      echo     "  remark='".$remark   ."'	;\n" ;
 
 //--------------------------- Извлечение дополнительных блоков
 
@@ -116,8 +116,6 @@ function ProcessDB() {
             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка создания временной папки") ;
                          return ;
      }
-
-//      echo     "  i_count.value='0' ;	\n" ;
 
                      $sql="Select e.id, e.type, e.remark, e.file, e.short_file, e.www_link".
 			  "  From client_pages_ext e".
@@ -170,7 +168,6 @@ function ProcessDB() {
           $sys_ext_link  [$i]= $fields[5] ;
      }
 
-//      echo     "  i_count.value=".$res->num_rows." ;	\n" ;
   }
 
      $res->close() ;
@@ -194,16 +191,19 @@ function ShowExtensions() {
   global  $sys_ext_sfile  ;
   global  $sys_ext_link   ;
 
-
+         $remark_show=true ;
+  
   for($i=0 ; $i<$sys_ext_count ; $i++)
   {
         $row=$i ;
 
     if($sys_ext_type[$i]=="Image") {
        echo "<img src='".$sys_ext_sfile[$i]."' height=150 id='Image_".$row."'>	\n" ;
+               $remark_show=false ;
     }
-
   }
+
+  if($remark_show==true)  echo  " <div id='Remark'></div>	\n" ;
 
 }
 
@@ -256,28 +256,22 @@ function SuccessMsg() {
 <script type="text/javascript">
 <!--
 
-    var  i_table ;    
-    var  i_page ;
-    var  i_check ;
-    var  i_crypto ;
-    var  i_count ;
+    var  i_remark ;
     var  i_error ;
     var  session ;
     var  password ;
     var  page_key ;
     var  check_key ;
+    var  remark ;
 
   function FirstField() 
   {
     var  v_session ;
     var  i_ext ;
     var  text ;
-    
-	i_page     =document.getElementById("Page") ;
-	i_check    =document.getElementById("Check") ;
-	i_crypto   =document.getElementById("Crypto") ;
-	i_count    =document.getElementById("Count") ;
-	i_error    =document.getElementById("Error") ;
+
+	i_remark=document.getElementById("Remark") ;
+	i_error =document.getElementById("Error") ;
 
            page_key="" ;
 
@@ -285,25 +279,18 @@ function SuccessMsg() {
             ProcessDB() ;
 ?>
 
+     if(i_remark!=null)
+     {             
+         password=TransitContext("restore", "password", "") ;
+         page_key= Crypto_decode( page_key, password) ;
+
+       i_remark.innerHTML=Crypto_decode(remark, page_key) ;
+     }
+
 //	parent.frames["processor"].location.assign("z_clear_tmp.php?Session="+session) ;
 
          return true ;
   }
-
-  function SendFields() 
-  {
-     var  error_text ;
-
-
-         error_text=""
-
-       i_error.style.color="red" ;
-       i_error.innerHTML  = error_text ;
-
-     if(error_text!="")  return false ;
-
-                         return true ;
-  } 
 
 
 <?php
@@ -322,13 +309,6 @@ function SuccessMsg() {
 </noscript>
 
  <div class="error" id="Error"></div>
-
-  <form onsubmit="return SendFields();" method="POST"  enctype="multipart/form-data" id="Form"> 
-    <input type="hidden" name="Page"    id="Page"> 
-    <input type="hidden" name="Check"   id="Check"> 
-    <input type="hidden" name="Crypto"  id="Crypto">
-    <input type="hidden" name="Count"   id="Count"> 
-  </form>
 
 <?php
             ShowExtensions() ;

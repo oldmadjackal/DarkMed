@@ -7,6 +7,7 @@ function TransitContext(p_action, p_context, p_text)
 
                     kernel=parent.frames["menu"] ;
   if(kernel==null)  kernel=parent.parent.frames["menu"] ;
+  if(kernel==null)  kernel=parent.parent.parent.frames["menu"] ;
 
   if(p_action=="save")
   {

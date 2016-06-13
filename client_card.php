@@ -148,108 +148,6 @@ function ProcessDB() {
       echo     "  i_name_o.value=\"".$name_o."\" ;\n" ;
       echo     "  i_remark.value=\"".$remark."\" ;\n" ;
 
-//--------------------------- Формирование списка дополнительных страницы пациента
-
-  if(!$read_only)
-  {
-
-                     $sql="Select p.page, p.title, a.crypto".
-			  "  From client_pages p, access_list a".
-			  " Where p.owner='$user'".
-			  "  and  p.page > 0".
-			  "  and  a.owner='$user_'".
-			  "  and  a.login='$user_'".
-			  "  and  a.page =p.page".
-                          "  and  p.type ='Client'".
-                          " Order by p.page" ;
-     $res=$db->query($sql) ;
-  if($res===false) {
-          FileLog("ERROR", "Select CLIENT_PAGES(type ='Client')... : ".$db->error) ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса разделов") ;
-                         return ;
-  }
-  if($res->num_rows==0) 
-  {
-          FileLog("", "No additional pages detected") ;
-  }
-  else
-  {  
-     for($i=0 ; $i<$res->num_rows ; $i++)
-     {
-	      $fields=$res->fetch_row() ;
-
-		$link_href="client_page.php?Session=".$session."&Page=".$fields[0] ;
-
-       echo     "         link_key     =\"".$fields[2]."\" ;			\n" ;
-       echo     "         link_key     =Crypto_decode(link_key, password) ;	\n" ;
-       echo     "         link_text    =\"".$fields[1]."\" ;			\n" ;
-       echo     "         link_text    =Crypto_decode(link_text, link_key) ;	\n" ;
-       echo     "	i_list_new     =document.createElement(\"li\") ;	\n" ;
-       echo     "	i_link_new     =document.createElement(\"a\") ;		\n" ;
-       echo     "       i_link_new.href=\"".$link_href."\" ;			\n" ;
-       echo     "       i_text_new     =document.createTextNode(link_text) ;	\n" ;
-       echo     "       i_link_new.appendChild(i_text_new) ;			\n" ;
-       echo     "       i_list_new.appendChild(i_link_new) ;			\n" ;
-       echo     "       i_pages   .appendChild(i_list_new) ;			\n" ;
-     }
-  }
-
-     $res->close() ;
-
-  }
-
-//--------------------------- Формирование списка назначений пациента
-
-  if(!$read_only)
-  {
-
-                     $sql="Select p.page, p.title, a.crypto".
-			  "  From client_pages p, access_list a".
-			  " Where p.owner='$user'".
-			  "  and  p.page > 0".
-			  "  and  a.owner='$user_'".
-			  "  and  a.login='$user_'".
-			  "  and  a.page =p.page".
-                          "  and  p.type ='Prescription'".
-                          " Order by p.page" ;
-     $res=$db->query($sql) ;
-  if($res===false) {
-          FileLog("ERROR", "Select CLIENT_PAGES(type ='Prescription')... : ".$db->error) ;
-                            $db->close() ;
-         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса назначений") ;
-                         return ;
-  }
-  if($res->num_rows==0) 
-  {
-          FileLog("", "No prescriptions pages detected") ;
-  }
-  else
-  {  
-     for($i=0 ; $i<$res->num_rows ; $i++)
-     {
-	      $fields=$res->fetch_row() ;
-
-		$link_href="client_prescr_view.php?Session=".$session."&Owner=".$user."&Page=".$fields[0] ;
-
-       echo     "         link_key     =\"".$fields[2]."\" ;			\n" ;
-       echo     "         link_key     =Crypto_decode(link_key, password) ;	\n" ;
-       echo     "         link_text    =\"".$fields[1]."\" ;			\n" ;
-       echo     "         link_text    =Crypto_decode(link_text, link_key) ;	\n" ;
-       echo     "	i_list_new     =document.createElement(\"li\") ;	\n" ;
-       echo     "	i_link_new     =document.createElement(\"a\") ;		\n" ;
-       echo     "       i_link_new.href=\"".$link_href."\" ;			\n" ;
-       echo     "       i_text_new     =document.createTextNode(link_text) ;	\n" ;
-       echo     "       i_link_new.appendChild(i_text_new) ;			\n" ;
-       echo     "       i_list_new.appendChild(i_link_new) ;			\n" ;
-       echo     "       i_prescr  .appendChild(i_list_new) ;			\n" ;
-     }
-  }
-
-     $res->close() ;
-
-  }
-
 //--------------------------- Обработка режима READ ONLY
 
   if($read_only)
@@ -269,8 +167,8 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;      " ;
+    echo  "i_error.innerHTML  ='".$text."' ;" ;
     echo  "return ;" ;
 }
 
@@ -279,8 +177,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;" ;
+    echo  "i_error.style.color='green' ;                    " ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ;" ;
 }
 //============================================== 
 ?>
@@ -304,9 +202,6 @@ function SuccessMsg() {
 <script type="text/javascript">
 <!--
 
-    var  i_table ;
-    var  i_pages ;
-    var  i_prescr ;
     var  i_check ;
     var  i_name_f ;
     var  i_name_i ;
@@ -326,9 +221,6 @@ function SuccessMsg() {
     var  link_text ;
 
 
-       i_table =document.getElementById("Fields") ;
-       i_pages =document.getElementById("Pages") ;
-       i_prescr=document.getElementById("Prescriptions") ;
        i_check =document.getElementById("Check") ;
        i_name_f=document.getElementById("Name_F") ;
        i_name_i=document.getElementById("Name_I") ;
@@ -380,9 +272,6 @@ function SuccessMsg() {
        i_name_o.readOnly=true ;
        i_remark.readOnly=true ;
        i_save1 .disabled=true ;
-       i_access.disabled=true ;
-
-       i_pages .removeChild(i_pctrl) ;
   }
 
   function SendFields() 
@@ -404,23 +293,6 @@ function SuccessMsg() {
                          return true ;         
   } 
 
-  function NewPage() 
-  {
-    var  v_session ;
-
-         v_session=TransitContext("restore","session","") ;
-
-        location.assign("client_page.php"+"?Session="+v_session+"&NewPage=1") ;
-  } 
-
-  function PagesAccess() 
-  {
-    var  v_session ;
-
-         v_session=TransitContext("restore","session","") ;
-
-        location.assign("pages_access_wrapper.php"+"?Session="+v_session) ;
-  } 
 
 <?php
   require("common.inc") ;
@@ -436,8 +308,6 @@ function SuccessMsg() {
 
 <noscript>
 </noscript>
-
-<div class="inputF">
 
   <table width="90%">
     <thead>
@@ -494,40 +364,6 @@ function SuccessMsg() {
   </table>
 
   </form>
-
-  <br>
-  <table width="100%" class="cols2">
-    <thead>
-    </thead>
-    <tbody>
-    <tr>
-      <td width="50%" class="fieldC"> 
-        <b>Дополнительные страницы</b>
-        <input type="button" value="Предоставить доступ" onclick=PagesAccess()  id="Access">
-      </td>
-      <td width="1%"> 
-      </td>
-      <td width="49%" class="fieldC"> 
-        <b> Назначения </b> 
-      </td>
-    </tr>
-    <tr>
-      <td width="50%">        
-       <ul class="menu" name="Pages" id="Pages">
-          <li  id="NewPage"><a href="#" onclick=NewPage() target="_self">Создать новый раздел</a></li> 
-        </ul>
-      </td>
-      <td width="1%" class="v-line"> 
-      </td>
-      <td width="49%"> 
-       <ul class="menu" name="Prescriptions" id="Prescriptions">
-        </ul>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-
-</div>
 
 </body>
 

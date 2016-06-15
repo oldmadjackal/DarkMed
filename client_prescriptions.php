@@ -2,7 +2,7 @@
 
 header("Content-type: text/html; charset=windows-1251") ;
 
-   $glb_script="Client_analises.php" ;
+   $glb_script="Client_prescriptions.php" ;
 
   require("stdlib.php") ;
 
@@ -99,6 +99,7 @@ function ProcessDB() {
   {      
 	      $fields=$res->fetch_row() ;
 
+       echo "          user='".$user."' ;				\n" ;
        echo "    sender_key='".$fields[0]."' ;				\n" ;
        echo "    sender_key=Crypto_decode(sender_key, password) ;	\n" ;
        echo "       msg_key='".$fields[1]."' ;				\n" ;
@@ -109,14 +110,15 @@ function ProcessDB() {
 
 //--------------------------- Формирование списка дополнительных страницы пациента
 
-                     $sql="Select p.page, p.title, a.crypto, a.ext_key".
-			  "  From client_pages p, access_list a".
-			  " Where p.owner='$user'".
+                     $sql="Select p.page, p.title, a.crypto, a.ext_key, p.creator, CONCAT_WS(' ', d.name_f,d.name_i,d.name_o)".
+			  "  From client_pages p, access_list a, doctor_page_main d".
+			  " Where d.owner=p.creator".
+                          "  and  p.owner='$user'".
 			  "  and  p.page > 0".
 			  "  and  a.owner='$user_'".
 			  "  and  a.login='$user_'".
 			  "  and  a.page =p.page".
-                          "  and  p.type ='Client'".
+                          "  and  p.type ='Prescription'".
                           " Order by p.page" ;
      $res=$db->query($sql) ;
   if($res===false) {
@@ -143,8 +145,9 @@ function ProcessDB() {
        echo     "         file_key     ='".$fields[3]."' ;			\n" ;
        echo     "         file_key     =Crypto_decode(file_key, password) ;	\n" ;
 
-       echo     "          a_letter[page_num]=page_num+':'+link_key+':'+file_key+';' ;	\n" ;
-       echo     "           PageAdd(page_num, link_text, file_key) ;			\n" ;
+       echo     "          a_letter [page_num]=page_num+':'+link_key+':'+file_key+';' ;	\n" ;
+       echo     "          a_creator[page_num]='".$fields[4]."' ;			\n" ;
+       echo     "           PageAdd(page_num, link_text, file_key, '".$fields[5]."') ;	\n" ;
      }
   }
 
@@ -186,7 +189,7 @@ function SuccessMsg() {
 
 <head>
 
-<title>DarkMed Client Card</title>
+<title>DarkMed Client Prescriptions</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
@@ -206,12 +209,14 @@ function SuccessMsg() {
     var  i_letter ;
     var  i_incopy ;
     var  password ;
+    var  user ;
     var  page_key ;
     var  sender_key ;
     var  msg_key ;
     var  doctor ;
     
     var  a_letter ;
+    var  a_creator ;
 
   function FirstField() 
   {
@@ -226,7 +231,8 @@ function SuccessMsg() {
        i_letter  =document.getElementById("Letter") ;
        i_incopy  =document.getElementById("InCopy") ;
        
-	a_letter=new Array() ; 
+	a_letter =new Array() ; 
+	a_creator=new Array() ; 
 
        password=TransitContext("restore", "password", "") ;
 
@@ -265,7 +271,7 @@ function SuccessMsg() {
                 return true ;         
   } 
 
-  function PageAdd(p_page, p_title, p_file_key) 
+  function PageAdd(p_page, p_title, p_text_key, p_creator) 
   {
     var  i_row_new ;
     var  i_col_new ;
@@ -293,14 +299,14 @@ function SuccessMsg() {
        i_btn_new . type   ="button" ;
        i_btn_new . value  ="Передать врачу/специалисту" ;
        i_btn_new . onclick= function(e) {  SendAccess(p_page) ;  } ;
-
+       
        i_col_new . appendChild(i_btn_new) ;
 //---
        i_ret_new = document.createElement('br') ;
        i_col_new . appendChild(i_ret_new) ;
 //---
        i_lnk_new = document.createElement('a') ;
-       i_lnk_new . href="client_page.php?Session="+v_session+"&Page="+p_page ;
+       i_lnk_new . href="client_prescr_view.php?Session="+v_session+"&Page="+p_page+"&Owner="+user ;
        i_txt_new = document.createTextNode(p_title) ;
        i_lnk_new . appendChild(i_txt_new) ;
 
@@ -315,8 +321,11 @@ function SuccessMsg() {
        i_ret_new = document.createElement('br') ;
        i_col_new . appendChild(i_ret_new) ;
 //---
+       i_txt_new = document.createTextNode('Назначение сделал '+p_creator) ;
+       i_col_new . appendChild(i_txt_new) ;
+//---
        i_frm_new = document.createElement('iframe') ;
-       i_frm_new . src         ="client_page_pilot.php?Session="+v_session+"&Page="+p_page+"&Key="+p_file_key ;
+       i_frm_new . src         ="client_prescr_pilot.php?Session="+v_session+"&Page="+p_page+"&Owner="+user ;
        i_frm_new . seamless    = true ;
        i_frm_new . height      ="152" ;
        i_frm_new . width       ="700" ;
@@ -339,16 +348,7 @@ function SuccessMsg() {
        i_row_new . appendChild(i_col_new) ;
        i_pages   . appendChild(i_row_new) ;
 
-  }
-  
-  function NewPage() 
-  {
-    var  v_session ;
-
-         v_session=TransitContext("restore","session","") ;
-
-        location.assign("client_page.php"+"?Session="+v_session+"&NewPage=1") ;
-  } 
+  }  
 
   function SendAccess(p_page) 
   {
@@ -373,6 +373,14 @@ function SuccessMsg() {
           document.getElementById("InvError").hidden     =false ;
           document.getElementById("InvMain" ).hidden     =true ;
       }
+      else
+      if(doctor.user==a_creator[p_page])
+      {
+          document.getElementById("InvError").innerHTML  ="Нельзя направлять назначение его автору." ;
+          document.getElementById("InvError").style.color='red' ;
+          document.getElementById("InvError").hidden     =false ;
+          document.getElementById("InvMain" ).hidden     =true ;              
+      }              
       else
       {
           document.getElementById("InvError"   ).hidden   =true ;
@@ -421,7 +429,7 @@ function SuccessMsg() {
         <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
       <td class="FormTitle"> 
-        <b>СНИМКИ И РЕЗУЛЬТАТЫ АНАЛИЗОВ</b>
+        <b>НАЗНАЧЕНИЯ</b>
       </td> 
     </tr>
     </tbody>
@@ -429,9 +437,6 @@ function SuccessMsg() {
   
    <div class="Error_CT" id="Error"></div>
    
-  <br>
-  <input  type="button"  onclick=NewPage() value="Создать новый раздел"> 
-  <br>
   <br>
   
   <form onsubmit="return SendFields();" method="POST">

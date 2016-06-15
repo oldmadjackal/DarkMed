@@ -15,6 +15,8 @@ function ProcessDB() {
   global  $sys_ext_type   ;
   global  $sys_ext_file   ;
   global  $sys_ext_sfile  ;
+  global  $sys_size  ;
+  global  $sys_self_id  ;
 
 //--------------------------- Считывание конфигурации
 
@@ -26,9 +28,21 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                         $get_id=$_GET["Id"] ;
+                                $get_id=$_GET["Id"] ;
+    if(isset($_GET["Size"  ]))  $size  =$_GET["Size"] ;
+    if(isset($_GET["SelfId"]))  $selfid=$_GET["SelfId"] ;
 
-    FileLog("START", "    Id:".$get_id) ;
+                        FileLog("START", "    Id:".$get_id) ;
+    if(isset($size  ))  FileLog("",      "  Size:".$size) ;
+    if(isset($selfid))  FileLog("",      "SelfId:".$selfid) ;
+
+//--------------------------- Подстановка умолчаний
+
+    if(!isset($size  ))  $size  =200 ;
+    if(!isset($selfid))  $selfid="None" ;
+
+                    $sys_size   =$size ;
+                    $sys_self_id=$selfid ;
 
 //--------------------------- Подключение БД
 
@@ -104,30 +118,40 @@ function ProcessDB() {
 //============================================== 
 //  Отображение дополнительных блоков описания
 
-function ShowExtensions() {
+function ShowExtensions($p_stage) {
 
-  global  $sys_ext_count  ;
-  global  $sys_ext_type   ;
-  global  $sys_ext_file   ;
-  global  $sys_ext_sfile  ;
+  global  $sys_ext_count ;
+  global  $sys_ext_type  ;
+  global  $sys_ext_file  ;
+  global  $sys_ext_sfile ;
+  global  $sys_size      ;
+  global  $sys_self_id   ;
 
         $sys_ext_count=1 ;
 
   for($i=0 ; $i<$sys_ext_count ; $i++)
   {
 
-    if($sys_ext_type[$i]=="Image") {
-//     echo "<div class='fieldC'>					\n" ; 
-       echo "<img src='".$sys_ext_sfile[$i]."' height=200		\n" ;
-       echo " onclick=\"window.open('".$sys_ext_file[$i]."')\" ;	\n" ;
-       echo ">								\n" ; 
-//     echo "</div>							\n" ; 
+    if($sys_ext_type[$i]=="Image") 
+    {
 
-          break ;
+      if($p_stage=="HTML")
+      {
+//       echo "<div class='fieldC'>					\n" ; 
+         echo "<img src='".$sys_ext_sfile[$i]."' height='".$sys_size."'	\n" ;
+         echo " onclick=\"window.open('".$sys_ext_file[$i]."')\" ;	\n" ;
+         echo ">							\n" ; 
+//       echo "</div>							\n" ;              
+      }
+
+          return ;
     }
-
   }
 
+      if($p_stage=="JavaScript" && $sys_self_id!="None")
+      {
+         echo "  window.parent.document.getElementById('".$sys_self_id."').hidden=true ;	\n" ;
+      }  
 }
 
 //============================================== 
@@ -191,7 +215,8 @@ function SuccessMsg() {
 	a_types=new Array() ;
 
 <?php
-            ProcessDB() ;
+             ProcessDB() ;
+        ShowExtensions("JavaScript") ;
 ?>
 
        i_description.innerHTML=i_description.innerHTML.replace(nl,"<br>") ;
@@ -231,7 +256,7 @@ function SuccessMsg() {
   </table>
 
 <?php
-            ShowExtensions() ;
+            ShowExtensions("HTML") ;
 ?>
 
 </div>

@@ -351,7 +351,7 @@ function SuccessMsg() {
       <td> <input type="text" size=60 name="Name_O" id="Name_O"> </td>
     </tr>
     <tr>
-      <td class="field"> Примечание </td>
+      <td class="field"> Жалобы </td>
       <td> 
         <textarea cols=60 rows=7 wrap="soft" name="Remark" id="Remark"> </textarea>
       </td>

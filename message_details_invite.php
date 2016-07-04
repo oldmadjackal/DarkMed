@@ -24,20 +24,22 @@ function ProcessDB() {
 
                                   $session=$_GET ["Session"] ;
                                   $message=$_GET ["Message"] ;
-    if(isset($_GET ["Action" ]))  $action =$_GET ["Action" ] ;
 
+    if(isset($_POST["Action" ]))  $action =$_POST["Action" ] ;
     if(isset($_POST["Details"]))  $details=$_POST["Details"] ;
     if(isset($_POST["Check"  ]))  $check  =$_POST["Check"  ] ;
-
+    if(isset($_POST["Text"   ]))  $text   =$_POST["Text"   ] ;
+    if(isset($_POST["Copy"   ]))  $copy   =$_POST["Copy"   ] ;    
+    
                          FileLog("START", "    Session:".$session) ;
                          FileLog("",      "    Message:".$message) ;
     if(isset($action ))  FileLog("",      "     Action:".$action) ;
     if(isset($details))  FileLog("",      "    Details:".$details) ;
-    if(isset($check  ))  FileLog("",      "    Check  :".$check  ) ;
+    if(isset($check  ))  FileLog("",      "      Check:".$check) ;
+    if(isset($text   ))  FileLog("",      "       Text:".$text) ;
+    if(isset($copy   ))  FileLog("",      "       Copy:".$copy) ;
 
 //--------------------------- Умолчания
-
-    if(!isset($action))  $action="none" ;
 
 //--------------------------- Подключение БД
 
@@ -55,11 +57,12 @@ function ProcessDB() {
                          return ;
   }
 
-       $user_=$db->real_escape_string($user ) ;
+       $user_   =$db->real_escape_string($user ) ;
+       $message_=$db->real_escape_string($message) ;
 
-//--------------------------- Запрос ключа подписи получателя
+//--------------------------- Запрос ключей подписи получателя
 
-                     $sql="Select u.sign_s_key".
+                     $sql="Select u.sign_s_key, u.msg_key".
 			  "  From `users` u".
 			  " Where u.login  ='$user_'" ;
      $res=$db->query($sql) ;
@@ -73,8 +76,9 @@ function ProcessDB() {
   {      
 	      $fields=$res->fetch_row() ;
 
-       echo "    receiver_key=\"".$fields[0]."\" ;			\n" ;
-       echo "    receiver_key=Crypto_decode(receiver_key, password) ;	\n" ;
+       echo "    doc_s_key='".$fields[0]."' ;			\n" ;
+       echo "    doc_s_key=Crypto_decode(doc_s_key, password) ;	\n" ;
+       echo "      msg_key='".$fields[1]."' ;			\n" ;  
   }
 
      $res->close() ;
@@ -85,7 +89,7 @@ function ProcessDB() {
                           "       c.check, c.name_f, c.name_i, c.name_o, m.done".
 			  "  From `messages` m, `ref_messages_types` t, users u, client_page_main c".
 			  " Where m.`receiver`='$user_'".
-			  "  and  m.`id`      = $message".
+			  "  and  m.`id`      = $message_".
 			  "  and  u.`login`   = m.`sender`".
 			  "  and  c.`owner`   = m.`sender`".
 			  "  and  t.`code`    = m.`type`".
@@ -113,14 +117,14 @@ function ProcessDB() {
 
       echo "    message_id           ='".$fields[0]."' ;				\n" ;
       echo "    sender_user          ='".$fields[1]."' ;				\n" ;
-      echo "    sender_key           ='".$fields[5]."' ;				\n" ;
+      echo "    snd_p_key            ='".$fields[5]."' ;				\n" ;
       echo "    details              ='".$fields[4]."' ;				\n" ;
-      echo "    details              =Sign_decode(details, sender_key, receiver_key) ;	\n" ;
+      echo "    details              =Sign_decode(details, snd_p_key, doc_s_key) ;	\n" ;
 
       echo "  i_msg_sender .innerHTML='".$owner."' ;					\n" ;
       echo "  i_msg_sent   .innerHTML='".$fields[2]."' ;				\n" ;
       echo "    text                 ='".$fields[3]."' ;				\n" ;
-      echo "    text                 =Sign_decode(text, sender_key, receiver_key) ;	\n" ;
+      echo "    text                 =Sign_decode(text, snd_p_key, doc_s_key) ;		\n" ;
       echo "  i_msg_text   .innerHTML= text ;						\n" ;
 
       echo "    c_check              ='".$fields[6]."' ;				\n" ;
@@ -161,9 +165,8 @@ function ProcessDB() {
 
 //--------------------------- Регистрация новых доступов
 
-  if(isset($details)) 
+  if(isset($action) && $action=="Accept") 
   {
-        $owner_=$db->real_escape_string($owner) ;
         $check_=$db->real_escape_string($check) ;
 //- - - - - - - - - - - - - - Перебор страниц, по которым предоставлен доступ
 	$words=explode(" ", $details) ;
@@ -181,7 +184,7 @@ function ProcessDB() {
 //- - - - - - - - - - - - - - Проверка повторного задания доступа
                        $sql="Select page ".
                             "from   access_list ".
-                            "where  Owner='$owner_'".
+                            "where  Owner='$owner'".
                             " and   Login='$user_'".
                             " and   Page ='$page_'" ;
         $res=$db->query($sql) ;
@@ -201,7 +204,7 @@ function ProcessDB() {
                        $sql="Insert into access_list".
                             "(owner, login, page, crypto, ext_key) ".
                             "values".
-                            "('$owner_','$user_','$page_','$key_1_','$key_2_')" ;
+                            "('$owner','$user_','$page_','$key_1_','$key_2_')" ;
         $res=$db->query($sql) ;
      if($res===false) {
                FileLog("ERROR", "Insert ACCESS_LIST... : ".$db->error) ;
@@ -221,7 +224,7 @@ function ProcessDB() {
                         $sql="Select client ".
                              "from   doctor_notes ".
                              "where  owner ='$user_'".
-                             " and   client='$owner_'" ;
+                             " and   client='$owner'" ;
         $res=$db->query($sql) ;
      if($res===false) {
           FileLog("ERROR", "Select DOCTOR_NOTES... : ".$db->error) ;
@@ -242,7 +245,7 @@ function ProcessDB() {
                        $sql="Insert into `doctor_notes`".
                             "(`Owner`, `Client`, `Check`) ".
                             "values".
-                            "('$user_','$owner_','$check_')" ;
+                            "('$user_','$owner','$check_')" ;
         $res=$db->query($sql) ;
      if($res===false) {
                FileLog("ERROR", "Insert DOCTOR_NOTES... : ".$db->error) ;
@@ -255,13 +258,62 @@ function ProcessDB() {
         FileLog("", "Notes page successfully created for ".$owner) ;
 //- - - - - - - - - - - - - - Создание страницы заметок о клиенте
     } while(false) ;
-//- - - - - - - - - - - - - - Отметка о прочтении
-     if(strpos($action, "read")!==false)
-     {          
-            $message_=$db->real_escape_string($message) ;
+  }
+//--------------------------- Удаление доступов при отказе
+
+  if(isset($action) && $action=="Reject") 
+  {
+                       $sql="Delete from access_list ".
+                            "Where  owner='$owner'".
+                            " and   login='$user_'" ;
+        $res=$db->query($sql) ;
+     if($res===false) {
+               FileLog("ERROR", "Delete ACCESS_LIST... : ".$db->error) ;
+                       $db->rollback() ;
+                       $db->close() ;
+              ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка удаления из базы данных") ;
+                           return ;
+     }
+
+        FileLog("", "Access successfully deleted : ".$owner." for ".$user) ;
+  }
+//--------------------------- Формирование сообщений и писем
+
+  if(isset($action)) 
+  {
+//- - - - - - - - - - - - - - Формирование сообщения пациенту
+          $text=$db->real_escape_string($text) ;
+          $copy=$db->real_escape_string($copy) ;
+
+    if($action=="Accept")  $msg_type='CLIENT_INVITE_ACCEPT' ;
+    else                   $msg_type='CLIENT_INVITE_REJECT' ;
+
+                       $sql="Insert into messages(Receiver,Sender,Type,Text,Copy)".
+                                         " values('$owner','$user_','$msg_type','$text','$copy')" ;
+       $res=$db->query($sql) ;
+    if($res===false) {
+             FileLog("ERROR", "Insert MESSAGES... : ".$db->error) ;
+                     $db->rollback();
+                     $db->close() ;
+            ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка создания сообщения") ;
+                         return ;
+    }
+
+//- - - - - - - - - - - - - - Формирование email-оповещения
+    if($action=="Accept")  Email_msg_notification($db, $owner, $error) ;
+    else                   Email_msg_notification($db, $owner, $error) ;
+//- - - - - - - - - - - - - -
+  }
+//--------------------------- Отметка о прочтении
+
+  if(isset($action)) 
+  {
+       if($action=="Accept")  $flag='Y' ;
+       else                   $flag='R' ;
 
                           $sql="Update messages ".
                                "   Set `read`='Y' ".
+                               "      ,`done`='$flag' ".
 	                       " Where receiver='$user_'".
 	  		       "  and  id      = $message_" ;
           $res=$db->query($sql) ;
@@ -271,27 +323,15 @@ function ProcessDB() {
              ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка изменения статуса сообщения") ;
                              return ;
        }
-     }
-//- - - - - - - - - - - - - -
-             $db->commit() ;
-
-              SuccessMsg() ;
   }
-//--------------------------- Автоматическая обработка
+//--------------------------- Завершение
 
-  if($action!="none")
+  if(isset($action)) 
   {
-//- - - - - - - - - - - - - - Первый проход
-     if(!isset($details)) 
-     {
-          echo "  execute='first' ;  \n" ;
-     }
-//- - - - - - - - - - - - - - Второй проход
-     else 
-     {
-          echo "  execute='second' ;  \n" ;
-     }
-//- - - - - - - - - - - - - -
+           $db->commit() ;
+
+      if($action=="Accept")  SuccessMsg("Доступ предоставлен!") ;
+      else                   SuccessMsg("Доступ аннулирован!") ;
   }
 //--------------------------- Завершение
 
@@ -305,18 +345,18 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;		\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
     echo  "return ;" ;
 }
 
 //============================================== 
 //  Выдача сообщения об успешной регистрации
 
-function SuccessMsg() {
+function SuccessMsg($text) {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Доступ предоставлен!\" ;" ;
+    echo  "i_error.style.color='green' ;	\n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;	\n" ;
 }
 //============================================== 
 ?>
@@ -348,12 +388,20 @@ function SuccessMsg() {
     var  i_msg_text ;
     var  i_details ;
     var  i_check ;
+    var  i_text ;
+    var  i_copy ;
+    var  i_action ;
     var  i_accept ;
+    var  i_reject ;
     var  i_error ;
     var  password ;
     var  message_id ;
     var  sender_user ;
     var  execute ;
+    var  doc_s_key ;
+    var  snd_p_key ;
+    var  rcv_type ;
+    var  msg_key ;
     var  a_pages_keys ;
     var  a_files_keys ;
 
@@ -377,7 +425,11 @@ function SuccessMsg() {
        i_error      =document.getElementById("Error") ;
        i_details    =document.getElementById("Details") ;
        i_check      =document.getElementById("Check") ;
+       i_text       =document.getElementById("Text") ;
+       i_copy       =document.getElementById("Copy") ;
+       i_action     =document.getElementById("Action") ;
        i_accept     =document.getElementById("Accept") ;
+       i_reject     =document.getElementById("Reject") ;
 
        password=TransitContext("restore", "password", "") ;
 
@@ -418,13 +470,8 @@ function SuccessMsg() {
        i_msg_sender.innerHTML=c_name_f+" "+c_name_i+" "+c_name_o ;
     }
 
-    if(execute=="first" ) {  SendFields() ; document.forms[0].submit() ;  }
-    else
-    if(execute=="second")  parent.frames['section'].ProcessNext() ;
-    else
-    {
-        if(msg_done=='Y')  i_accept.hidden=true ;
-    }
+        if(msg_done=='Y') {  i_accept.hidden=true ;  }
+        if(msg_done=='R') {  i_reject.hidden=true ;  }
 
          return true ;
   }
@@ -432,6 +479,23 @@ function SuccessMsg() {
   function SendFields() 
   {
      var  error_text ;
+
+        error_text="" ;
+
+	i_copy.value=Crypto_encode(i_text.value, msg_key) ;
+	i_text.value=  Sign_encode(i_text.value, doc_s_key, snd_p_key) ;
+
+     if(error_text!="") {
+                          i_error.style.color="red" ;
+                          i_error.innerHTML  = error_text ;
+                              return false ;
+                        }
+
+      return true ;         
+  }
+
+  function AcceptInvite() 
+  {
      var  details ;
 
         error_text="" ;
@@ -448,14 +512,21 @@ function SuccessMsg() {
     }
 
 	  i_details.value=details ;
+          
+	  i_action.value="Accept" ;
+            i_text.value="Ваше приглашение принято" ;
 
-     if(error_text!="") {
-                          i_error.style.color="red" ;
-                          i_error.innerHTML  = error_text ;
-                              return false ;
-                        }
+                      SendFields() ; 
+        document.forms[0].submit() ;
+  }
+  
+  function RejectInvite() 
+  {
+	  i_action.value="Reject" ;
+            i_text.value="Ваше приглашение отклонено" ;
 
-      return true ;         
+                      SendFields() ; 
+        document.forms[0].submit() ;
   }
 
   function GoToChat()
@@ -498,11 +569,15 @@ function SuccessMsg() {
   <em><div class="Normal_CT" id="MsgText"></div>
   <br>
   <div class="Normal_CT">
-    <input type="submit" id="Accept" value="Принять">
+    <input type="button" class="InsertButton" id="Accept" value="Принять"  onclick=AcceptInvite()>
+    <input type="button" class="DeleteButton" id="Reject" value="Отказать" onclick=RejectInvite()>
   </div>
 
   <input type="hidden" name="Details" id="Details">
   <input type="hidden" name="Check"   id="Check">
+  <input type="hidden" name="Action"  id="Action">
+  <input type="hidden" name="Text"    id="Text">
+  <input type="hidden" name="Copy"    id="Copy">
 
   </form>
 

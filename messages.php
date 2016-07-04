@@ -401,13 +401,6 @@ function SuccessMsg() {
                           action="execute,read" ;
                }
          }
-         if(a_msg_type[msg_idx]=="CLIENT_ACCESS_INVITE") 
-         {
-            if(a_access[a_msg_sender[msg_idx]]!=null)
-            {
-//                  action="execute" ;
-            }
-         }
          if(a_msg_type[msg_idx]=="CLIENT_ACCESS_PAGES") 
          {
             if(a_access[a_msg_sender[msg_idx]]!=null)

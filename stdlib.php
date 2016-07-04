@@ -550,6 +550,46 @@ function Email_inv_notification($db, $user, &$error)
 }
 
 //============================================== 
+//  Отправка пользователю уведомления о приеме приглашения
+
+function Email_acc_notification($db, $user, &$error) 
+{
+  global  $glb_cfg_email_forms ;
+
+//--------------------------- Считывание файла сообщения
+
+   $text=file_get_contents($glb_cfg_email_forms."/AcceptInviteNotification.html") ;
+
+//--------------------------- Отправка сообщения
+
+  $status=Email($db, $user, "GeneralPractice.ru - Ваше приглашение принято", $text, $error) ;
+
+//---------------------------
+
+  return($status) ;
+}
+
+//============================================== 
+//  Отправка пользователю уведомления об отказе от приглашения
+
+function Email_rej_notification($db, $user, &$error) 
+{
+  global  $glb_cfg_email_forms ;
+
+//--------------------------- Считывание файла сообщения
+
+   $text=file_get_contents($glb_cfg_email_forms."/RejectInviteNotification.html") ;
+
+//--------------------------- Отправка сообщения
+
+  $status=Email($db, $user, "GeneralPractice.ru - Ваше приглашение отклонено", $text, $error) ;
+
+//---------------------------
+
+  return($status) ;
+}
+
+//============================================== 
 //  Отправка пользователю уведомления о регистрации
 
 function Email_confirmation($db, $user, $code_confirm, &$error) 

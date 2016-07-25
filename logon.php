@@ -273,7 +273,8 @@ function SuccessMsg($session) {
 <meta http-equiv="Content-Type" content="text/html" charset="windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css");
+  @import url("forms.css")
 </style>
 
 <script type="text/javascript">
@@ -417,7 +418,7 @@ function SuccessMsg($session) {
 <noscript>
 </noscript>
 
-<dev class="inputF">
+<div class="inputF">
 
   <table width="90%">
     <thead>
@@ -428,33 +429,37 @@ function SuccessMsg($session) {
         <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
         <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
-        <b>АВТОРИЗАЦИЯ</b>
-      </td> 
     </tr>
     </tbody>
   </table>
 
   <br>
-  <form onsubmit="return SendFields();" method="POST">
+  <form class="form-container" onsubmit="return SendFields();" method="POST">
   <table width="100%" id="Fields">
     <thead>
+	<th>
+		<div class="form-title"><h2>Авторизация</h2></div>
+	</th>
     </thead>
     <tbody>
     <tr>
-      <td class="field"> Логин </td>
+      <td class="form-title"> Логин </td>
       <td> <input type="text" size=20 name="Login" id="Login"> </td>
     </tr>
     <tr>
-      <td class="field"> Пароль </td>
+      <td class="form-title"> Пароль </td>
       <td> <input type="password" size=20 name="Password" id="Password"> </td>
     </tr>
     <tr>
       <td class="field"> </td>
-      <td> <br> <input type="submit" value="Войти"> </td>
+      <td> 
+	  		<div class="submit-container">
+				<input class="submit-button" type="submit" value="Войти" />
+			</div>
+		</td>
     </tr>
     <tr>
-      <td class="field"> </td>
+      <td class="form-title"> </td>
       <td> <div class="error" id="Error"></div> </td>
     </tr>
     </tbody>

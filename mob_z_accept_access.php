@@ -94,6 +94,12 @@ function ProcessDB() {
            $owner=$user_ ;
    }
    else
+   if($msg_type=="CLIENT_INVITE_ACCEPT" ||
+      $msg_type=="CLIENT_INVITE_REJECT"   )
+   {
+           $details="" ;
+   }
+   else
    {
           FileLog("ERROR", "Unknown message type detected... : ".$db->error) ;
                             $db->close() ;
@@ -103,6 +109,31 @@ function ProcessDB() {
 
            $owner_=$owner ;
    
+//--------------------------- Проверка на наличие отказа от приглашения
+
+   if($msg_type=="CLIENT_ACCESS_PAGES")
+   {
+                       $sql="Select id ".
+                            "from   messages ".
+                            "where  Sender  ='$owner_'".
+                            " and   Receiver='$user_'".
+                            " and   Type    ='CLIENT_ACCESS_INVITE'".
+                            " and   Done    ='R'" ;
+        $res=$db->query($sql) ;
+     if($res===false) {
+          FileLog("ERROR", "Select MESSAGES... : ".$db->error) ;
+                       $db->rollback() ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка проверки повторного доступа") ;
+                         return ;
+     }
+     if($res->num_rows!=0) {
+          FileLog("", "Reject detected - access ignored") ;
+                                 $details="" ;
+                                 $action =$action."read" ;
+     }
+			      $res->free() ;
+   }
 //--------------------------- Регистрация новых доступов
 //- - - - - - - - - - - - - - Перебор страниц, по которым предоставлен доступ
 	$words=explode(" ", $details) ;
@@ -156,6 +187,7 @@ function ProcessDB() {
 //--------------------------- Создание страницы заметок о клиенте
     do
     {
+       if($details=="")  break ;
 //- - - - - - - - - - - - - - Проверка наличия страницы заметок о клиенте
                         $sql="Select client ".
                              "from   doctor_notes ".

@@ -168,12 +168,14 @@ function ProcessDB() {
   if($glb_options_a["user"]=="Doctor"   ||
      $glb_options_a["user"]=="Executor"   )
   {
-                       $sql="Select distinct owner".
-	  		    "  From access_list ".
-			    " Where login='$user_'" ;
+                       $sql="Select sender, done".
+	  		    "  From messages ".
+			    " Where receiver='$user_'".
+                            "  and  type    ='CLIENT_ACCESS_INVITE'".
+                            "  and  done in ('Y','R')" ;
        $res=$db->query($sql) ;
     if($res===false) {
-          FileLog("ERROR", "Select ACCESS_LIST... : ".$db->error) ;
+          FileLog("ERROR", "Select MESSAGES(CLIENT_ACCESS_INVITE)... : ".$db->error) ;
                             $db->close() ;
          ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса списка установленных связей") ;
                          return ;
@@ -185,7 +187,7 @@ function ProcessDB() {
       {
 	      $fields=$res->fetch_row() ;
 
-        echo "  a_access['".$fields[0]."']='1' ;   \n" ;
+        echo "  a_access['".$fields[0]."']='".$fields[1]."' ;   \n" ;
       }
       
          $res->close() ;
@@ -372,6 +374,7 @@ function SuccessMsg() {
   {
     var  v_session ;
     var  v_form ;
+    var  v_group ;
 
 
     if(msg_idx==-1)
@@ -401,11 +404,29 @@ function SuccessMsg() {
                           action="execute,read" ;
                }
          }
-         if(a_msg_type[msg_idx]=="CLIENT_ACCESS_PAGES") 
+         if(a_msg_type[msg_idx]=="CLIENT_INVITE_ACCEPT" ||
+            a_msg_type[msg_idx]=="CLIENT_INVITE_REJECT"   ) 
+         {
+                               v_group="Invite_AR:"+a_msg_sender[msg_idx] ;
+
+               if(a_msg_groups[v_group]==null)
+               {
+                  if(a_msg_done[msg_idx]!="Y")  action="execute" ;
+
+                    a_msg_groups[v_group]="1" ;                          
+               }
+               else
+               {
+                          action="execute,read" ;
+               }
+         }
+         if(a_msg_type[msg_idx]=="CLIENT_ACCESS_PAGES")
          {
             if(a_access[a_msg_sender[msg_idx]]!=null)
             {
-               if(a_msg_done[msg_idx]!="Y")  action="execute" ;
+               if(a_msg_done[msg_idx]!="Y")
+                if(a_access[a_msg_sender[msg_idx]]=='R')  action="execute,read" ;
+                else                                      action="execute" ;
             }
          }
 
@@ -448,6 +469,8 @@ function SuccessMsg() {
                                               v_form="message_details_any.php" ;
     if(p_type=="CLIENT_ACCESS_INVITE"      )  v_form="message_details_invite.php" ;
     if(p_type=="CLIENT_ACCESS_PAGES"       )  v_form="message_details_access.php" ;
+    if(p_type=="CLIENT_INVITE_ACCEPT"      )  v_form="message_details_accept.php" ;
+    if(p_type=="CLIENT_INVITE_REJECT"      )  v_form="message_details_reject.php" ;
     if(p_type=="CLIENT_PRESCRIPTIONS_ALERT")  v_form="message_details_prescr.php" ;
     if(p_type=="CHAT_MESSAGE"              )  v_form="message_details_simple.php" ;
 

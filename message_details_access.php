@@ -165,6 +165,27 @@ function ProcessDB() {
   {
         $owner_=$db->real_escape_string($owner) ;
         $check_=$db->real_escape_string($check) ;
+//- - - - - - - - - - - - - - Проверка на наличие отказа от приглашения
+                       $sql="Select id ".
+                            "from   messages ".
+                            "where  Sender  ='$owner_'".
+                            " and   Receiver='$user_'".
+                            " and   Type    ='CLIENT_ACCESS_INVITE'".
+                            " and   Done    ='R'" ;
+        $res=$db->query($sql) ;
+     if($res===false) {
+          FileLog("ERROR", "Select MESSAGES... : ".$db->error) ;
+                       $db->rollback() ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка проверки повторного доступа") ;
+                         return ;
+     }
+     if($res->num_rows!=0) {
+          FileLog("", "Reject detected - access ignored") ;
+                                 $details="" ;
+                                 $action =$action."read" ;
+     }
+			      $res->free() ;
 //- - - - - - - - - - - - - - Перебор страниц, по которым предоставлен доступ
 	$words=explode(" ", $details) ;
 
@@ -307,8 +328,8 @@ function ProcessDB() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;      \n" ;
+    echo  "i_error.innerHTML  ='".$text."' ;    \n" ;
     echo  "return ;" ;
 }
 
@@ -317,8 +338,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Доступ предоставлен!\" ;" ;
+    echo  "i_error.style.color='green' ;    \n" ;
+    echo  "i_error.innerHTML  ='Доступ предоставлен!' ;  \n" ;
 }
 //============================================== 
 ?>
@@ -408,7 +429,7 @@ function SuccessMsg() {
     }
     else
     {
-      if(a_pages_keys["0"]!="") c_name_key=a_pages_keys["0"] ;
+      if(a_pages_keys["0"]!=null) c_name_key=a_pages_keys["0"] ;
     }
 
     if(c_name_key!="NONE")
@@ -442,7 +463,6 @@ function SuccessMsg() {
 
     for(var elem in a_pages_keys)
     {
-
         details=details+elem+" " ;
 	details=details+Crypto_encode(a_pages_keys[elem], password) ;
         details=details+" " ;

@@ -24,7 +24,8 @@ function ProcessDB() {
                           $session=$_GET ["Session"] ;
                           $doctor =$_GET ["Doctor"] ;
 
-                         $receiver=$_POST["Receiver"] ;
+    if(isset($_POST["Receiver"]))  $receiver=$_POST["Receiver"] ;
+    
     if(isset($receiver))
     {
                          $letter  =$_POST["Letter"] ;
@@ -65,6 +66,27 @@ function ProcessDB() {
 
   if(isset($receiver))
   {
+//- - - - - - - - - - - - - - Определение вид сообщения
+                     $sql="Select done".
+                          "  From messages".
+                          " Where type='CLIENT_ACCESS_INVITE'".
+                          "  and  receiver='$doctor_'".
+                          "  and  sender  ='$user_'" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select MESSAGES... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка поиска приглашения") ;
+                         return ;
+  }
+  if($res->num_rows==0) {
+                             $msg_type='CLIENT_ACCESS_INVITE' ;
+  }
+  else {
+                             $msg_type='CLIENT_ACCESS_PAGES' ;
+  }
+
+	              $res->close() ;
 //- - - - - - - - - - - - - - Внутреннее сообщение
           $receiver=$db->real_escape_string($receiver) ;
           $letter  =$db->real_escape_string($letter) ;
@@ -72,7 +94,7 @@ function ProcessDB() {
           $incopy  =$db->real_escape_string($incopy) ;
 
                        $sql="Insert into messages(Receiver,Sender,Type,Text,Details,Copy)".
-                            " values('$receiver','$user','CLIENT_ACCESS_INVITE','$invite','$letter','$incopy')" ;
+                            " values('$receiver','$user','$msg_type','$invite','$letter','$incopy')" ;
        $res=$db->query($sql) ;
     if($res===false) {
              FileLog("ERROR", "Insert MESSAGES... : ".$db->error) ;
@@ -234,7 +256,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="CryptoJS/rollups/tripledes.js"></script>
@@ -364,18 +389,16 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
   <table width="90%">
     <thead>
     </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>ПРЕДОСТАВЛЕНИЕ ДОСТУПА К СВОИМ ДАННЫМ</b>
       </td> 
     </tr>
@@ -385,14 +408,12 @@ function SuccessMsg() {
   <br>
   <form onsubmit="return SendFields();" method="POST">
 
-  <div class="error" id="Error"></div>
+  <p class="Error_CT" id="Error"></p>
 
-  <b><div class="fieldC" id="DoctorFIO"></div></b>
+  <b><div class="Normal_CT" id="DoctorFIO"></div></b>
 
   <br>
   <table width="100%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td id="Main">
@@ -400,13 +421,13 @@ function SuccessMsg() {
       <td></td>
     </tr>
     <tr>
-      <td class="fieldL"><br><b>Результаты анализов и обследований</b></td>
-      <td class="fieldL"><br><b>Назначения</b></td>
+      <td class="Normal_LT"><br><b>Результаты анализов и обследований</b></td>
+      <td class="Normal_LT"><br><b>Назначения</b></td>
     </tr>
     <tr>
-      <td class="fieldL" id="Pages">
+      <td class="Normal_LT" id="Pages">
       </td>
-      <td class="fieldL" id="Prescriptions">
+      <td class="Normal_LT" id="Prescriptions">
       </td>
     </tr>
     </tbody>
@@ -415,17 +436,15 @@ function SuccessMsg() {
   <br>
 
   <table width="100%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
-      <td class="fieldC">
+      <td class="Normal_CT">
         Сопроводительный техт <br>
         <textarea cols=100 rows=3 wrap="soft" name="Invite" id="Invite"></textarea>
       </td>
     </tr>
     <tr>
-      <td class="fieldC"> <br> <input type="submit" value="Направить приглашение"> </td>
+      <td class="Normal_CT"> <br> <input type="submit" value="Направить приглашение"> </td>
     </tr>
     </tbody>
   </table>
@@ -435,11 +454,6 @@ function SuccessMsg() {
 	<input type="hidden" name="InCopy"   id="InCopy" >
 
   </form>
-
-  <ul class="menu" name="Pages" id="Pages">
-  </ul>
-
-</div>
 
 </body>
 

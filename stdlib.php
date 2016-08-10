@@ -482,8 +482,6 @@ function Email($db, $user, $subject, $text, &$error)
 
        $status=mail($receiver, $subject, $body, $header) ;
 
-  	FileLog("DEBUG", "Send email for: ".$receiver."\n".$subject."\n".$body."\n".$header."\nstatus: ".$status);
-
 //---------------------------
 
   return(true) ;
@@ -613,7 +611,6 @@ function Email_confirmation($db, $user, $code_confirm, &$error)
   $status=Email($db, $user, "GeneralPractice.ru - Подтверждение регистрации", $text, $error) ;
 
 //---------------------------
-  FileLog("DEBUG", "Email_confirmation for: ".$user);
   return($status) ;
 }
 

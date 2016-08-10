@@ -19,6 +19,7 @@ function ProcessDB() {
   global  $sys_doc_spec     ;
   global  $sys_doc_remark   ;
   global  $sys_doc_portrait ;
+  global  $sys_doc_contact  ;
   global  $sys_user_type    ;
   global  $a_specialities   ;
 
@@ -32,13 +33,13 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                          $session=$_GET ["Session"] ;
-  if(!isset($session ))   $session=$_POST["Session"] ;
+                                 $session=$_GET ["Session"] ;
+  if(!isset($session        ))   $session=$_POST["Session"] ;
 
-                         $filter_s=$_GET ["FilterS"] ;
-  if(!isset($filter_s))  $filter_s=$_POST["FilterS"] ;
-                         $filter_n=$_GET ["FilterN"] ;
-  if(!isset($filter_n))  $filter_n=$_POST["FilterN"] ;
+  if( isset($_GET["FilterS"]))  $filter_s=$_GET ["FilterS"] ;
+  if(!isset($filter_s       ))  $filter_s=$_POST["FilterS"] ;
+  if( isset($_GET["FilterN"]))  $filter_n=$_GET ["FilterN"] ;
+  if(!isset($filter_n       ))  $filter_n=$_POST["FilterN"] ;
 
     FileLog("START", "Session:".$session) ;
     FileLog("",      "FilterS:".$filter_s) ;
@@ -92,11 +93,11 @@ function ProcessDB() {
 
            $user_=$db->real_escape_string($user) ;
 
-           $sql ="Select owner, CONCAT_WS(' ', d.name_f, d.name_i, d.name_o), speciality, remark, portrait".
-                  " From doctor_page_main d, users u".
-                  " Where d.confirmed='Y'".
-                  "  and d.owner     =u.login" ;
-                  
+           $sql ="Select owner, CONCAT_WS(' ', d.name_f, d.name_i, d.name_o), speciality, remark, portrait, m.done".
+                  " From doctor_page_main d inner join users    u on d.owner=u.login".
+                  "                    left outer join messages m on m.receiver=u.login and m.sender='$user_' and type='CLIENT_ACCESS_INVITE'".
+                  " Where d.confirmed='Y'" ;
+
    if(!isset($glb_options_a["tester"]))  $sql.=" and  u.options not like '%Tester;%'";
 
    if(!isset($filter_s))  $sql.=" and  d.owner in (select distinct m.receiver from messages m where m.sender='$user_')" ;
@@ -134,6 +135,7 @@ function ProcessDB() {
           $sys_doc_spec    [$i]= $fields[2] ;
           $sys_doc_remark  [$i]= $fields[3] ;
           $sys_doc_portrait[$i]= $fields[4] ;
+          $sys_doc_contact [$i]= $fields[5] ;
      }
 
      $res->close() ;
@@ -164,6 +166,7 @@ function ShowDoctors() {
   global  $sys_doc_spec     ;
   global  $sys_doc_remark   ;
   global  $sys_doc_portrait ;
+  global  $sys_doc_contact ;
   global  $a_specialities   ;
   global  $sys_user_type    ;
 
@@ -179,24 +182,32 @@ function ShowDoctors() {
                                                 $spec=substr($spec, 0, strlen($spec)-1) ;
                                                 $spec=str_replace(",", ", ", $spec) ;
 
-       echo  "  <tr class='table' id='Row_".$row."'>						\n" ;
-       echo  "    <td class='table' width='10%'>						\n" ;
+       echo  "  <tr class='Table_LT' id='Row_".$row."'>						\n" ;
+       echo  "    <td class='Table_LT' width='10%'>						\n" ;
 
     if($sys_doc_portrait[$i]!="") 
     {
-       echo "<div class='fieldC'>								\n" ;
+       echo "<div class='Normal_CT'>								\n" ;
        echo "<img src='".$sys_doc_portrait[$i]."' height=100>					\n" ;
        echo "</div>										\n" ;
        echo "<br>										\n" ;
     }
        echo  "      <input type='hidden' id='Login_"  .$row."' value='".$user."'>		\n" ;
        echo  "    </td>										\n" ;
-       echo  "    <td class='table'>								\n" ;
+       echo  "    <td class='Table_LT'>								\n" ;
        echo  "      <div><b>".$sys_doc_fio[$i]."</b></div>					\n" ;
+
+    if($sys_doc_contact[$i]=="R")
+       echo  "      <div><font color='red'>Приглашение не принято</font></div>			\n" ;
+    if($sys_doc_contact[$i]=="Y")
+       echo  "      <div><font color='green'>Приглашение принято</font></div>			\n" ;
+    if($sys_doc_contact[$i]=="N")
+       echo  "      <div><font color='blue'>Приглашение направлено</font></div>			\n" ;
+    
        echo  "      <div>".$spec."</div>							\n" ;
        echo  "      <div><i>".$text."</i></div>							\n" ;
        echo  "    </td>										\n" ;
-       echo  "    <td class='tableB' width='10%'>						\n" ;
+       echo  "    <td class='Table_CT' width='10%'>						\n" ;
 
     if($sys_user_type=="Client"  ||
        $sys_user_type=="Doctor"  ||
@@ -212,7 +223,13 @@ function ShowDoctors() {
     {
        echo  "      <br>									\n" ;
        echo  "      <br>									\n" ;
+
+      if($sys_doc_contact[$i]=="")
        echo  "      <input type='button' value='Приглашение'  onclick=GoToAccess('".$user."')>	\n" ;
+
+      if($sys_doc_contact[$i]=="N" ||
+         $sys_doc_contact[$i]=="Y"   )
+       echo  "      <input type='button' value='Передать данные'  onclick=GoToAccess('".$user."')>	\n" ;
     }
        echo  "    </td>										\n" ;
        echo  "  </tr>										\n" ;
@@ -263,7 +280,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="CryptoJS/rollups/tripledes.js"></script>
@@ -375,38 +395,34 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
   <table width="90%">
     <thead>
     </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>ВРАЧИ И СПЕЦИАЛИСТЫ</b>
       </td> 
     </tr>
     </tbody>
   </table>
 
-  <p class="error" id="Error"></p>
+  <p class="Error_CT" id="Error"></p>
 
   <form onsubmit="return SendFields();" method="POST"  enctype="multipart/form-data" id="Form">
 
   <table width="100%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
-      <td class="field">Специальность: </td>
-      <td><span class="fieldL" id="Speciality"></span></td>
+      <td class="Normal_RT">Специальность: </td>
+      <td><span class="Normal_LT " id="Speciality"></span></td>
     </tr>
     <tr>
-      <td class="field">ФИО: </td>
+      <td class="Normal_RT">ФИО: </td>
       <td> <input type="text" size=20 name="FilterN" id="FilterN"> </td>
     </tr>
     <tr>
@@ -421,8 +437,6 @@ function SuccessMsg() {
   <br>
 
   <table width="100%">
-    <thead>
-    </thead>
     <tbody  id="Doctors">
 
 <?php
@@ -433,8 +447,6 @@ function SuccessMsg() {
   </table>
 
   </form>
-
-</div>
 
 </body>
 

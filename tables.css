@@ -6,6 +6,14 @@
                   padding-left : 1ex             ; 
                  padding-right : 1ex             ; 
 }
+.Table_CT  /* Строка с рамкой, центр-верх */
+{
+                    text-align : center          ;
+                vertical-align : top             ;
+                        border : 1px solid black ; 
+                  padding-left : 1ex             ; 
+                 padding-right : 1ex             ; 
+}
 .Table_LC  /* Строка с рамкой, лево-центр */
 {
                     text-align : left            ;

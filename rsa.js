@@ -7,7 +7,7 @@ function Vli()
    this.data   =Array(256);
    this.data[0]= 0 ;
    this.data[1]=NaN ;
-   this.debug  =0 ;
+   this.log  =null ;
 }
 
 //============================================== 
@@ -461,9 +461,9 @@ Vli.prototype.subVli=function(p_vli)
 
      for(shift=0, i=0 ; i<this.data.length && !isNaN(this.data[i]) ; i++)
      {
-         if(isNaN(p_vli.data[i]))  break ;
+         if(isNaN(p_vli.data[i]))  tmp=this.data[i]              -shift ;
+         else                      tmp=this.data[i]-p_vli.data[i]-shift ;
 
-            tmp=this.data[i]-p_vli.data[i]-shift ;
          if(tmp>=0)
          {
             this.data[i]=tmp ;
@@ -648,10 +648,12 @@ Vli.prototype.divVli=function(p_vli)
                              i++ ;       }
                            n=i ;
 //- - - - - - - - - - - - - - - - - - Разрядное вычитание 
-     for(shift=0, k=0 ; k<n ; k++)
+     for(shift=0, k=0 ; k<n || shift>0; k++)
      {
               m=z-len2+k ;
-            tmp=this.data[m]-res.data[k]-shift ;
+         if(k<n)  tmp=this.data[m]-res.data[k]-shift ;
+         else     tmp=this.data[m]            -shift ;
+
          if(tmp>=0)
          {
             this.data[m]=tmp ;
@@ -749,14 +751,13 @@ Vli.prototype.powerMode=function(p_b, p_c, p_d)
   {
      if(!(y.data[0] & 1))
      {
-           y.rshiftVli() ;
+           y.rshiftVli() ;         
            x.mulVli(x) ;
          x=x.divVli(p_c) ;
      }
 
            y.subNumber(1) ;
            z.mulVli(x) ;
-         tmp.setVli(z) ;
 
          z=z.divVli(p_c) ;
   }
@@ -833,10 +834,12 @@ Vli.prototype.toSimple=function()
    7741,  7753,  7757,  7759,  7789,  7793,  7817,  7823,  7829,  7841,   7853,  7867,  7873,  7877,  7879,  7883,  7901,  7907,  7919,  7927,
    0 ] ;
 
+    var  fast=new Array(10) ;
+
     var  x=new Vli() ;
     var  y=new Vli() ;
     var  p_1=new Vli() ;
-    var  i, k, len, rem ;
+    var  i, j, k, len, rem, fast_flag ;
 
 /*-------------------------------------------- Подбор числа-критерия */
 
@@ -855,6 +858,7 @@ Vli.prototype.toSimple=function()
    }
 
          x.divNumber(simple[k]) ;
+         x.isZero() ;
 
 /*---------------------------------------- Подготовка базового числа */
 
@@ -864,7 +868,18 @@ Vli.prototype.toSimple=function()
 
     do {
             this.subNumber(2) ;                                     /* Модиф.искомое число */
+/*- - - - - - - - - - - - - - - - - - - - - - -  Ускоренная проверка */
+              
+         for(fast_flag=0, j=0 ; j<10 ; j++) 
+         {
+               fast[j]-- ;
+            if(fast[j]==0) {  fast[j]=simple[j] ;  fast_flag=1 ; }
+         }
+
+             if(fast_flag)  continue ;
 /*- - - - - - - - - - - - - - - - - - - - - - - -  Проверка делением */
+     if(this.log!=null)  this.log(this.getHex_()) ;
+
        for(i=0 ; i<1000 ; i++)  {
 
                 y.data=[].concat(this.data) ;
@@ -874,12 +889,22 @@ Vli.prototype.toSimple=function()
 	 if(rem==0)  break ;
 				}
 
+     if(this.log!=null)  this.log("Factor "+i) ;
+
+         if(i<10)  fast[i]=simple[i] ;
+
          if(i<1000)  continue ; 
 /*- - - - - - - - - - - - - - - - -  Проверка по малой теореме Ферма */
                 p_1.data=[].concat(this.data) ;
                 p_1.subNumber(1) ;                                  /* Вычисляем P-1 */
 
+     if(this.log!=null)  this.log("   x= "+   x.getHex_()) ;
+     if(this.log!=null)  this.log("this= "+this.getHex_()) ;
+     if(this.log!=null)  this.log(" p-1= "+ p_1.getHex_()) ;
+
 		y.powerMode(x, this, p_1) ;                         /* Вычисляем критерий */
+
+     if(this.log!=null)  this.log(" Rem= "+ y.getHex_()) ;
 
              if(y.data[0]==1 && isNaN(y.data[1]))  break ;          /* Проверка критерия на равенство 1 */
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -983,12 +1008,14 @@ Rsa.prototype.generateKeys=function(p_base)
 
      if(this.log!=null)  this.log("Generate P...") ;
 
+             p.log=this.log ;
              p.random(p_base) ;
              p.toSimple() ;        /* Генерируем случайное простое P */
 
      if(this.log!=null)  this.log("P generated") ;
      if(this.log!=null)  this.log("Generate Q...") ;
 
+             q.log=this.log ;
              q.random(p_base) ;
              q.toSimple() ;        /* Генерируем случайное простое Q */
 
@@ -1013,6 +1040,7 @@ Rsa.prototype.generateKeys=function(p_base)
 
      if(this.log!=null)  this.log("New D generate...") ;
 
+             d.log=this.log ;
              d.setVli(p) ;         /* Ищем D, большее P и Q и взаимно-простое с Eu */
              d.addVli(q) ;
              d.addVli(t) ;
@@ -1130,6 +1158,20 @@ Rsa.prototype.setPublicKey=function(p_text)
 /*                                                                   */
 /*              RSA-кодирование на ключах E и N                      */
 
+Rsa.prototype.encodeText=function(p_text)
+
+{
+  var  hex, tmp, i ;
+  
+   for(hex="", i=0 ; i<p_text.length ; i++) 
+   {
+       tmp ="0000"+p_text.charCodeAt(i).toString(16) ;
+       hex+=tmp.substr(-4) ;
+   }
+
+   return(this.encode(hex)) ;
+}
+
 Rsa.prototype.encode=function(p_text)
 
 {
@@ -1173,6 +1215,19 @@ Rsa.prototype.encode=function(p_text)
 /*********************************************************************/
 /*                                                                   */
 /*              RSA-декодирование на ключах D и N                    */
+
+Rsa.prototype.decodeText=function(p_code)
+
+{
+  var  hex, tmp, i ;
+
+       hex=this.decode(p_code)
+
+   for(tmp="", i=0 ; i<hex.length ; i+=4) 
+       tmp+=String.fromCharCode(parseInt(hex.substr(i, 4), 16)) ;
+
+   return(tmp) ;
+}
 
 Rsa.prototype.decode=function(p_code)
 

@@ -86,11 +86,10 @@ function ProcessDB() {
            $sql ="Select owner, CONCAT_WS(' ', d.name_f, d.name_i, d.name_o), speciality, remark, portrait, u.sign_p_key".
                   " From doctor_page_main d, users u".
                   " Where d.confirmed='Y'".
-                  "  and  d.owner    =u.login" ;
-                  
-   if(!isset($glb_options_a["tester"]))  $sql.=" and  u.options not like '%Tester;%'";
+                  "  and  d.owner    =u.login".
+                  "  and  d.owner in (select distinct m.receiver from messages m where m.sender='$user_' and type='CLIENT_ACCESS_INVITE' and done!='R')" ;
 
-   if(!isset($filter_s))  $sql.=" and  d.owner in (select distinct m.receiver from messages m where m.sender='$user_')" ;
+   if(!isset($glb_options_a["tester"]))  $sql.=" and  u.options not like '%Tester;%'";
 
      $res=$db->query($sql) ;
   if($res===false) {

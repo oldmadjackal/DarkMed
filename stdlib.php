@@ -180,8 +180,11 @@ function PrepareTmpFolder($session)
              $path.="/".$session ;
 
    if(is_dir($path)==false) {
+
               $status=mkdir($path, 0722) ;
-           if($status==false)  return("") ;
+           if($status==false)
+             if(is_dir($path)==false)  return("") ;
+
                             }
 
   return($path) ;

@@ -231,6 +231,8 @@ function SuccessMsg() {
 </style>
 
 <script src="CryptoJS/rollups/tripledes.js"></script>
+<script src="rsa.js"></script>
+
 <script type="text/javascript">
 <!--
 
@@ -247,6 +249,7 @@ function SuccessMsg() {
     var  i_p_key ;
     var  i_msg_key ;
     var  i_error ;    
+    var  i_log ;
 
   function FirstField() 
   {
@@ -263,6 +266,7 @@ function SuccessMsg() {
        i_p_key   =document.getElementById("Sign_public") ;
        i_msg_key =document.getElementById("Msg_key") ;
        i_error   =document.getElementById("Error") ;
+       i_log     =document.getElementById("Log") ;
 
        i_login.focus() ;
 
@@ -275,6 +279,17 @@ function SuccessMsg() {
          return true ;
   }
 
+  function Log(p_text) 
+  {
+    var date = Date.now();
+    var curDate = null;
+
+     console.log(p_text) ;
+
+    do {  curDate = Date.now() ;  } while(curDate-date<100) ;
+
+  }
+
   function SendFields() 
   {
      var  password ;
@@ -284,6 +299,8 @@ function SuccessMsg() {
      var  keys_pair ;
      var  error_text ;
      var  text ;
+
+	keys_pair    =Sign_generate(Log) ;
 
        i_table.rows[0].cells[0].style.color="black"   ;
        i_table.rows[1].cells[0].style.color="black"   ;
@@ -341,7 +358,7 @@ function SuccessMsg() {
 
      if(error_text=="") {
 
-	keys_pair    =Sign_generate() ;
+	keys_pair    =Sign_generate(Log) ;
 	i_s_key.value=Crypto_encode(keys_pair[0], password) ;
 	i_p_key.value=              keys_pair[1] ;	
      }
@@ -353,7 +370,6 @@ function SuccessMsg() {
 
                    return true ;         
   } 
-
 
 <?php
   require("common.inc") ;
@@ -454,6 +470,8 @@ function SuccessMsg() {
   </table>
 
   </form>
+
+  <div id="Log" scrolling="auto"></div>
 
 </div>
 

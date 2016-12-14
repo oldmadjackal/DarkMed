@@ -1183,6 +1183,7 @@ Rsa.prototype.encode=function(p_text)
    var  block_size ;
    var  buff_i ;
    var  buff_o ;
+   var  size ;
    var  i ;
 
 
@@ -1207,7 +1208,10 @@ Rsa.prototype.encode=function(p_text)
             buff_o=buff_o+block ;
      }
 
-            buff_o=p_text.length+":"+buff_o ;
+              size="0000"+p_text.length.toString(16) ;
+              size=size.substr(-4) ;
+
+            buff_o=size+buff_o ;
 
    return(buff_o) ;
 }
@@ -1234,7 +1238,6 @@ Rsa.prototype.decode=function(p_code)
 {
    var  data_i=new Vli() ;
    var  data_o=new Vli() ;
-   var  words ;
    var  size_o ;
    var  chunk ;
    var  chunk_size ;
@@ -1246,9 +1249,8 @@ Rsa.prototype.decode=function(p_code)
    var  i ;
 
 
-          words=p_code.split(":") ;
-         size_o=parseInt(words[0])
-         buff_i=words[1] ;
+         size_o=parseInt(p_code.substr(0,4), 16)
+         buff_i= p_code.substr(4);
          buff_o=   "" ;
 
         block_size=2*(this.base*2  ) ;

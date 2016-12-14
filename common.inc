@@ -1,4 +1,7 @@
 //============================================== 
+//  Глобальные переменные
+
+//============================================== 
 //  Чтение/Запись контекста
 
 function TransitContext(p_action, p_context, p_text)
@@ -102,27 +105,65 @@ function Check_validate(p_text)
 //
 //   0 - secret key, 1 - public key
 
-function Sign_generate()
+function Sign_generate(p_log_function)
 {
-  var  Key_pair= new Array(2) ;
+  var  rsa=new Rsa() ;
+  var  key_pair= new Array(2) ;
+  var  text ;
+  var  code ;
 
-	Key_pair[0]="RSA"+GetRandomString(32) ;
-	Key_pair[1]= Key_pair[0] ;
+//                  rsa.log=p_log_function ;
 
-  return Key_pair ;
+                           rsa.generateKeys(20) ;
+	key_pair[0]="RSA:"+rsa.getSecretKey() ;
+	key_pair[1]="RSA:"+rsa.getPublicKey() ;
+
+  return key_pair ;
 }
 //============================================== 
 //  Формирование подписанного контента
 
 function Sign_encode(p_text, p_sender_key, p_receiver_key)
 {
- var  data_1 ;
- var  data_1_s ;
- var  data_2 ;
+  var  rsa=new Rsa() ;
+  var  data_1 ;
+  var  data_1_s ;
+  var  data_2 ;
+  var  data_key ;
 
-   data_1  =Crypto_encode(p_text, p_sender_key  ) ;
-   data_1_s=""+data_1 ;
-   data_2  =Crypto_encode(data_1_s, p_receiver_key) ;
+  if(p_sender_key  .substr(0,4)=="RSA:" ||
+     p_receiver_key.substr(0,4)=="RSA:"   ) 
+  {
+         data_key=GetRandomString(64) ;
+
+     if(p_sender_key  .substr(0,4)=="RSA:" &&
+        p_receiver_key.substr(0,4)=="RSA:"   )
+     {
+                 rsa.setSecretKey(p_sender_key.substr(4)) ; 
+          data_2=rsa.encodeText(data_key) ;
+                 rsa.setSecretKey(p_receiver_key.substr(4)) ; 
+          data_1=rsa.encode(data_2) ;
+     } 
+     else
+     if(p_sender_key  .substr(0,4)=="RSA:")
+     {
+                 rsa.setSecretKey(p_sender_key.substr(4)) ; 
+          data_1=rsa.encodeText(data_key) ;
+     } 
+     else
+     {
+                 rsa.setSecretKey(p_receiver_key.substr(4)) ; 
+          data_1=rsa.encodeText(data_key) ;
+     } 
+
+         data_2=data_1+" "+Crypto_encode(p_text, data_key) ;  
+  }
+  else
+  {
+         data_1  =Crypto_encode(p_text, p_sender_key  ) ;
+         data_1_s=""+data_1 ;
+         data_2  =Crypto_encode(data_1_s, p_receiver_key) ;
+  }
 
   return data_2 ;
 }
@@ -131,11 +172,44 @@ function Sign_encode(p_text, p_sender_key, p_receiver_key)
 
 function Sign_decode(p_text, p_sender_key, p_receiver_key)
 {
+ var  rsa=new Rsa() ;
  var  data_1 ;
  var  data_2 ;
+ var  data_key ;
+ var  words ;
 
-   data_1=Crypto_decode(p_text, p_receiver_key) ;
-   data_2=Crypto_decode(data_1, p_sender_key  ) ;
+  if(p_sender_key  .substr(0,4)=="RSA:" ||
+     p_receiver_key.substr(0,4)=="RSA:"   ) 
+  {
+         words=p_text.split(" ") ;
+
+     if(p_sender_key  .substr(0,4)=="RSA:" &&
+        p_receiver_key.substr(0,4)=="RSA:"   )
+     {
+                   rsa.setPublicKey(p_receiver_key.substr(4)) ; 
+          data_key=rsa.decode(words[0]) ;
+                   rsa.setPublicKey(p_sender_key.substr(4)) ; 
+          data_key=rsa.decodeText(data_key) ;
+     } 
+     else
+     if(p_sender_key  .substr(0,4)=="RSA:")
+     {
+                   rsa.setPublicKey(p_sender_key.substr(4)) ; 
+          data_key=rsa.decodeText(words[0]) ;
+     } 
+     else
+     {
+                   rsa.setPublicKey(p_receiver_key.substr(4)) ; 
+          data_key=rsa.decodeText(words[0]) ;
+     }
+
+         data_2=Crypto_decode(words[1], data_key) ;  
+  }
+  else
+  {
+     data_1=Crypto_decode(p_text, p_receiver_key) ;
+     data_2=Crypto_decode(data_1, p_sender_key  ) ;
+  }
 
   return data_2 ;
 }

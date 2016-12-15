@@ -73,9 +73,6 @@ function ProcessDB() {
       echo "  i_name       .innerHTML='".$name       ."' ;	\n" ;
       echo "  i_description.innerHTML='".$description."' ;	\n" ;
 
-    if($append=="false")
-      echo "  i_append     .hidden   = true ;			\n" ;
-
 //--------------------------- Извлечение состава комплекса
 
                      $sql="Select e.prescription_id, r.type, e.remark".
@@ -143,7 +140,9 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("tables.css") ;
+  @import url("text.css") ;
 </style>
 
 <script type="text/javascript">
@@ -152,7 +151,6 @@ function SuccessMsg() {
     var  i_id ;
     var  i_name ;
     var  i_description ;
-    var  i_append ;
     var  i_error ;
     var  a_id ;
     var  a_type ;
@@ -165,7 +163,6 @@ function SuccessMsg() {
        i_id         =document.getElementById("Id") ;
        i_name       =document.getElementById("Name") ;
        i_description=document.getElementById("Description") ;
-       i_append     =document.getElementById("Append") ;
        i_error      =document.getElementById("Error") ;
 
        a_id    =new Array() ;
@@ -190,14 +187,6 @@ function SuccessMsg() {
     window.open("set_view.php"+"?Session="+v_session+"&Id="+i_id.value) ;
   } 
 
-  function AppendSet()
-  {
-
-     for(i in a_id) {
-          parent.frames['section'].AddListRow(a_id[i], a_type[i], a_remark[i], "") ;
-                    }
-  } 
-
 <?php
   require("common.inc") ;
 ?>
@@ -213,22 +202,18 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-  <div class="error" id="Error"></div>
+  <div class="Error_LT" id="Error"></div>
 
-    <table border="0" width="100%" id="Fields">
-    <thead>
-    </thead>
-    <tbody>
-    <tr>
-      <td><input type="hidden" id="Id">
-          <input type="button" value="Полностью" onclick=GoToView()></td>
-      <td><b><div id="Name"></div></b></td>
-      <td><input type="button" value="Добавить" id="Append" onclick=AppendSet()></td>
-    </tr>
-    </tbody>
-  </table>
+  <div class="Normal_CT">
+        <input type="button" value="Полностью" onclick=GoToView()>
+  </div>
+  <br>
+  <div class="Bold_CT" id="Name"></div>
 
+  <br>
   <i><div id="Description"></div></i>
+
+  <input type="hidden" id="Id">
 
 </body>
 

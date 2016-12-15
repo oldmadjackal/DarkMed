@@ -13,7 +13,7 @@
 <noscript>
 </noscript>
 
-<frameset rows="*,20%">
+<frameset cols="70%,30%">
 
 <?php
 

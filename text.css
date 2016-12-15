@@ -17,6 +17,12 @@
                     text-align : right           ;
                 vertical-align : top             ;
 }
+.Bold_CT  /* Жирный шрифт, центр-верх */
+ {
+                    text-align : center          ;
+                vertical-align : top             ;
+                   font-weight : bold            ; 
+}
 .Bold_LT  /* Жирный шрифт, лево-верх */
  {
                     text-align : left            ;

@@ -29,6 +29,12 @@
                 vertical-align : top             ;
                    font-weight : bold            ; 
 }
+.Bold_RT  /* Жирный шрифт, лево-верх */
+ {
+                    text-align : right           ;
+                vertical-align : top             ;
+                   font-weight : bold            ; 
+}
 .Error_CT  /* Строка ошибки, центр-верх */
  {
                     text-align : center          ;

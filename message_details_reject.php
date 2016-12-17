@@ -332,6 +332,10 @@ function SuccessMsg() {
   <div class="Normal_CT" id="MsgSent"> </div>
   <br>         
   <em><div class="Normal_CT" id="MsgText"></div>
+
+  <div class="Normal_CT">
+    <input type="submit" id="Accept" value="Принять">
+  </div>
   
   </form>
 

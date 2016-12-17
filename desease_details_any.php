@@ -130,7 +130,9 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("tables.css") ;
+  @import url("text.css") ;
 </style>
 
 <script type="text/javascript">
@@ -219,35 +221,51 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-  <div class="error" id="Error"></div>
+  <div class=""Error_CT"" id="Error"></div>
 
-  <table border="0" width="100%" id="Fields">
-    <thead>
-    </thead>
+  <div class="Bold_CT" id="Name"></div>
+  <br>
+
+  <table border="0" width="100%">
     <tbody>
-    <tr class="fieldL">
-      <td width="20%">
-         <span><b>Код: <span id="Id"> </span></b></span>
-         <input type="button" value="Полностью" onclick=GoToView()>
-         <div id="Owner"> </div>
-           <input type="button" value="Кто это?" onclick=WhoIsIt()>
-           <input type="button" value="Переписка" onclick=MailTo() id="MailTo">
-         <div id="Type"> </div>
-         <div id="Reference"> </div>
+      <tr>
+        <td class="Bold_RT">Категория:</td>
+        <td class="Normal_LT"> <div id="Type"> </div></td>
+      </tr>
+      <tr>
+        <td class="Bold_RT">Классификатор:</td>
+        <td class="Normal_LT"> <div id="Reference"> </div> </td>
       </td>
-      <td width="2%">
-      </td>
-      <td width="73%">
-         <b><div id="Name"></div></b>
-         <a href="javascript:
-                  window.open(document.getElementById('WWW_link').value) ;"
-                     Id="GoToLink">Смотреть на</a></b>
-         <i><div id="Description"></div></i>
-         <input type="hidden" Name="WWW_link" Id="WWW_link">
-      </td>
-    </tr>
+      </tr>
     </tbody>
   </table>
+
+  <br>
+  <div class="Normal_CT">
+    <a href="javascript:
+             window.open(document.getElementById('WWW_link').value) ;"
+       Id="GoToLink">Смотреть на</a>
+  </div>
+  <br>
+  <i><div id="Description"></div></i>
+  <br>
+  <br>
+
+  <table border="0" width="100%">
+    <tbody>
+      <tr>
+        <td class="Bold_RT">Автор:</td>
+        <td class="Normal_LT">
+           <div id="Owner"> </div>
+           <input type="button" value="Кто это?" onclick=WhoIsIt()>
+           <input type="button" value="Переписка" onclick=MailTo() id="MailTo">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div id="Id" hidden></div>
+  <input type="hidden" Name="WWW_link" Id="WWW_link">
 
 </body>
 

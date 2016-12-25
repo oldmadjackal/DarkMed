@@ -332,14 +332,20 @@ function SuccessMsg() {
 
   <form onsubmit="return SendFields();" method="POST">
 
-  <div class="Normal_CT"> 
-    <b><div id="Receiver"> </div></b>
-
-    <textarea cols=46 rows=10 wrap="soft" name="Text" id="Text"></textarea>
-
-    <input type="submit" value="Отправить">
-    <input type="hidden" name="Copy" id="Copy">
-  </div>
+  <table width="100%">
+    <tbody>
+    <tr>
+      <td class="Bold_RT" width="15%"> 
+        <div id="Receiver"> </div> 
+      </td>
+      <td class="Normal_LT" width="85%">
+        <textarea cols=100 rows=3 wrap="soft" name="Text" id="Text"></textarea>
+        <input type="submit" value="Отправить">
+        <input type="hidden" name="Copy" id="Copy">
+      </td>
+    </tr>
+    </tbody>
+  </table>
 
   </form>
 

@@ -156,19 +156,21 @@ function ShowDoctors() {
 
     if($sys_doc_portrait[$i]!="") 
     {
-       echo "<div class='Normal_CT'>							\n" ;
-       echo "<img src='".$sys_doc_portrait[$i]."' height=100>				\n" ;
-       echo "</div>									\n" ;
+       echo "<div class='Normal_CT'>								\n" ;
+       echo "<img src='".$sys_doc_portrait[$i]."' height=100>					\n" ;
+       echo "</div>										\n" ;
     }
-       echo  "      <input type='hidden' id='Login_"  .$row."' value='".$user."'>	\n" ;
-       echo  "    </td>									\n" ;
-       echo  "    <td class='Table_LT'>							\n" ;
-       echo  "      <div><b>".$sys_doc_fio[$i]."</b></div>				\n" ;
-       echo  "      <div>".$spec."</div>						\n" ;
-//     echo  "      <div><i>".$text."</i></div>						\n" ;
-       echo  "    </td>									\n" ;
+       echo  "      <input type='hidden' id='Login_"  .$row."' value='".$user."'>		\n" ;
+       echo  "    </td>										\n" ;
+       echo  "    <td class='Table_LT'>								\n" ;
+       echo  "      <div><b>".$sys_doc_fio[$i]."</b></div>					\n" ;
+       echo  "      <div>".$spec."</div>							\n" ;
+       echo  "      <br>									\n" ;
+       echo  "      <input type='button' value='Переписка' onclick=GoToMail('".$user."')>	\n" ;
+//     echo  "      <div><i>".$text."</i></div>							\n" ;
+       echo  "    </td>										\n" ;
 
-       echo  "  </tr>									\n" ;
+       echo  "  </tr>										\n" ;
 
   }
 
@@ -286,6 +288,15 @@ function SuccessMsg() {
   function GoToView(p_user)
   {
     window.open("doctor_view.php"+"?Owner="+p_user) ;
+  } 
+
+  function GoToMail(p_user)
+  {
+    var  v_session ;
+
+	 v_session=TransitContext("restore","session","") ;
+
+	location.replace("messages_chat_ud.php?Session="+v_session+"&Sender="+p_user) ;
   } 
 
   function EI_GetSelectedDoctor() 

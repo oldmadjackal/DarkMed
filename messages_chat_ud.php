@@ -457,8 +457,6 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div>
-
   <p class="Error_CT" id="Error"></p>
 
   <form onsubmit="return SendFields();" method="POST">
@@ -487,8 +485,6 @@ function SuccessMsg() {
   </table>
 
   </form>
-
-</div>
 
 </body>
 

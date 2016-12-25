@@ -27,8 +27,13 @@ function ProcessDB() {
                         $sender =$_GET ["Sender" ] ;
   if(!isset($sender ))  $sender =$_POST["Sender" ] ;
 
-  FileLog("START", "    Session:".$session) ;
-  FileLog("",      "     Sender:".$sender) ;
+  if(isset($_POST["ChatOnly"]))  $chatonly=$_POST["ChatOnly"] ;
+
+                        FileLog("START", "    Session:".$session) ;
+                        FileLog("",      "     Sender:".$sender) ;
+  if(isset($chatonly))  FileLog("",      "   ChatOnly:".$chatonly) ;
+
+  if(!isset($chatonly))  $chatonly="true" ;
 
 //--------------------------- Подключение БД
 
@@ -84,12 +89,16 @@ function ProcessDB() {
 
 //--------------------------- Формирование списка сообщений
 
-                     $sql="Select m.sender, m.id, m.type, t.name, m.text, m.copy, m.sent".
-			  "  From messages m ".
-                          "       inner join ref_messages_types t on t.code=m.type and  t.language='RU' ".
-			  " Where (m.receiver='$user_'   and m.sender='$sender_')".
-                          "   or  (m.receiver='$sender_' and m.sender='$user_'  )".
-                          " Order by id desc"  ;
+           echo "  i_chat_only_cb.checked=".$chatonly." ;	\n" ;
+
+                         $sql ="Select m.sender, m.id, m.type, t.name, m.text, m.copy, m.sent".
+			       "  From messages m ".
+                               "       inner join ref_messages_types t on t.code=m.type and  t.language='RU' ".
+			       " Where ((m.receiver='$user_'   and m.sender='$sender_') or".
+                               "        (m.receiver='$sender_' and m.sender='$user_'  )   )" ;
+  if($chatonly=="true")  $sql.="  and    m.type='CHAT_MESSAGE'"  ;
+                         $sql.=" Order by id desc"  ;
+
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select MESSAGES... : ".$db->error) ;
@@ -182,6 +191,8 @@ function SuccessMsg() {
 <script type="text/javascript">
 <!--
 
+    var  i_chat_only ;
+    var  i_chat_only_cb ;
     var  i_messages ;
     var  i_error ;
     var  rec_s_key ;
@@ -197,8 +208,10 @@ function SuccessMsg() {
     var  top_id ;
 
 
-       i_messages=document.getElementById("Messages") ;
-       i_error   =document.getElementById("Error") ;
+       i_chat_only   =document.getElementById("ChatOnly") ;
+       i_chat_only_cb=document.getElementById("ChatOnly_cb") ;
+       i_messages    =document.getElementById("Messages") ;
+       i_error       =document.getElementById("Error") ;
 
        password=TransitContext("restore", "password", "") ;
         session=TransitContext("restore", "session",  "") ;
@@ -218,6 +231,8 @@ function SuccessMsg() {
   {
      var  error_text ;
 
+
+        i_chat_only.value=i_chat_only_cb.checked ;
 
             error_text="" ;
 
@@ -302,8 +317,6 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div>
-
   <table width="90%">
     <thead>
     </thead>
@@ -322,18 +335,20 @@ function SuccessMsg() {
 
   <br>
   <form onsubmit="return SendFields();" method="POST">
-  <p class="error" id="Error"></p>
-  <table width="100%">
-    <thead>
+    <p class="Error_CT" id="Error"></p>
     <input type="submit" value="Обновить"> 
-    </thead>
+    <br>
+    <br>
+    <input type="checkbox" id="ChatOnly_cb"> Только сообщения чата
+    <input type="hidden" name="ChatOnly" id="ChatOnly">
+    <br>
+    <br>
+  <table width="100%">
     <tbody id="Messages">
     </tbody>
   </table>
 
   </form>
-
-</div>
 
 </body>
 

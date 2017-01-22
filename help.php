@@ -217,6 +217,12 @@ function SuccessMsg($session) {
     <li><a href="DarkMed_client.docx"  target="section">Руководство пользователя для пациента (docx-файл)</a></li> 
   </ul>
 
+  <p>Кроме того, предлагаются видеокурсы по использованию портала:</p>
+
+  <ul class="menu">
+    <li><a href="tutorial\Doctor_1_prepare.mp4"  target="section">Видеокурс врача - основной портал, начало работы, подготовка комплексов упражнений (mp4-файл)</a></li> 
+  </ul>
+
   <div class="error" id="Error"></div>
 
   <br>

@@ -220,7 +220,7 @@ function SuccessMsg() {
 
          v_session=TransitContext("restore","session","") ;
 
-        parent.location.assign("set_edit.php"+"?Session="+v_session) ;
+        parent.location.assign("set_edit_wrapper.php"+"?Session="+v_session) ;
   } 
 
   function SetReadOnly() 

@@ -17,10 +17,11 @@
 
 <?php
 
-       $session=$_GET ["Session"] ;
-            $id=$_GET ["Id"] ;
+                          $session=$_GET["Session"] ;
+  if(isset($_GET["Id"]))  $id     =$_GET["Id"] ;
 
-   echo " <frame src='set_edit.php?Session=".$session."&Id=".$id."' name='section'>" ;	
+  if(isset($id))  echo " <frame src='set_edit.php?Session=".$session."&Id=".$id."' name='section'>" ;	
+  else            echo " <frame src='set_edit.php?Session=".$session."' name='section'>" ;	 
 ?>
 
    <frame name="details">

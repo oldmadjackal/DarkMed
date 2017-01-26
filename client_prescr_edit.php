@@ -381,6 +381,7 @@ function ProcessDB() {
     }
 //- - - - - - - - - - - - - - Сохранение списка назначений
            $assign_reference=false ;
+               $new_first_id= 0 ;
 
    for($i=0 ; $i<$prescr_count ; $i++) 
    {

@@ -40,12 +40,36 @@ function ProcessDB() {
                     ErrorMsg($error) ;
                          return ;
   }
+//--------------------------- Извлечение списка специальностей
+
+                     $sql="Select code, name".
+			  "  From ref_prescriptions_keywords".
+			  " Where language='RU'" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select REF_PRESCRIPTIONS_KEYWORDS... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса справочника ключевых слов") ;
+                         return ;
+  }
+  else
+  {  
+     for($i=0 ; $i<$res->num_rows ; $i++)
+     {
+	        $fields=$res->fetch_row() ;
+
+       $kw_list[$fields[0]]=$fields[1] ;
+     }
+  }
+
+     $res->close() ;
+
 //--------------------------- Извлечение данных для отображения
 
           $get_id_=$db->real_escape_string($get_id) ;
 
                        $sql="Select  r.id, r.user, t.name, r.name, r.reference, r.description, r.www_link, r.deseases".
-                            "       ,d.name_f, d.name_i, d.name_o".
+                            "       ,d.name_f, d.name_i, d.name_o, r.keywords".
                             "  From  prescriptions_registry r".
                             "        inner join doctor_page_main d on d.owner=r.user".
                             "        inner join ref_prescriptions_types t on t.code=r.type and t.language='RU'".
@@ -70,6 +94,7 @@ function ProcessDB() {
                    $description=$fields[5] ;
                    $www_link   =$fields[6] ;
                    $deseases   =$fields[7] ;
+                   $keywords   =$fields[11] ;
 
         FileLog("", "Prescription data selected successfully") ;
 
@@ -162,6 +187,13 @@ function ProcessDB() {
 
 //      echo     "  SetType('".$type."') ;\n" ;
 
+		$keywords_a=explode(",", $keywords) ;
+
+	foreach($keywords_a as $spec)     
+        { 
+          if($spec!="")  echo "  AddKeyWord('".$kw_list[$spec]."') ;\n" ;
+        }
+
 //--------------------------- Завершение
 
      $db->close() ;
@@ -184,18 +216,18 @@ function ShowExtensions() {
 
   for($i=0 ; $i<$sys_ext_count ; $i++)
   {
-       echo  "  <tr class='table'>				\n" ;
-       echo  "    <td  class='table' width='20%'>		\n" ;
+       echo  "  <tr class='Table_LT'>				\n" ;
+       echo  "    <td  class='Table_LT' width='20%'>		\n" ;
        echo  $sys_ext_user[$i] ;
        echo  "    </td>						\n" ;
-       echo  "    <td class='table'>				\n" ;
+       echo  "    <td class='Table_LT'>				\n" ;
        echo  "      <div>					\n" ;
        echo  htmlspecialchars(stripslashes($sys_ext_remark[$i]), ENT_COMPAT, "windows-1251") ;
        echo  "      </div>					\n" ;
        echo  "    <br>						\n" ;
 
     if($sys_ext_type[$i]=="Image") {
-       echo "<div class='fieldC'>					\n" ; 
+       echo "<div class='Normal_CT'>					\n" ; 
        echo "<img src='".$sys_ext_sfile[$i]."' height=200		\n" ;
        echo " onclick=\"window.open('".$sys_ext_file[$i]."')\" ;	\n" ;
        echo ">								\n" ; 
@@ -258,7 +290,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script type="text/javascript">
@@ -273,6 +308,7 @@ function SuccessMsg() {
     var  i_description ;
     var  i_www_link ;
     var  i_goto ;
+    var  i_keywords ;
     var  i_error ;
 
     var  creator ;
@@ -295,6 +331,7 @@ function SuccessMsg() {
        i_description=document.getElementById("Description") ;
        i_www_link   =document.getElementById("WWW_link") ;
        i_goto       =document.getElementById("GoToLink") ;
+       i_keywords   =document.getElementById("KeyWords") ;
        i_error      =document.getElementById("Error") ;
 
 	a_types=new Array() ;
@@ -336,20 +373,20 @@ function SuccessMsg() {
        i_dss_list= document.getElementById("Deseases_list") ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . className = "Table_LT" ;
        i_row_new . id        =  v_id ;
 
        i_col_new = document.createElement("td") ;
 
    if(p_gcode==0)
    {
-       i_col_new . className = "tableG" ;
+       i_col_new . className = "TableDeseasesGroup" ;
        i_txt_new = document.createTextNode(p_group) ;
        i_col_new . appendChild(i_txt_new) ;
    }
    else
    {
-       i_col_new . className = "tableL" ;
+       i_col_new . className = "TableDeseaseItem" ;
        i_txt_new = document.createTextNode(p_name) ;
        i_col_new . appendChild(i_txt_new) ;
    } 
@@ -369,6 +406,19 @@ function SuccessMsg() {
     return ;         
   } 
 
+  function AddKeyWord(p_spec)
+  {
+     var  i_div_new ;
+     var  i_txt_new ;
+
+       i_div_new =document.createElement("div") ;
+       i_txt_new =document.createTextNode(p_spec) ;
+       i_div_new .appendChild(i_txt_new) ;	
+       i_keywords.appendChild(i_div_new) ;	
+
+    return ;         
+  } 
+
 <?php
   require("common.inc") ;
 ?>
@@ -384,18 +434,14 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
-  <table width="90%">
-    <thead>
-    </thead>
+ <table width="90%">
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>КАРТОЧКА РЕГИСТРА НАЗНАЧЕНИЙ</b>
       </td> 
     </tr>
@@ -409,39 +455,39 @@ function SuccessMsg() {
     </thead>
     <tbody>
     <tr>
-      <td> <div class="error" id="Error"></div> </td>
+      <td> <div class="Error_CT" id="Error"></div> </td>
     </tr>
     <tr>
-    <td class="table">
+    <td class="Table_LT">
 
   <table width="100%" id="Fields">
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="field"><b> Код: </b></td>
+      <td class="Normal_RT"><b> Код: </b></td>
       <td> <dev id="Id"></dev> </td>
     </tr>
     <tr>
-      <td class="field"><b> Создано: </b></td>
+      <td class="Normal_RT"><b> Создано: </b></td>
       <td> <span id="Owner"></span>
            <input type="button" value="Кто это?" onclick=WhoIsIt()></td>
       </td>
     </tr>
     <tr>
-      <td class="field"><b> Категория: </b></td>
+      <td class="Normal_RT"><b> Категория: </b></td>
       <td> <div id="Type"></div> </td>
     </tr>
     <tr>
-      <td class="field"><b> Название: </b></td>
+      <td class="Normal_RT"><b> Название: </b></td>
       <td> <div id="Name"></div> </td>
     </tr>
     <tr>
-      <td class="field"><b> Регистр: </b></td>
+      <td class="Normal_RT"><b> Регистр: </b></td>
       <td> <div id="Reference"></div> </td>
     </tr>
     <tr>
-      <td class="field"><b> Смотреть на: </b></td>
+      <td class="Normal_RT"><b> Смотреть на: </b></td>
       <td>
          <a href="javascript:
                   window.open(document.getElementById('WWW_link').value) ;"
@@ -450,20 +496,22 @@ function SuccessMsg() {
       </td>
     </tr>
     <tr>
-      <td class="field"><b> Описание: </b></td>
+      <td class="Normal_RT"><b> Описание: </b></td>
       <td> <div id="Description"></div> </td>
     </tr>
     </tbody>
   </table>
 
       </td>
-      <td class="table">
+      <td class="Table_LT">
         <table width="100%">
-          <thead>
-          </thead>
           <tbody  id="Deseases_list">
           </tbody>
         </table>
+        <br>
+        <div id="KeyWords">
+        <b>Ключевые слова:</b> 
+        </div>
       </td>
     </tr>
     </tbody>
@@ -482,8 +530,6 @@ function SuccessMsg() {
   </table>
 
   </form>
-
-</div>
 
 </body>
 

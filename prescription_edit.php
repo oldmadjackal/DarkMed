@@ -46,6 +46,7 @@ function ProcessDB() {
                          $description=$_POST["Description"] ;
                          $www_link   =$_POST["WWW_link"] ;
                          $deseases   =$_POST["Deseases"] ;
+                         $keywords_a =$_POST["KeyWords"] ;
                          $count      =$_POST["Count"] ;
                          $delete     =$_POST["Delete"] ;
                          $reorder    =$_POST["ReOrder"] ;
@@ -68,6 +69,11 @@ function ProcessDB() {
     if($new_type=="Link"    )  $new_link  =$_POST["LinkNew"] ;
   }
 
+			  $keywords="" ;
+  if(isset($keywords_a))
+     foreach($keywords_a as $tmp) 
+       if($tmp!="Dummy")  $keywords=$keywords.$tmp."," ;
+
     FileLog("START", "    Session:".$session) ;
 
   if( isset($get_id )) 
@@ -84,6 +90,7 @@ function ProcessDB() {
     FileLog("",      "Description:".$description) ;
     FileLog("",      "   WWW_link:".$www_link) ;
     FileLog("",      "   Deseases:".$deseases) ;
+    FileLog("",      "   Keywords:".$keywords) ;
     FileLog("",      "      Count:".$count) ;
     FileLog("",      "     Delete:".$delete) ;
     FileLog("",      "    ReOrder:".$reorder) ;
@@ -128,6 +135,7 @@ function ProcessDB() {
           $description_=$db->real_escape_string($description) ;
           $www_link_   =$db->real_escape_string($www_link) ;
           $deseases_   =$db->real_escape_string($deseases) ;
+          $keywords_   =$db->real_escape_string($keywords) ;
 
                        $sql="Update prescriptions_registry".
                             " Set   type       ='$type_'".
@@ -136,6 +144,7 @@ function ProcessDB() {
                             "      ,description='$description_'".
                             "      ,www_link   ='$www_link_'".
                             "      ,deseases   ='$deseases_'".
+                            "      ,keywords   ='$keywords_'".
                             " Where id='$put_id_'" ; 
        $res=$db->query($sql) ;
     if($res===false) {
@@ -325,6 +334,7 @@ function ProcessDB() {
                    $description='' ;
                    $www_link   ='' ;
                    $deseases   ='' ;
+                   $keywords   ='' ;
 
           $get_id_=$db->real_escape_string($put_id) ;
 
@@ -336,7 +346,7 @@ function ProcessDB() {
   {
           $get_id_=$db->real_escape_string($get_id) ;
 
-                       $sql="Select id, user, type, name, reference, description, www_link, deseases".
+                       $sql="Select id, user, type, name, reference, description, www_link, deseases, keywords".
                             "  From  prescriptions_registry".
                             " Where  id='$get_id_'" ; 
        $res=$db->query($sql) ;
@@ -358,6 +368,7 @@ function ProcessDB() {
                    $description=$fields[5] ;
                    $www_link   =$fields[6] ;
                    $deseases   =$fields[7] ;
+                   $keywords   =$fields[8] ;
 
         FileLog("", "Prescription data selected successfully") ;
   }
@@ -388,6 +399,45 @@ function ProcessDB() {
 
      $res->close() ;
 
+//--------------------------- Извлечение списка ключевых слов
+
+                     $sql="Select code, name".
+			  "  From ref_prescriptions_keywords".
+			  " Where language='RU'".
+                          "  and  code<>'unregistered'" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select REF_PRESCRIPTIONS_KEYWORDS... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса справочника ключевых слов назначений") ;
+                         return ;
+  }
+  else
+  {  
+       echo "   a_keywords['dummy']='' ;\n" ;
+
+     for($i=0 ; $i<$res->num_rows ; $i++)
+     {
+	      $fields=$res->fetch_row() ;
+
+       echo "   a_keywords['".$fields[0]."']='".$fields[1]."' ;\n" ;
+     }
+  }
+
+     $res->close() ;
+
+  if($keywords!="")
+  {
+		  $keywords_a=explode(",", $keywords) ;	
+                  $spec_first= true ;
+
+	foreach($keywords_a as $spec)
+         if(strlen($spec)>1 or $spec_first)
+         { 
+             echo "  AddKeyWord('" .$spec."') ;\n" ;
+                  $spec_first=false ;
+         }
+  }
 //--------------------------- Извлечение списка связанных заболеваний
 
   if($deseases!="")
@@ -511,8 +561,8 @@ function ShowExtensions() {
   {
         $row=$i ;
 
-       echo  "  <tr class='table' id='Row_".$row."'>						\n" ;
-       echo  "    <td  class='table' width='15%'>						\n" ;
+       echo  "  <tr class='Table_LT' id='Row_".$row."'>						\n" ;
+       echo  "    <td  class='Table_LT' width='15%'>						\n" ;
        echo  "      <div>									\n" ;
        echo  $sys_ext_user[$i] ;
        echo  "      </div>									\n" ;
@@ -520,14 +570,14 @@ function ShowExtensions() {
        echo  "      <input type='hidden' id='Ext_"  .$row."' value='".$sys_ext_id[$i]."'>	\n" ;
        echo  "      <input type='hidden' id='Type_" .$row."' value='".$sys_ext_type[$i]."'>	\n" ;
        echo  "    </td>										\n" ;
-       echo  "    <td class='table'>								\n" ;
+       echo  "    <td class='Table_LT'>								\n" ;
        echo  "      <div id='Remark_".$row."'>							\n" ;
        echo  htmlspecialchars(stripslashes($sys_ext_remark[$i]), ENT_COMPAT, "windows-1251") ;
        echo  "      </div>									\n" ;
        echo  "    <br>										\n" ;
 
     if($sys_ext_type[$i]=="Image") {
-       echo "<div class='fieldC'>					\n" ; 
+       echo "<div class='Normal_CT'>					\n" ; 
        echo "<img src='".$sys_ext_sfile[$i]."' height=200		\n" ;
        echo " onclick=\"window.open('".$sys_ext_file[$i]."')\" ;	\n" ;
        echo ">								\n" ; 
@@ -552,7 +602,7 @@ function ShowExtensions() {
     }
 
        echo  "    </td>						\n" ;
-       echo  "    <td class='table'>				\n" ;
+       echo  "    <td class='Table_LT'>				\n" ;
 
     if($sys_ext_owner[$i]===true) {
        echo  "      <input type='button' value='Вверх'         id='LiftUp_".$row."' onclick=LiftUpRow('".$row."')>	\n" ;
@@ -573,8 +623,8 @@ function ShowExtensions() {
 
 function ErrorMsg($text) {
 
-    echo  "i_error.style.color=\"red\" ;      " ;
-    echo  "i_error.innerHTML  =\"".$text."\" ;" ;
+    echo  "i_error.style.color='red' ;      " ;
+    echo  "i_error.innerHTML  ='".$text."' ;" ;
     echo  "return ;" ;
 }
 
@@ -583,8 +633,8 @@ function ErrorMsg($text) {
 
 function SuccessMsg() {
 
-    echo  "i_error.style.color=\"green\" ;                    " ;
-    echo  "i_error.innerHTML  =\"Данные успешно сохранены!\" ;" ;
+    echo  "i_error.style.color='green' ;                    " ;
+    echo  "i_error.innerHTML  ='Данные успешно сохранены!' ;" ;
 }
 //============================================== 
 ?>
@@ -601,7 +651,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script type="text/javascript">
@@ -624,6 +677,7 @@ function SuccessMsg() {
     var  i_error ;
 
     var  a_types ;
+    var  a_keywords ;
 
     var  s_deseases_select_use ;
 
@@ -647,7 +701,8 @@ function SuccessMsg() {
 	i_reorder    =document.getElementById("ReOrder") ;
 	i_error      =document.getElementById("Error") ;
 
-	a_types=new Array() ;
+	a_types   =new Array() ;
+        a_keywords=new Array() ;
 
         s_deseases_select_use=false ;
 
@@ -775,11 +830,11 @@ function SuccessMsg() {
        i_set     = document.getElementById("Extensions") ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . className = "Table_LT" ;
        i_row_new . id        = "ExtensionNew" ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_txt_new = document.createTextNode("ФИО доктора") ;
        i_col_new . appendChild(i_txt_new) ;
        i_fld_new = document.createElement("input") ;
@@ -799,7 +854,7 @@ function SuccessMsg() {
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_fld_new = document.createElement("div") ;
        i_fld_new . id        ='ErrorExt' ;
        i_col_new . appendChild(i_fld_new) ;
@@ -847,7 +902,7 @@ function SuccessMsg() {
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_fld_new = document.createElement("br") ;
        i_col_new . appendChild(i_fld_new) ;
        i_add_new = document.createElement("input") ;
@@ -929,11 +984,11 @@ function SuccessMsg() {
        i_row_old = document.getElementById("Row_"+p_row) ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . className = "Table_LT" ;
        i_row_new . id        = "ExtensionNew" ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_txt_new = document.createTextNode("Редактирование предыдущей записи") ;
        i_col_new . appendChild(i_txt_new) ;
        i_fld_new = document.createElement("input") ;
@@ -957,7 +1012,7 @@ function SuccessMsg() {
        i_row_new . appendChild(i_col_new) ;
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_fld_new = document.createElement("div") ;
        i_fld_new . id        ='ErrorExt' ;
        i_col_new . appendChild(i_fld_new) ;
@@ -1005,7 +1060,7 @@ function SuccessMsg() {
      }
 
        i_col_new = document.createElement("td") ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_fld_new = document.createElement("br") ;
        i_col_new . appendChild(i_fld_new) ;
        i_add_new = document.createElement("input") ;
@@ -1150,20 +1205,20 @@ function SuccessMsg() {
        i_deseases.value =i_deseases.value.trim() ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . className = "Table_LT" ;
        i_row_new . id        =  v_id ;
 
        i_col_new = document.createElement("td") ;
 
    if(p_gcode==0)
    {
-       i_col_new . className = "tableG" ;
+       i_col_new . className = "TableDeseasesGroup" ;
        i_txt_new = document.createTextNode(p_group) ;
        i_col_new . appendChild(i_txt_new) ;
    }
    else
    {
-       i_col_new . className = "tableL" ;
+       i_col_new . className = "TableDeseaseItem" ;
        i_txt_new = document.createTextNode(p_name) ;
        i_col_new . appendChild(i_txt_new) ;
    } 
@@ -1187,6 +1242,35 @@ function SuccessMsg() {
     return ;         
   } 
 
+  function AddKeyWord(p_selected)
+  {
+     var  i_keywords ;
+     var  i_div_new ;
+     var  i_select_new ;
+     var  selected ;
+
+       i_keywords       =document.getElementById("KeyWords") ;
+       i_div_new        =document.createElement("div") ;
+       i_select_new     =document.createElement("select") ;
+       i_select_new.name="KeyWords[]" ;
+
+    for(var elem in a_keywords)
+    {
+                             selected=false ;
+       if(p_selected==elem)  selected=true ;
+
+                            i_select_new.length++ ;
+       i_select_new.options[i_select_new.length-1].text    =a_keywords[elem] ;
+       i_select_new.options[i_select_new.length-1].value   =           elem ;
+       i_select_new.options[i_select_new.length-1].selected=       selected ;
+    }
+
+       i_div_new .appendChild(i_select_new) ;	
+       i_keywords.appendChild(i_div_new   ) ;	
+
+    return ;         
+  } 
+
 
 <?php
   require("common.inc") ;
@@ -1203,18 +1287,14 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
-  <table width="90%">
-    <thead>
-    </thead>
+ <table width="90%">
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>КАРТОЧКА РЕГИСТРА НАЗНАЧЕНИЙ</b>
       </td> 
     </tr>
@@ -1228,54 +1308,54 @@ function SuccessMsg() {
     </thead>
     <tbody>
     <tr>
-      <td class="fieldC">
+      <td class="Normal_CT">
           <br> 
           <input type="submit" value="Сохранить"  id="Save1"> 
       </td>
       <td> </td>
     </tr>
     <tr>
-      <td> <div class="error" id="Error"></div> </td>
+      <td> <div class="Error_CT" id="Error"></div> </td>
     </tr>
     <tr>
-    <td class="table">
+    <td class="Table_LT">
 
   <table width="100%" id="Fields">
     <thead>
     </thead>
     <tbody>
     <tr>
-      <td class="field"> Код </td>
+      <td class="Normal_RT"> Код </td>
       <td> <input type="text" size=10 disabled name="Id" id="Id"> </td>
     </tr>
     <tr>
-      <td class="field"> Создано </td>
+      <td class="Normal_RT"> Создано </td>
       <td> <input type="text" size=10 disabled name="Owner" id="Owner"> </td>
     </tr>
     <tr>
-      <td class="field"> Категория </td>
+      <td class="Normal_RT"> Категория </td>
       <td>
          <select name="Type" id="Type"> 
          </select> 
       </td>
     </tr>
     <tr>
-      <td class="field"> Название </td>
+      <td class="Normal_RT"> Название </td>
       <td> <input type="text" size=60 name="Name" id="Name"> </td>
     </tr>
     <tr>
-      <td class="field"> Регистр </td>
+      <td class="Normal_RT"> Регистр </td>
       <td> <input type="text" size=60 name="Reference" id="Reference"> </td>
     </tr>
     <tr>
-      <td class="field"> Смотреть на </td>
+      <td class="Normal_RT"> Смотреть на </td>
       <td>
           <input type="text" size=60 maxlength=510 name="WWW_link" id="WWW_link"> 
           <input type="button" value="Проверить" onclick=GoToLink('WWW_link')>
       </td>
     </tr>
     <tr>
-      <td class="field"> Описание </td>
+      <td class="Normal_RT"> Описание </td>
       <td> 
         <textarea cols=60 rows=7 wrap="soft" name="Description" id="Description"> </textarea>
       </td>
@@ -1284,8 +1364,8 @@ function SuccessMsg() {
   </table>
 
       </td>
-      <td class="table">
-        <div class="fieldC">
+      <td class="Table_LT">
+        <div class="Normal_CT">
           <input type="button" value="Добавить/удалить заболевания" onclick=LinkDesease()>
         </div> 
         <table width="100%">
@@ -1294,6 +1374,10 @@ function SuccessMsg() {
           <tbody  id="Deseases_list">
           </tbody>
         </table>
+        <br>
+        <input type="button" value="Добавить ключевое слово" onclick="AddKeyWord('');"> 
+        <div id="KeyWords"></div>
+
       </td>
     </tr>
     </tbody>
@@ -1312,7 +1396,7 @@ function SuccessMsg() {
   </table>
 
   <br>
-  <div class="fieldC">
+  <div class="Normal_CT">
     <select name="ExtensionType" id="ExtensionType"> 
       <option value="Image">Картинка с пояснением</option>
       <option value="Text">Текстовой блок</option>
@@ -1331,8 +1415,6 @@ function SuccessMsg() {
   <br>
 
   </form>
-
-</div>
 
 </body>
 

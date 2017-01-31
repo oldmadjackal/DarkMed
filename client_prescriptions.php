@@ -451,9 +451,9 @@ function SuccessMsg() {
   <div id="Invitation" hidden>
     <div class="Error_LT" id="InvError"></div>
     <div id="InvMain">
-      <b><div class="Text_LT" id="InvReceiver"></div></b>
+      <b><div class="Normal_LT" id="InvReceiver"></div></b>
       <br>
-      <div class="Text_LT">Сопроводительный текст:</div>
+      <div class="Normal_LT">Сопроводительный текст:</div>
       <textarea cols=60 rows=4 wrap="soft" name="InvText" id="InvText"></textarea>
       <br>
       <input type="submit" value="Направить данные">

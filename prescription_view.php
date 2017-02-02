@@ -40,7 +40,7 @@ function ProcessDB() {
                     ErrorMsg($error) ;
                          return ;
   }
-//--------------------------- Извлечение списка специальностей
+//--------------------------- Извлечение списка ключевых слов
 
                      $sql="Select code, name".
 			  "  From ref_prescriptions_keywords".

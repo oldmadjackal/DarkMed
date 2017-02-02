@@ -3,7 +3,7 @@
 header("Content-type: text/html; charset=windows-1251") ;
 
    $glb_script ="Prescriptions_selector.php" ;
-   $glb_log_off=true ;
+//   $glb_log_off=true ;
 
   require("stdlib.php") ;
 
@@ -44,6 +44,14 @@ function ProcessDB() {
    if(isset($_POST["Type"    ]))  $type    =$_POST["Type"] ;
    else                           $type    =   "dummy" ;
 
+   if(isset($_POST["Title"   ]))  $title   =$_POST["Title"] ;
+   else                           $title   =   "" ;
+
+   if(isset($_POST["KeyWord1"]))  $keyword1=$_POST["KeyWord1"] ;
+   else                           $keyword1=   "dummy" ;
+   if(isset($_POST["KeyWord2"]))  $keyword2=$_POST["KeyWord2"] ;
+   else                           $keyword2=   "dummy" ;
+
    if(isset($_POST["Selected"]))  $selected=$_POST["Selected"] ;
    else                         
    if(isset($_GET ["Selected"]))  $selected=$_GET ["Selected"] ;
@@ -52,6 +60,9 @@ function ProcessDB() {
    if(isset($_POST["Common"  ]))  $common  =$_POST["Common"] ;
 
       FileLog("START", "    Type:".$type) ;
+      FileLog("",      "   Title:".$title) ;
+      FileLog("",      "KeyWord1:".$keyword1) ;
+      FileLog("",      "KeyWord2:".$keyword2) ;
       FileLog("",      "Deseases:".$deseases) ;
 
   if(isset($selected))
@@ -105,7 +116,39 @@ function ProcessDB() {
 
      $res->close() ;
 
-      echo     "  SetType('".$type."') ;\n" ;
+      echo     "  i_title.value='".$title."' ;  \n" ;
+      echo     "  SetType('".$type."') ;        \n" ;
+
+//--------------------------- Извлечение списка ключевых слов
+
+                     $sql="Select code, name".
+			  "  From ref_prescriptions_keywords".
+			  " Where language='RU'" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select REF_PRESCRIPTIONS_KEYWORDS... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса справочника ключевых слов") ;
+                         return ;
+  }
+  else
+  {  
+       echo "   a_keywords['dummy']='' ;\n" ;
+
+     for($i=0 ; $i<$res->num_rows ; $i++)
+     {
+	        $fields=$res->fetch_row() ;
+
+          $kw_list[$fields[0]]=$fields[1] ;
+
+       echo "   a_keywords['".$fields[0]."']='".$fields[1]."' ;\n" ;
+     }
+  }
+
+     $res->close() ;
+
+      echo     "  SetKeyWord(1, '".$keyword1."') ;        \n" ;
+      echo     "  SetKeyWord(2, '".$keyword2."') ;        \n" ;
 
 //--------------------------- Формирование списка всех заболеваний
 
@@ -226,7 +269,9 @@ function ProcessDB() {
   }
 //--------------------------- Формирование списка назначений
 //- - - - - - - - - - - - - - Проверка наличия фильтров
-  if( ! ((isset($type)         &&
+  if( ! ((isset($title)        &&
+                $title!=""       ) ||
+         (isset($type)         &&
                 $type!="dummy"   ) ||
          (isset($deseases)     &&
                 $deseases!=""    )   )) {
@@ -241,7 +286,12 @@ function ProcessDB() {
                            "       inner join ref_prescriptions_types t on t.code=p.type and t.language='RU'".
                            " Where 1=1" ; 
 
-  if($type!="dummy") $sql.="  and  p.type='$type'" ; 
+  if($title   !=""     ) $sql.="  and  p.name like '%$title%'" ;  
+
+  if($type    !="dummy") $sql.="  and  p.type='$type'" ; 
+
+  if($keyword1!="dummy") $sql.="  and  p.keywords like '%$keyword1%'" ; 
+  if($keyword2!="dummy") $sql.="  and  p.keywords like '%$keyword2%'" ; 
 
   if($deseases!="" || $common=="true")
   {
@@ -428,6 +478,7 @@ function InfoMsg($text) {
 <!--
 
     var  i_type ;
+    var  i_title ;
     var  i_common ;
     var  i_deseases ;
     var  i_exclude ;
@@ -435,6 +486,7 @@ function InfoMsg($text) {
     var  i_error ;
 
     var  a_types ;
+    var  a_keywords ;
 
     var  gshow_start ;
     var  gshow_end ;
@@ -442,15 +494,16 @@ function InfoMsg($text) {
 
   function FirstField() 
   {
-
 	i_type    =document.getElementById("Type") ;
+	i_title   =document.getElementById("Title") ;
 	i_common  =document.getElementById("Common") ;
 	i_deseases=document.getElementById("Deseases") ;
 	i_exclude =document.getElementById("Exclude") ;
 	i_selected=document.getElementById("Selected") ;
         i_error   =document.getElementById("Error") ;
 
-           a_types=new Array() ;
+           a_types   =new Array() ;
+           a_keywords=new Array() ;
 
 <?php
             ProcessDB() ;
@@ -479,6 +532,27 @@ function InfoMsg($text) {
        i_type.options[i_type.length-1].text    =a_types[elem] ;
        i_type.options[i_type.length-1].value   =        elem ;
        i_type.options[i_type.length-1].selected=    selected ;
+    }
+
+    return ;         
+  } 
+
+  function SetKeyWord(p_idx, p_selected)
+  {
+     var  i_keyword ;
+     var  selected ;
+
+     var  i_keyword = document.getElementById("KeyWord"+p_idx) ;
+
+    for(var elem in a_keywords)
+    {
+                             selected=false ;
+       if(p_selected==elem)  selected=true ;
+
+                         i_keyword.length++ ;
+       i_keyword.options[i_keyword.length-1].text    =a_keywords[elem] ;
+       i_keyword.options[i_keyword.length-1].value   =           elem ;
+       i_keyword.options[i_keyword.length-1].selected=       selected ;
     }
 
     return ;         
@@ -698,6 +772,20 @@ function InfoMsg($text) {
     <tr>
       <td>
          <select name="Type" id="Type" placeholder="Выбирете категорию" > 
+         </select> 
+      </td>
+    </tr>
+    <tr>
+      <td>
+         <input type="text" name="Title" id="Title" size=30 placeholder="Введите фрагмент названия" > 
+      </td>
+    </tr>
+    <tr>
+      <td>
+         Ключевые слова:
+         <select name="KeyWord1" id="KeyWord1" > 
+         </select> 
+         <select name="KeyWord2" id="KeyWord2" > 
          </select> 
       </td>
     </tr>

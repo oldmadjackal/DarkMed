@@ -25,14 +25,27 @@ function ProcessDB() {
 
                         $session =$_GET ["Session"] ;
   if(!isset($session))  $session =$_POST["Session"] ;
+                        $title   =$_POST["Title"] ;
                         $type    =$_POST["Type"] ;
+                        $keyword1=$_POST["KeyWord1"] ;
+                        $keyword2=$_POST["KeyWord2"] ;
+                        $keyword3=$_POST["KeyWord3"] ;
                         $deseases=$_POST["Deseases"] ;
                         $common  =$_POST["Common"] ;
 
   FileLog("START", " Session:".$session) ;
+  FileLog("",      "   Title:".$title) ;
   FileLog("",      "    Type:".$type) ;
+  FileLog("",      "KeyWord1:".$keyword1) ;
+  FileLog("",      "KeyWord2:".$keyword2) ;
+  FileLog("",      "KeyWord3:".$keyword3) ;
   FileLog("",      "Deseases:".$deseases) ;
   FileLog("",      "  Common:".$common) ;
+
+    if($type    =="")  $type    ="dummy" ;
+    if($keyword1=="")  $keyword1="dummy" ;
+    if($keyword2=="")  $keyword2="dummy" ;
+    if($keyword3=="")  $keyword3="dummy" ;
 
 //--------------------------- Подключение БД
 
@@ -111,7 +124,40 @@ function ProcessDB() {
 
      $res->close() ;
 
-      echo     "  SetType('".$type."') ;\n" ;
+      echo     "  i_title.value='".$title."' ;  \n" ;
+      echo     "  SetType('".$type."') ;        \n" ;
+
+//--------------------------- Извлечение списка ключевых слов
+
+                     $sql="Select code, name".
+			  "  From ref_prescriptions_keywords".
+			  " Where language='RU'" ;
+     $res=$db->query($sql) ;
+  if($res===false) {
+          FileLog("ERROR", "Select REF_PRESCRIPTIONS_KEYWORDS... : ".$db->error) ;
+                            $db->close() ;
+         ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка запроса справочника ключевых слов") ;
+                         return ;
+  }
+  else
+  {  
+       echo "   a_keywords['dummy']='' ;\n" ;
+
+     for($i=0 ; $i<$res->num_rows ; $i++)
+     {
+	        $fields=$res->fetch_row() ;
+
+          $kw_list[$fields[0]]=$fields[1] ;
+
+       echo "   a_keywords['".$fields[0]."']='".$fields[1]."' ;\n" ;
+     }
+  }
+
+     $res->close() ;
+
+      echo     "  SetKeyWord(1, '".$keyword1."') ;        \n" ;
+      echo     "  SetKeyWord(2, '".$keyword2."') ;        \n" ;
+      echo     "  SetKeyWord(3, '".$keyword3."') ;        \n" ;
 
 //--------------------------- Извлечение списка заболеваний
 
@@ -191,7 +237,9 @@ function ProcessDB() {
   }
 //--------------------------- Формирование списка назначений
 //- - - - - - - - - - - - - - Проверка наличия фильтров
-  if( ! ((isset($type)         &&
+  if( ! ((isset($title)        &&
+                $title!=""       ) ||
+         (isset($type)         &&
                 $type!="dummy"   ) ||
          (isset($deseases)     &&
                 $deseases!=""    )   )) {
@@ -200,12 +248,18 @@ function ProcessDB() {
   }
 //- - - - - - - - - - - - - - Запрос данных
   else {
-                     $sql ="Select id, t.name, p.name".
+                     $sql ="Select id, t.name, p.name, p.keywords".
 			   "  From prescriptions_registry p ".
                            "       inner join ref_prescriptions_types t on t.code=p.type and t.language='RU'".
                            " Where 1=1" ; 
 
-  if($type!="dummy") $sql.="  and  p.type='$type'" ; 
+  if($title   !=""     ) $sql.="  and  p.name like '%$title%'" ;  
+
+  if($type    !="dummy") $sql.="  and  p.type='$type'" ; 
+
+  if($keyword1!="dummy") $sql.="  and  p.keywords like '%$keyword1%'" ; 
+  if($keyword2!="dummy") $sql.="  and  p.keywords like '%$keyword2%'" ; 
+  if($keyword3!="dummy") $sql.="  and  p.keywords like '%$keyword3%'" ; 
 
   if($deseases!="" || $common=="true")
   {
@@ -238,13 +292,21 @@ function ProcessDB() {
      {
 	      $fields=$res->fetch_row() ;
 
-       echo "    prs_id  ='".$fields[0]."' ;				\n" ;
-       echo "    prs_type='".$fields[1]."' ;				\n" ;
-       echo "    prs_text='".$fields[2]."' ;				\n" ;
+       echo "    prs_id  ='".$fields[0]."' ;	\n" ;
+       echo "    prs_type='".$fields[1]."' ;	\n" ;
+       echo "    prs_text='".$fields[2]."' ;	\n" ;
+       echo "    prs_kws =' ' ;          	\n" ;
+
+		$keywords_a=explode(",", $fields[3]) ;
+
+	foreach($keywords_a as $spec)     
+        { 
+          if($spec!="")  echo "  prs_kws+=', '+'".$kw_list[$spec]."' ;\n" ;
+        }
 
        if($read_only)       
-              echo "  AddNewRow(prs_id, prs_type, prs_text, 0) ;	\n" ;
-       else   echo "  AddNewRow(prs_id, prs_type, prs_text, 1) ;	\n" ;
+              echo "  AddNewRow(prs_id, prs_type, prs_text, prs_kws, 0) ;	\n" ;
+       else   echo "  AddNewRow(prs_id, prs_type, prs_text, prs_kws, 1) ;	\n" ;
      }
   }
 
@@ -307,18 +369,23 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script type="text/javascript">
 <!--
 
+    var  i_title ;
     var  i_type ;
     var  i_common ;
     var  i_deseases ;
     var  i_error ;
 
     var  a_types ;
+    var  a_keywords ;
 
     var  s_deseases_select_use ;
 
@@ -326,12 +393,14 @@ function SuccessMsg() {
   {
     var  msg_text ;
 
+	i_title   =document.getElementById("Title") ;
 	i_type    =document.getElementById("Type") ;
 	i_common  =document.getElementById("Common") ;
 	i_deseases=document.getElementById("Deseases") ;
         i_error   =document.getElementById("Error") ;
 
-           a_types=new Array() ;
+           a_types   =new Array() ;
+           a_keywords=new Array() ;
 
 <?php
             ProcessDB() ;
@@ -380,7 +449,28 @@ function SuccessMsg() {
     return ;         
   } 
 
-  function AddNewRow(p_id, p_type, p_text, p_edit)
+  function SetKeyWord(p_idx, p_selected)
+  {
+     var  i_keyword ;
+     var  selected ;
+
+     var  i_keyword = document.getElementById("KeyWord"+p_idx) ;
+
+    for(var elem in a_keywords)
+    {
+                             selected=false ;
+       if(p_selected==elem)  selected=true ;
+
+                         i_keyword.length++ ;
+       i_keyword.options[i_keyword.length-1].text    =a_keywords[elem] ;
+       i_keyword.options[i_keyword.length-1].value   =           elem ;
+       i_keyword.options[i_keyword.length-1].selected=       selected ;
+    }
+
+    return ;         
+  } 
+
+  function AddNewRow(p_id, p_type, p_text, p_keywords, p_edit)
   {
      var  i_prescr ;
      var  i_row_new ;
@@ -392,7 +482,7 @@ function SuccessMsg() {
        i_prescr  = document.getElementById("Prescriptions") ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . className = "Table_LT" ;
 
        i_col_new = document.createElement("td") ;
        i_col_new . onclick= function(e) {
@@ -405,7 +495,7 @@ function SuccessMsg() {
                                                                                           "&Id="+p_id) ;
 					} ;
        i_txt_new = document.createTextNode(p_type) ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
        i_col_new . appendChild(i_txt_new) ;
        i_row_new . appendChild(i_col_new) ;
 
@@ -420,7 +510,13 @@ function SuccessMsg() {
                                                                                           "&Id="+p_id) ;
 					} ;
        i_txt_new = document.createTextNode(p_text) ;
-       i_col_new . className = "table" ;
+       i_col_new . className = "Table_LT" ;
+       i_col_new . appendChild(i_txt_new) ;
+       i_row_new . appendChild(i_col_new) ;
+
+       i_col_new = document.createElement("td") ;
+       i_txt_new = document.createTextNode(p_keywords.replace(' , ','')) ;
+       i_col_new . className = "Table_LT" ;
        i_col_new . appendChild(i_txt_new) ;
        i_row_new . appendChild(i_col_new) ;
 
@@ -513,20 +609,20 @@ function SuccessMsg() {
        i_deseases.value =i_deseases.value.trim() ;
 
        i_row_new = document.createElement("tr") ;
-       i_row_new . className = "table" ;
+       i_row_new . className = "Table_LT" ;
        i_row_new . id        =  v_id ;
 
        i_col_new = document.createElement("td") ;
 
    if(p_gcode==0)
    {
-       i_col_new . className = "tableG" ;
+       i_col_new . className = "TableDeseasesGroup" ;
        i_txt_new = document.createTextNode(p_group) ;
        i_col_new . appendChild(i_txt_new) ;
    }
    else
    {
-       i_col_new . className = "tableL" ;
+       i_col_new . className = "TableDeseaseItem" ;
        i_txt_new = document.createTextNode(p_name) ;
        i_col_new . appendChild(i_txt_new) ;
    } 
@@ -564,37 +660,38 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div>
-
-  <table width="90%">
-    <thead>
-    </thead>
+ <table width="90%">
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>ОБЩИЙ РЕГИСТР НАЗНАЧЕНИЙ</b>
       </td> 
     </tr>
     </tbody>
   </table>
 
-  <p class="error" id="Error"></p>
+  <p class="Error_LT" id="Error"></p>
 
   <form onsubmit="return SendFields();" method="POST">
 
   <table>
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td>
         <input type="submit" value="Показать назначения для:">
       </td>
-      <td class="field"> Категория </td>
+      <td class="Normal_RT"> Название </td>
+      <td>
+          <input type="text" size=30 maxlength=30 name="Title" id="Title"> 
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td class="Normal_RT"> Категория </td>
       <td>
          <select name="Type" id="Type"> 
          </select> 
@@ -602,12 +699,22 @@ function SuccessMsg() {
     </tr>
     <tr>
       <td></td>
-      <td class="field"> Заболевания </td>
+      <td class="Normal_RT"> Ключевые слова </td>
+      <td>
+         <select name="KeyWord1" id="KeyWord1"> 
+         </select> 
+         <select name="KeyWord2" id="KeyWord2"> 
+         </select> 
+         <select name="KeyWord3" id="KeyWord3"> 
+         </select> 
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td class="Normal_RT"> Заболевания </td>
       <td>
         <input type="checkbox" name="Common" id="Common" value="true">Не отнесенные к каким-либо заболеваниям
         <table width="100%">
-          <thead>
-          </thead>
           <tbody  id="Deseases_list">
           </tbody>
         </table>
@@ -626,14 +733,10 @@ function SuccessMsg() {
 
   </form>
 
-  <table class="table">
-    <thead>
-    </thead>
+  <table class="Table_LT">
     <tbody id="Prescriptions">
     </tbody>
   </table>
-
-</div>
 
 </body>
 

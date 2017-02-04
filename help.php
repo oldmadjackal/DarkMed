@@ -223,6 +223,7 @@ function SuccessMsg($session) {
     <li><a href="tutorial\Doctor_1_prepare.mp4"      target="section">Видеокурс врача - основной портал, начало работы, подготовка комплексов упражнений (mp4-файл)</a></li> 
     <li><a href="tutorial\Doctor_2_appointment.mp4"  target="section">Видеокурс врача - основной портал, прием пациента и направление назначения (mp4-файл)</a></li> 
     <li><a href="tutorial\Client_1.mp4"              target="section">Видеокурс пациента - основной портал (mp4-файл)</a></li> 
+    <li><a href="tutorial\Client_mobile_1.mp4"       target="section">Видеокурс пациента - мобильный портал (mp4-файл)</a></li> 
   </ul>
 
   <div class="error" id="Error"></div>

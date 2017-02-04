@@ -3,7 +3,7 @@
 header("Content-type: text/html; charset=windows-1251") ;
 
    $glb_script ="Prescriptions_selector.php" ;
-//   $glb_log_off=true ;
+   $glb_log_off=true ;
 
   require("stdlib.php") ;
 
@@ -15,6 +15,7 @@ function ProcessDB() {
   global  $glb_options_a  ;
 
   global  $sys_deseases   ;
+  global  $sys_photos     ;
 
   global  $sys_dss_count  ;
   global  $sys_dss_name   ;
@@ -58,6 +59,7 @@ function ProcessDB() {
    
    if(isset($_POST["Exclude" ]))  $exclude =$_POST["Exclude"] ;
    if(isset($_POST["Common"  ]))  $common  =$_POST["Common"] ;
+   if(isset($_POST["Photos"  ]))  $photos  =$_POST["Photos"] ;
 
       FileLog("START", "    Type:".$type) ;
       FileLog("",      "   Title:".$title) ;
@@ -74,7 +76,11 @@ function ProcessDB() {
   if(isset($exclude))
       FileLog("",      " Exclude:".$exclude) ;
 
+  if(isset($photos ))
+      FileLog("",      "  Photos:".$photos) ;
+
         $sys_deseases=$deseases ;
+        $sys_photos  =$photos  ;
 
 //--------------------------- Умолчания
 
@@ -89,6 +95,11 @@ function ProcessDB() {
                     ErrorMsg($error) ;
                          return ;
   }
+//------------------------ Отображение данных
+
+                       echo  "  i_title .value='".$title."' ;	\n" ;
+  if($photos=="true")  echo  "  i_photos.checked=true ;		\n" ;
+
 //--------------------------- Извлечение списка типов назначений
 
                      $sql="Select code, name".
@@ -116,7 +127,6 @@ function ProcessDB() {
 
      $res->close() ;
 
-      echo     "  i_title.value='".$title."' ;  \n" ;
       echo     "  SetType('".$type."') ;        \n" ;
 
 //--------------------------- Извлечение списка ключевых слов
@@ -355,6 +365,7 @@ function ShowPrescriptions() {
   global  $sys_prs_type   ;
   global  $sys_prs_icon   ;
   global  $sys_prs_name   ;
+  global  $sys_photos     ;
 
 
   for($i=0 ; $i<$sys_prs_count ; $i++)
@@ -375,10 +386,18 @@ function ShowPrescriptions() {
        echo  " <td class='".$class."' id='".$sys_prs_id[$i]."'> \n" ;
        echo  htmlspecialchars(stripslashes($sys_prs_name[$i]), ENT_COMPAT, "windows-1251") ;
        echo  " </td> \n" ;
+ 
+    if($sys_photos=="true")
+    {  
+       echo  " <td> \n" ;
+       echo  " <iframe height=102 width=153 scrolling=no frameboard=0 marginheight=0 marginwidth=0 src=\"prescription_pilot_2.php?Id=".$sys_prs_id[$i]."\"></iframe> \n" ;
+       echo  " </td> \n" ;
+    }
+
        echo  " <td> \n" ;
        echo  "  <input type='button' class='DetailsButton' value='?' onclick=GoToView('".$sys_prs_id[$i]."')>	\n" ;
        echo  " </td> \n" ;
-       echo  "</tr> \n" ;
+       echo  "</tr> \n" ; 
   }
 
 }
@@ -482,6 +501,7 @@ function InfoMsg($text) {
     var  i_common ;
     var  i_deseases ;
     var  i_exclude ;
+    var  i_photos ;
     var  i_selected ;
     var  i_error ;
 
@@ -499,6 +519,7 @@ function InfoMsg($text) {
 	i_common  =document.getElementById("Common") ;
 	i_deseases=document.getElementById("Deseases") ;
 	i_exclude =document.getElementById("Exclude") ;
+	i_photos  =document.getElementById("Photos") ;
 	i_selected=document.getElementById("Selected") ;
         i_error   =document.getElementById("Error") ;
 
@@ -768,7 +789,7 @@ function InfoMsg($text) {
       <td id="Column1"> 
     
   <table class="Normal_CT" width="100%">
-    <thead>
+    <tbody>
     <tr>
       <td>
          <select name="Type" id="Type" placeholder="Выбирете категорию" > 
@@ -808,6 +829,8 @@ function InfoMsg($text) {
     <tr>
       <td>
         <input type="checkbox" name="Exclude" id="Exclude" value="true" onclick="HideSelected();">Не показывать уже отобранные назначения
+        <br>
+        <input type="checkbox" name="Photos" id="Photos" value="true">Показывать картинки
         <input type="hidden" name="Selected" id="Selected">
       </td>
     </tr>
@@ -823,8 +846,6 @@ function InfoMsg($text) {
   </form>
 
   <table>
-    <thead>
-    </thead>
     <tbody id="Prescriptions">
 
 <?php

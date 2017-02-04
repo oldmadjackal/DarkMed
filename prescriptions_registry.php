@@ -3,6 +3,7 @@
 header("Content-type: text/html; charset=windows-1251") ;
 
    $glb_script="Prescriptions_registry.php" ;
+   $glb_log_off=true ;
 
   require("stdlib.php") ;
 
@@ -32,6 +33,7 @@ function ProcessDB() {
                         $keyword3=$_POST["KeyWord3"] ;
                         $deseases=$_POST["Deseases"] ;
                         $common  =$_POST["Common"] ;
+                        $photos  =$_POST["Photos"] ;
 
   FileLog("START", " Session:".$session) ;
   FileLog("",      "   Title:".$title) ;
@@ -41,6 +43,7 @@ function ProcessDB() {
   FileLog("",      "KeyWord3:".$keyword3) ;
   FileLog("",      "Deseases:".$deseases) ;
   FileLog("",      "  Common:".$common) ;
+  FileLog("",      "  Photos:".$photos) ;
 
     if($type    =="")  $type    ="dummy" ;
     if($keyword1=="")  $keyword1="dummy" ;
@@ -75,6 +78,11 @@ function ProcessDB() {
        if($glb_options_a["user"]=="Doctor"  )  $read_only=false ;
   else if($glb_options_a["user"]=="Executor")  $read_only=false ;
   else                                         $read_only=true ;
+
+//------------------------ Отображение данных
+
+                       echo  "  i_title .value='".$title."' ;	\n" ;
+  if($photos=="true")  echo  "  i_photos.checked=true ;		\n" ;
 
 //------------------------ Проверка "подтвержденности" врача
 
@@ -124,7 +132,6 @@ function ProcessDB() {
 
      $res->close() ;
 
-      echo     "  i_title.value='".$title."' ;  \n" ;
       echo     "  SetType('".$type."') ;        \n" ;
 
 //--------------------------- Извлечение списка ключевых слов
@@ -305,8 +312,8 @@ function ProcessDB() {
         }
 
        if($read_only)       
-              echo "  AddNewRow(prs_id, prs_type, prs_text, prs_kws, 0) ;	\n" ;
-       else   echo "  AddNewRow(prs_id, prs_type, prs_text, prs_kws, 1) ;	\n" ;
+              echo "  AddNewRow(prs_id, prs_type, prs_text, prs_kws, '".$photos."' ,0) ;	\n" ;
+       else   echo "  AddNewRow(prs_id, prs_type, prs_text, prs_kws, '".$photos."', 1) ;	\n" ;
      }
   }
 
@@ -381,6 +388,7 @@ function SuccessMsg() {
     var  i_title ;
     var  i_type ;
     var  i_common ;
+    var  i_photos ;
     var  i_deseases ;
     var  i_error ;
 
@@ -396,6 +404,7 @@ function SuccessMsg() {
 	i_title   =document.getElementById("Title") ;
 	i_type    =document.getElementById("Type") ;
 	i_common  =document.getElementById("Common") ;
+	i_photos  =document.getElementById("Photos") ;
 	i_deseases=document.getElementById("Deseases") ;
         i_error   =document.getElementById("Error") ;
 
@@ -470,12 +479,13 @@ function SuccessMsg() {
     return ;         
   } 
 
-  function AddNewRow(p_id, p_type, p_text, p_keywords, p_edit)
+  function AddNewRow(p_id, p_type, p_text, p_keywords, p_photos, p_edit)
   {
      var  i_prescr ;
      var  i_row_new ;
      var  i_col_new ;
      var  i_txt_new ;
+     var  i_frm_new ;
      var  i_shw_new ;
      var  i_edt_new ;
 
@@ -519,6 +529,22 @@ function SuccessMsg() {
        i_col_new . className = "Table_LT" ;
        i_col_new . appendChild(i_txt_new) ;
        i_row_new . appendChild(i_col_new) ;
+
+   if(p_photos=="true")
+   {
+       i_col_new = document.createElement("td") ;
+       i_frm_new = document.createElement("iframe") ;
+       i_frm_new . src         ="prescription_pilot_2.php?Id="+p_id ;
+       i_frm_new . seamless    = true ;
+       i_frm_new . height      ="102" ;
+       i_frm_new . width       ="152" ;
+       i_frm_new . scrolling   ="no" ;
+       i_frm_new . frameborder ="0" ;
+       i_frm_new . marginheight="0" ;
+       i_frm_new . marginwidth ="0" ;
+       i_col_new . appendChild(i_frm_new) ;
+       i_row_new . appendChild(i_col_new) ;
+   }
 
        i_col_new = document.createElement("td") ;
        i_shw_new = document.createElement("input") ;
@@ -690,7 +716,9 @@ function SuccessMsg() {
       </td>
     </tr>
     <tr>
-      <td></td>
+      <td>
+        <input type="checkbox" name="Photos" id="Photos" value="true">Показывать картинки
+      </td>
       <td class="Normal_RT"> Категория </td>
       <td>
          <select name="Type" id="Type"> 

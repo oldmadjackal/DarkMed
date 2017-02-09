@@ -344,7 +344,7 @@ function SuccessMsg() {
 
    if(p_dir=='R')
    {
-	i_col_new . className = "chat_r" ;
+	i_col_new . className = "ChatReceiver" ;
 	i_col_new . width     = "75%" ;
         i_dev_new = document.createElement("dev") ;
 	i_dev_new . style.fontWeight=600 ;
@@ -367,7 +367,7 @@ function SuccessMsg() {
 
    if(p_dir=='S')
    {
-	i_col_new . className = "chat_s" ;
+	i_col_new . className = "ChatSender" ;
 	i_col_new . width     = "75%" ;
         i_dev_new = document.createElement("dev") ;
 	i_dev_new . style.fontWeight=600 ;

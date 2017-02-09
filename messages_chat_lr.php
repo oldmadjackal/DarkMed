@@ -264,12 +264,11 @@ function SuccessMsg() {
    else		   txt_right=p_text ;
 
 	i_row_new = document.createElement("tr") ;
-//	i_row_new . className = "table" ;
 
 	i_col_new = document.createElement("td") ;
 
    if(p_dir=='R') {
-	i_col_new . className = "chat_r" ;
+	i_col_new . className = "ChatReceiver" ;
         i_dev_new = document.createElement("dev") ;
 	i_dev_new . style.fontWeight=600 ;
         i_txt_new = document.createTextNode(header) ;
@@ -285,7 +284,7 @@ function SuccessMsg() {
 	i_col_new = document.createElement("td") ;
 
    if(p_dir=='S') {
-	i_col_new . className = "chat_s" ;
+	i_col_new . className = "ChatSender" ;
         i_dev_new = document.createElement("dev") ;
 	i_dev_new . style.fontWeight=600 ;
         i_txt_new = document.createTextNode(header) ;
@@ -318,15 +317,13 @@ function SuccessMsg() {
 </noscript>
 
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>œ≈–≈œ»— ¿</b>
       </td> 
     </tr>

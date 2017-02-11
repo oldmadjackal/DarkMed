@@ -195,7 +195,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="CryptoJS/rollups/tripledes.js"></script>
@@ -332,7 +335,7 @@ function SuccessMsg() {
     <tbody>
     <tr>
       <td class="field"> </td>
-      <td> <br> <input type="submit" value="Сохранить"  id="Save1"> </td>
+      <td> <br> <input type="submit" class="SaveButton" value="Сохранить"  id="Save1"> </td>
     </tr>
     <tr>
       <td class="field"> </td>

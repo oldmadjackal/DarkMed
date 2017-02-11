@@ -38,6 +38,11 @@
                    font-weight : bold            ; 
               background-color : white           ; 
 }
+.SaveButton  /*Зеленая кнопка*/
+{
+                         color : green           ;
+              background-color : #BBFFBB         ; 
+}   
 
 #login_submit:hover {
     background-color: #ffffff;

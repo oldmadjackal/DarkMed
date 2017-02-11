@@ -1325,7 +1325,7 @@ function SuccessMsg() {
     <tr>
       <td class="Normal_LT"> </td>
       <td> 
-        <input type="submit" value="Сохранить" id="Save1"> 
+        <input type="submit" class="SaveButton" value="Сохранить" id="Save1"> 
         <input type="checkbox" value="1" name="Publish" id="Publish"> Передать пациенту
       </td>
     </tr>
@@ -1385,8 +1385,13 @@ function SuccessMsg() {
     <tbody  id="Prescriptions">
     </tbody>
   </table>
-  
+
+  <div class="Normal_CT">
   <br>
+  <input type="submit" class="SaveButton" value="Сохранить" id="Save1"> 
+  <br>
+  <br>
+  </div>
   <div class="Normal_CT">
     <div>Комплексы назначений:</div>
     <select id="SetsList"></select>

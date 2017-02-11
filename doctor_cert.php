@@ -476,7 +476,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script type="text/javascript">
@@ -649,8 +652,9 @@ function SuccessMsg() {
 	i_fld_new = document.createElement("br") ;
 	i_col_new . appendChild(i_fld_new) ;
 	i_add_new = document.createElement("input") ;
-	i_add_new . type   ="submit" ;
-	i_add_new . value  ="Сохранить" ;
+	i_add_new . type      ="submit" ;
+	i_add_new . className ="SaveButton" ;
+	i_add_new . value     ="Сохранить" ;
 	i_col_new . appendChild(i_add_new) ;
 	i_fld_new = document.createElement("br") ;
 	i_col_new . appendChild(i_fld_new) ;
@@ -779,8 +783,9 @@ function SuccessMsg() {
 	i_fld_new = document.createElement("br") ;
 	i_col_new . appendChild(i_fld_new) ;
 	i_add_new = document.createElement("input") ;
-	i_add_new . type   ="submit" ;
-	i_add_new . value  ="Сохранить" ;
+	i_add_new . type      ="submit" ;
+	i_add_new . className ="SaveButton" ;
+	i_add_new . value     ="Сохранить" ;
 	i_col_new . appendChild(i_add_new) ;
 	i_fld_new = document.createElement("br") ;
 	i_col_new . appendChild(i_fld_new) ;
@@ -1035,7 +1040,7 @@ function SuccessMsg() {
   </div>
 
   <div class="fieldC">
-      <input type="submit" value="Сохранить">
+      <input type="submit" class="SaveButton" value="Сохранить">
   </div>
   <br>
 

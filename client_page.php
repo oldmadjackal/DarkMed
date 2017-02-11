@@ -716,7 +716,10 @@ function SuccessMsg() {
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 
 <style type="text/css">
-  @import url("common.css")
+  @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script src="CryptoJS/rollups/tripledes.js"></script>
@@ -1080,6 +1083,7 @@ function SuccessMsg() {
        i_col_new . appendChild(i_fld_new) ;
        i_add_new = document.createElement("input") ;
        i_add_new . type   ="submit" ;
+       i_add_new . className="SaveButton" ;
        i_add_new . value  ="Сохранить" ;
        i_col_new . appendChild(i_add_new) ;
        i_fld_new = document.createElement("br") ;
@@ -1237,7 +1241,8 @@ function SuccessMsg() {
        i_fld_new = document.createElement("br") ;
        i_col_new . appendChild(i_fld_new) ;
        i_add_new = document.createElement("input") ;
-       i_add_new . type   ="submit" ;
+       i_add_new . type     ="submit" ;
+       i_add_new . className="SaveButton"
        i_add_new . value  ="Сохранить" ;
        i_col_new . appendChild(i_add_new) ;
        i_fld_new = document.createElement("br") ;
@@ -1377,7 +1382,7 @@ function SuccessMsg() {
     <tbody>
     <tr>
       <td class="field"> </td>
-      <td> <br> <input type="submit" value="Сохранить" id="Save1"> </td>
+      <td> <br> <input type="submit" class="SaveButton" value="Сохранить" id="Save1"> </td>
     </tr>
     <tr>
       <td class="field"> </td>

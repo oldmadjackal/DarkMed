@@ -850,7 +850,7 @@ function SuccessMsg() {
     <tr>
       <td class="Normal_CT">
           <br> 
-          <input type="submit" value="Сохранить"   id="Save1"> 
+          <input type="submit" value="Сохранить"   class="SaveButton" id="Save1"> 
           <input type="button" value="Просмотреть" id="Preview" onclick="GoToPreview();"> 
       </td>
       <td> </td>
@@ -909,6 +909,12 @@ function SuccessMsg() {
     <tbody  id="Prescriptions">
     </tbody>
   </table>
+
+  <div class="Normal_CT">
+    <br>
+    <br>
+    <input type="submit" value="Сохранить"   class="SaveButton" id="Save1"> 
+  </div> 
   
   </form>
 

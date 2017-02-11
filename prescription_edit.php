@@ -906,8 +906,9 @@ function SuccessMsg() {
        i_fld_new = document.createElement("br") ;
        i_col_new . appendChild(i_fld_new) ;
        i_add_new = document.createElement("input") ;
-       i_add_new . type   ="submit" ;
-       i_add_new . value  ="Сохранить" ;
+       i_add_new . type      ="submit" ;
+       i_add_new . className ="SaveButton" ;
+       i_add_new . value     ="Сохранить" ;
        i_col_new . appendChild(i_add_new) ;
        i_fld_new = document.createElement("br") ;
        i_col_new . appendChild(i_fld_new) ;
@@ -1064,8 +1065,9 @@ function SuccessMsg() {
        i_fld_new = document.createElement("br") ;
        i_col_new . appendChild(i_fld_new) ;
        i_add_new = document.createElement("input") ;
-       i_add_new . type   ="submit" ;
-       i_add_new . value  ="Сохранить" ;
+       i_add_new . type      ="submit" ;
+       i_add_new . className ="SaveButton" ;
+       i_add_new . value     ="Сохранить" ;
        i_col_new . appendChild(i_add_new) ;
        i_fld_new = document.createElement("br") ;
        i_col_new . appendChild(i_fld_new) ;
@@ -1310,7 +1312,7 @@ function SuccessMsg() {
     <tr>
       <td class="Normal_CT">
           <br> 
-          <input type="submit" value="Сохранить"  id="Save1"> 
+          <input type="submit" class="SaveButton" value="Сохранить"  id="Save1"> 
       </td>
       <td> </td>
     </tr>

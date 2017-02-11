@@ -36,10 +36,13 @@ function ProcessDB() {
                                  $session=$_GET ["Session"] ;
   if(!isset($session        ))   $session=$_POST["Session"] ;
 
-  if( isset($_GET["FilterS"]))  $filter_s=$_GET ["FilterS"] ;
-  if(!isset($filter_s       ))  $filter_s=$_POST["FilterS"] ;
-  if( isset($_GET["FilterN"]))  $filter_n=$_GET ["FilterN"] ;
-  if(!isset($filter_n       ))  $filter_n=$_POST["FilterN"] ;
+  if( isset($_POST["FilterS"]))  $filter_s=$_POST["FilterS"] ;
+  if( isset($_GET ["FilterS"]))  $filter_s=$_GET ["FilterS"] ;
+  if(!isset($filter_s        ))  $filter_s="" ;
+
+  if( isset($_POST["FilterN"]))  $filter_n=$_POST["FilterN"] ;
+  if( isset($_GET ["FilterN"]))  $filter_n=$_GET ["FilterN"] ;
+  if(!isset($filter_n        ))  $filter_n="" ;
 
     FileLog("START", "Session:".$session) ;
     FileLog("",      "FilterS:".$filter_s) ;

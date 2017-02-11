@@ -35,8 +35,8 @@ function ProcessDB() {
                         $session=$_GET ["Session"] ;
   if(!isset($session))  $session=$_POST["Session"] ;
 
-                         $get_id=$_GET ["Id"] ;
-                         $put_id=$_POST["Id"] ;
+  if( isset($_GET ["Id"]))  $get_id=$_GET ["Id"] ;
+  if( isset($_POST["Id"]))  $put_id=$_POST["Id"] ;
 
   if( isset($put_id )) 
   {

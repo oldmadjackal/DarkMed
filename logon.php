@@ -21,8 +21,8 @@ function RegistryDB() {
   }
 //--------------------------- Извлечение и анализ параметров
 
-   $login   =$_POST["Login"   ] ;
-   $password=$_POST["Password"] ;
+  if(isset($_POST["Login"   ]))  $login   =$_POST["Login"   ] ;
+  if(isset($_POST["Password"]))  $password=$_POST["Password"] ;
 
      $completeness=0 ;
 

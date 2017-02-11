@@ -46,7 +46,7 @@ function ProcessDB() {
                         $session=$_GET ["Session"] ;
   if(!isset($session))  $session=$_POST["Session"] ;
 
-                         $name_f=$_POST["Name_F"] ;
+  if(isset($_POST["Name_F"]))  $name_f=$_POST["Name_F"] ;
 
   if(isset($name_f)) {
                          $name_i=$_POST["Name_I"] ;
@@ -65,22 +65,22 @@ function ProcessDB() {
        if($tmp!="Dummy")  $speciality=$speciality.$tmp."," ;
   }
 
-                         $new_order  =$_POST["OrderNew"] ;
-                         $ext_edit   =$_POST["ExtEdit"] ;
+  if(isset($_POST["OrderNew"]))  $new_order  =$_POST["OrderNew"] ;
+  if(isset($_POST["ExtEdit" ]))  $ext_edit   =$_POST["ExtEdit"] ;
 
-                               $new_file  = "" ;
-                               $new_link  = "" ;
+                                 $new_file  = "" ;
+                                 $new_link  = "" ;
 
   if( isset($new_order) ||
       isset($ext_edit )   )
   {
-                               $new_type  =$_POST["TypeNew"] ;
-                               $new_remark=$_POST["RemarkNew"] ;
+                                $new_type  =$_POST["TypeNew"] ;
+                                $new_remark=$_POST["RemarkNew"] ;
 
-    if($new_type=="Image" or
-       $new_type=="File"    )  $new_file  =$_POST["FileName"] ;
+     if($new_type=="Image" or
+        $new_type=="File"    )  $new_file  =$_POST["FileName"] ;
 
-    if($new_type=="Link"    )  $new_link  =$_POST["LinkNew"] ;
+     if($new_type=="Link"    )  $new_link  =$_POST["LinkNew"] ;
   }
 
 

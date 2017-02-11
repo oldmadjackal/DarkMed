@@ -21,17 +21,17 @@ function RegistryDB(){
   }
 //--------------------------- Извлечение и анализ параметров
 
-   $login   =$_POST["Login"   ] ;
+  if(isset($_POST["Login"])) {
 
-  if(isset($login)) {
-   $password=$_POST["Password"] ;
-   $email   =$_POST["Email"] ;
-   $type_a  =$_POST["Type"] ;
-   $s_key   =$_POST["Sign_secret"] ;
-   $p_key   =$_POST["Sign_public"] ;
-   $msg_key =$_POST["Msg_key"] ;
-   $crypto  =$_POST["Crypto"] ;
-   $check   =$_POST["Check"] ;
+             $login   =$_POST["Login"   ] ;
+             $password=$_POST["Password"] ;
+             $email   =$_POST["Email"] ;
+             $type_a  =$_POST["Type"] ;
+             $s_key   =$_POST["Sign_secret"] ;
+             $p_key   =$_POST["Sign_public"] ;
+             $msg_key =$_POST["Msg_key"] ;
+             $crypto  =$_POST["Crypto"] ;
+             $check   =$_POST["Check"] ;
 
                               $type="" ;
      foreach($type_a as $tmp) $type=$type.$tmp."," ;

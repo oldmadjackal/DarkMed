@@ -277,11 +277,8 @@ function ProcessDB() {
       foreach($a_dss as $value)  $sql.="       or instr(concat(' ', deseases, ' '), ' ".$value." ')>0 \r\n" ;
                                  $sql.="      )\r\n" ;
   }
+
                      $sql.=" Order by t.name, p.name" ;
-
-  FileLog("DEBUG", $sql) ;
-
-
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select PRESCRIPTIONS_REGISTRY... : ".$db->error) ;

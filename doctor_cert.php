@@ -37,7 +37,7 @@ function ProcessDB() {
                         $session=$_GET ["Session"] ;
   if(!isset($session))  $session=$_POST["Session"] ;
 
-                          $count=$_POST["Count"] ;
+  if(isset($_POST["Count"]))  $count=$_POST["Count"] ;
 
   if(isset($count))
   {

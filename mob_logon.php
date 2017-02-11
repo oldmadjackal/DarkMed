@@ -21,8 +21,8 @@ function RegistryDB() {
   }
 //--------------------------- Извлечение и анализ параметров
 
-   $login   =$_POST["Login"   ] ;
-   $password=$_POST["Password"] ;
+  if(isset($_POST["Login"   ]))  $login   =$_POST["Login"   ] ;
+  if(isset($_POST["Password"]))  $password=$_POST["Password"] ;
 
      $completeness=0 ;
 
@@ -51,7 +51,7 @@ function RegistryDB() {
    $login   =$db->real_escape_string($login   ) ;
    $password=$db->real_escape_string($password) ;
 
-                     $sql="Select options from users Where Login='$login' and Password='$password'" ;
+                     $sql="Select options, Email_confirm, email, Code_confirm  from users Where Login='$login' and Password='$password'" ;
      $res=$db->query($sql) ;
   if($res===false) {
           FileLog("ERROR", "Select... : ".$db->error) ;
@@ -66,15 +66,20 @@ function RegistryDB() {
          ErrorMsg("Несоответствие логина и пароля пользователя") ;
                          return ;
   }
-      $fields=$res->fetch_row() ;
+              $fields=$res->fetch_row() ;
+
              $options=$fields[0] ;
-             if($fields[1]=="N") {Email_confirmation($db, $login, $fields[3] ,$error);
+
+  if($fields[1]=="N") {
+
+    Email_confirmation($db, $login, $fields[3] ,$error);
                          $db->close() ;
-                         FileLog("CANCEL", "Неподтвержденный E-Mail") ;
-                         ErrorMsg("Ваш E-mail не подтвержден.<br>Если Вы не получили ссылку на Ваш E-mail:".$fields[2].
-                                           ", для отправки повторного подтверждения перейдите по ссылке ". 
-                                "<a href=\"http://".$_SERVER["HTTP_HOST"]."/regisry_ack.php?confirm_key=Repeat\">сюда</a>" ) ;
-                         return ; }
+               FileLog("CANCEL", "Неподтвержденный E-Mail") ;
+              ErrorMsg("Ваш E-mail не подтвержден.<br>Если Вы не получили ссылку на Ваш E-mail:".$fields[2].
+                       ", для отправки повторного подтверждения перейдите по ссылке ". 
+                       "<a href=\"http://".$_SERVER["HTTP_HOST"]."/regisry_ack.php?confirm_key=Repeat\">сюда</a>" ) ;
+                         return ; 
+  }
 
                     $res->free() ;
 

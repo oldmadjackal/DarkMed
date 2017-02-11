@@ -29,7 +29,7 @@ function ProcessDB() {
     FileLog("",      "  Owner:".$owner) ;
     FileLog("",      "   Page:".$page) ;
     
-           $values_cheched=0 ;
+           $values_checked=0 ;
 
   foreach($_POST as $key => $value) 
    if(substr($key, 0, 6)=="Value_")

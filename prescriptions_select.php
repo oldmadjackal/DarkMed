@@ -60,6 +60,7 @@ function ProcessDB() {
    if(isset($_POST["Exclude" ]))  $exclude =$_POST["Exclude"] ;
    if(isset($_POST["Common"  ]))  $common  =$_POST["Common"] ;
    if(isset($_POST["Photos"  ]))  $photos  =$_POST["Photos"] ;
+   else                           $photos  = false ;
 
       FileLog("START", "    Type:".$type) ;
       FileLog("",      "   Title:".$title) ;

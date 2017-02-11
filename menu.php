@@ -34,7 +34,7 @@ header("Content-type: text/html; charset=windows-1251") ;
        i_elem.hidden= false ;
        i_elem       =document.getElementById("Analyses") ;
        i_elem.hidden= false ;
- 	   i_elem       =document.getElementById("Prescriptions") ;
+       i_elem       =document.getElementById("Prescriptions") ;
        i_elem.hidden= false ;
        i_elem       =document.getElementById("DoctorCard") ;
        i_elem.hidden= true ;
@@ -42,6 +42,8 @@ header("Content-type: text/html; charset=windows-1251") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("Messages") ;
        i_elem.hidden= false ;
+       i_elem       =document.getElementById("PrescriptionsRegistry") ;
+       i_elem.hidden= true ;
        i_elem       =document.getElementById("PrescriptionsSets") ;
        i_elem.hidden= true ;
   }
@@ -52,15 +54,17 @@ header("Content-type: text/html; charset=windows-1251") ;
 
        i_elem       =document.getElementById("ClientCard") ;
        i_elem.hidden= true ;
-	   i_elem       =document.getElementById("Analyses") ;
+       i_elem       =document.getElementById("Analyses") ;
        i_elem.hidden= true ;
- 	   i_elem       =document.getElementById("Prescriptions") ;
+       i_elem       =document.getElementById("Prescriptions") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("DoctorCard") ;
        i_elem.hidden= false ;
        i_elem       =document.getElementById("ClientsList") ;
        i_elem.hidden= false ;
        i_elem       =document.getElementById("Messages") ;
+       i_elem.hidden= false ;
+       i_elem       =document.getElementById("PrescriptionsRegistry") ;
        i_elem.hidden= false ;
        i_elem       =document.getElementById("PrescriptionsSets") ;
        i_elem.hidden= false ;
@@ -72,9 +76,9 @@ header("Content-type: text/html; charset=windows-1251") ;
 
        i_elem       =document.getElementById("ClientCard") ;
        i_elem.hidden= true ;
-	   i_elem       =document.getElementById("Analyses") ;
+       i_elem       =document.getElementById("Analyses") ;
        i_elem.hidden= true ;
- 	   i_elem       =document.getElementById("Prescriptions") ;
+       i_elem       =document.getElementById("Prescriptions") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("DoctorCard") ;
        i_elem.hidden= false ;
@@ -82,6 +86,8 @@ header("Content-type: text/html; charset=windows-1251") ;
        i_elem.hidden= false ;
        i_elem       =document.getElementById("Messages") ;
        i_elem.hidden= false ;
+       i_elem       =document.getElementById("PrescriptionsRegistry") ;
+       i_elem.hidden= true ;
        i_elem       =document.getElementById("PrescriptionsSets") ;
        i_elem.hidden= true ;
   }
@@ -92,15 +98,17 @@ header("Content-type: text/html; charset=windows-1251") ;
 
        i_elem       =document.getElementById("ClientCard") ;
        i_elem.hidden= true ;
-	   i_elem       =document.getElementById("Analyses") ;
+       i_elem       =document.getElementById("Analyses") ;
        i_elem.hidden= true ;
- 	   i_elem       =document.getElementById("Prescriptions") ;
+       i_elem       =document.getElementById("Prescriptions") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("DoctorCard") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("ClientsList") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("Messages") ;
+       i_elem.hidden= true ;
+       i_elem       =document.getElementById("PrescriptionsRegistry") ;
        i_elem.hidden= true ;
        i_elem       =document.getElementById("PrescriptionsSets") ;
        i_elem.hidden= true ;
@@ -179,7 +187,7 @@ header("Content-type: text/html; charset=windows-1251") ;
                                 parent.frames['view'].location.assign('deseases_registry_wrapper.php'+'?Session='+v_session) ; "
          target="view" id="ill_catalog_btn">Реестр заболеваний</a> 
     </li>
-    <li>
+    <li hidden id="PrescriptionsRegistry">
 	<a class="menu_item" href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                                 parent.frames['view'].location.assign('prescriptions_registry_wrapper.php'+'?Session='+v_session) ; "

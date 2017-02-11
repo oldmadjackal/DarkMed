@@ -537,7 +537,7 @@ function SuccessMsg($text) {
 
        v_session=TransitContext("restore","session","") ;
 
-	parent.frames['section'].location.assign("messages_chat_lr.php?Session="+v_session+"&Sender="+sender_user) ;
+	parent.parent.frames['view'].location.assign("messages_chat_lr_wrapper.php?Session="+v_session+"&Sender="+sender_user) ;
   }
 
 <?php

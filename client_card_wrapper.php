@@ -15,20 +15,16 @@
 
 <frameset cols="*,370">
 
-<frameset rows="*,20%">
-
 <?php
 
-       $session=$_GET ["Session"] ;
+                               $session =$_GET["Session"] ;
+    if(isset($_GET["Owner"]))  $owner   =$_GET["Owner"] ;
 
-   echo " <frame src='doctor_clients.php?Session=".$session."' name='section'>" ;	
+    if(isset($owner))  echo " <frame src='client_card.php?Session=".$session."&Owner=".$owner."' name='section'>" ;
+    else               echo " <frame src='client_card.php?Session=".$session."' name='section'>" ;
 ?>
 
-   <frame name='details'>
-</frameset>
-
    <frame name="anatomy">
-
 </frameset>
 
 <noframes>

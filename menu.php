@@ -133,7 +133,7 @@ header("Content-type: text/html; charset=windows-1251") ;
         <a class="menu_item"  href="javascript:
                  var  v_session=parent.frames['menu'].document.getElementById('glbSession').value ;
                   if(v_session=='')  parent.frames['view'].location.assign('logon.php') ;
-                  else               parent.frames['view'].location.assign('client_card.php'+'?Session='+v_session) ; "
+                  else               parent.frames['view'].location.assign('client_card_wrapper.php'+'?Session='+v_session) ; "
          target="view" id="user_card_btn">Карта пациента</a>
     </li> 
 	

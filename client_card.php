@@ -24,21 +24,30 @@ function ProcessDB() {
                         $session=$_GET ["Session"] ;
   if(!isset($session))  $session=$_POST["Session"] ;
 
-                          $owner=$_GET ["Owner"] ;
+  if(isset($_GET ["Owner"]))  $owner=$_GET ["Owner"] ;
 
-                         $name_f=$_POST["Name_F"] ;
-                         $name_i=$_POST["Name_I"] ;
-                         $name_o=$_POST["Name_O"] ;
-                         $remark=$_POST["Remark"] ;
-                         $check =$_POST["Check"] ;
+  if(isset($_POST["Name_F"])) 
+  {
+                         $name_f =$_POST["Name_F"] ;
+                         $name_i =$_POST["Name_I"] ;
+                         $name_o =$_POST["Name_O"] ;
+                         $remark =$_POST["Remark"] ;
+                         $anatomy=$_POST["Anatomy"] ;
+                         $check  =$_POST["Check"] ;
+  }
 
-  FileLog("START", "Session:".$session) ;
-  FileLog("",      "  Owner:".$owner) ;
-  FileLog("",      "  Check:".$check) ;
-  FileLog("",      " Name_F:".$name_f) ;
-  FileLog("",      " Name_I:".$name_i) ;
-  FileLog("",      " Name_O:".$name_o) ;
-  FileLog("",      " Remark:".$remark) ;
+             FileLog("START", "Session:".$session) ;
+             FileLog("",      "  Owner:".$owner) ;
+
+  if(isset($name_f))
+  {
+             FileLog("",      "  Check:".$check) ;
+             FileLog("",      " Name_F:".$name_f) ;
+             FileLog("",      " Name_I:".$name_i) ;
+             FileLog("",      " Name_O:".$name_o) ;
+             FileLog("",      " Remark:".$remark) ;
+             FileLog("",      "Anatomy:".$anatomy) ;
+  } 
 
 //--------------------------- Подключение БД
 
@@ -90,7 +99,7 @@ function ProcessDB() {
 
   if(!isset($check) || $read_only)
   {
-                       $sql="Select `check`, name_f, name_i, name_o, remark".
+                       $sql="Select `check`, name_f, name_i, name_o, remark, anatomy".
                             "  From  client_page_main".
                             " Where  owner='$owner_'" ; 
        $res=$db->query($sql) ;
@@ -104,27 +113,30 @@ function ProcessDB() {
 	      $fields=$res->fetch_row() ;
 	              $res->close() ;
 
-                   $check =$fields[0] ;
-                   $name_f=$fields[1] ;
-                   $name_i=$fields[2] ;
-                   $name_o=$fields[3] ;
-                   $remark=$fields[4] ;
+                   $check  =$fields[0] ;
+                   $name_f =$fields[1] ;
+                   $name_i =$fields[2] ;
+                   $name_o =$fields[3] ;
+                   $remark =$fields[4] ;
+                   $anatomy=$fields[5] ;
 
         FileLog("", "User main page selected successfully") ;
   }
 //--------------------------- Сохранение данных со страницы
   else
   {
-          $name_f_=$db->real_escape_string($name_f) ;
-          $name_i_=$db->real_escape_string($name_i) ;
-          $name_o_=$db->real_escape_string($name_o) ;
-          $remark_=$db->real_escape_string($remark) ;
+          $name_f_ =$db->real_escape_string($name_f) ;
+          $name_i_ =$db->real_escape_string($name_i) ;
+          $name_o_ =$db->real_escape_string($name_o) ;
+          $remark_ =$db->real_escape_string($remark) ;
+          $anatomy_=$db->real_escape_string($anatomy) ;
 
                        $sql="Update client_page_main".
-                            " Set   name_f='$name_f_'".
-                            "      ,name_i='$name_i_'".
-                            "      ,name_o='$name_o_'".
-                            "      ,remark='$remark_'".
+                            " Set   name_f ='$name_f_'".
+                            "      ,name_i ='$name_i_'".
+                            "      ,name_o ='$name_o_'".
+                            "      ,remark ='$remark_'".
+                            "      ,anatomy='$anatomy_'".
                             " Where owner ='$user_'" ; 
        $res=$db->query($sql) ;
     if($res===false) {
@@ -147,6 +159,7 @@ function ProcessDB() {
       echo     "  i_name_i.value=\"".$name_i."\" ;\n" ;
       echo     "  i_name_o.value=\"".$name_o."\" ;\n" ;
       echo     "  i_remark.value=\"".$remark."\" ;\n" ;
+      echo     "  i_anatomy.value='".$anatomy."' ;\n" ;
 
 //--------------------------- Обработка режима READ ONLY
 
@@ -210,6 +223,7 @@ function SuccessMsg() {
     var  i_name_i ;
     var  i_name_o ;
     var  i_remark ;
+    var  i_anatomy ;
     var  i_error ;
     var  password ;
     var  page_key ;
@@ -229,6 +243,7 @@ function SuccessMsg() {
        i_name_i=document.getElementById("Name_I") ;
        i_name_o=document.getElementById("Name_O") ;
        i_remark=document.getElementById("Remark") ;
+       i_anatomy=document.getElementById("Anatomy") ;
        i_error =document.getElementById("Error") ;
 
        i_name_f.focus() ;
@@ -250,31 +265,26 @@ function SuccessMsg() {
          return true ;
      }
 
-       i_name_f.value=Crypto_decode(i_name_f.value, page_key) ;
-       i_name_i.value=Crypto_decode(i_name_i.value, page_key) ;
-       i_name_o.value=Crypto_decode(i_name_o.value, page_key) ;
-       i_remark.value=Crypto_decode(i_remark.value, page_key) ;
+       i_name_f .value=Crypto_decode(i_name_f.value, page_key) ;
+       i_name_i .value=Crypto_decode(i_name_i.value, page_key) ;
+       i_name_o .value=Crypto_decode(i_name_o.value, page_key) ;
+       i_remark .value=Crypto_decode(i_remark.value, page_key) ;
+       i_anatomy.value=Crypto_decode(i_anatomy.value, page_key) ;
+
+      parent.frames["anatomy"].location.replace('anatomia_main.html?groups='+i_anatomy.value) ;
 
          return true ;
   }
 
   function SetReadOnly() 
   {
-    var  i_save1 ;
-    var  i_access ;
-    var  i_form ;
-    var  i_pctrl ;
-
-       i_save1 =document.getElementById("Save1") ;
-       i_access=document.getElementById("Access") ;
-       i_pages =document.getElementById("Pages") ;
-       i_pctrl =document.getElementById("NewPage") ;
-
        i_name_f.readOnly=true ;
        i_name_i.readOnly=true ;
        i_name_o.readOnly=true ;
        i_remark.readOnly=true ;
-       i_save1 .disabled=true ;
+
+       document.getElementById("Save1"      ).hidden =true ; 
+       document.getElementById("AnatomyText").hidden =true ; 
   }
 
   function SendFields() 
@@ -292,6 +302,9 @@ function SuccessMsg() {
        i_name_i.value=Crypto_encode(i_name_i.value, page_key) ;
        i_name_o.value=Crypto_encode(i_name_o.value, page_key) ;
        i_remark.value=Crypto_encode(i_remark.value, page_key) ;
+
+       i_anatomy.value=parent.frames["anatomy"].GetGroups() ;
+       i_anatomy.value=Crypto_encode(i_anatomy.value, page_key) ;
 
                          return true ;         
   } 
@@ -313,15 +326,13 @@ function SuccessMsg() {
 </noscript>
 
   <table width="90%">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td width="10%"> 
-        <input type="button" value="?" onclick=GoToHelp()     id="GoToHelp"> 
-        <input type="button" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
+        <input type="button" class="HelpButton"     value="?" onclick=GoToHelp()     id="GoToHelp"> 
+        <input type="button" class="CallBackButton" value="!" onclick=GoToCallBack() id="GoToCallBack"> 
       </td> 
-      <td class="title"> 
+      <td class="FormTitle"> 
         <b>КАРТА ПАЦИЕНТА</b>
       </td> 
     </tr>
@@ -334,39 +345,47 @@ function SuccessMsg() {
     </thead>
     <tbody>
     <tr>
-      <td class="field"> </td>
+      <td class="Normal_RT"> </td>
       <td> <br> <input type="submit" class="SaveButton" value="Сохранить"  id="Save1"> </td>
     </tr>
     <tr>
-      <td class="field"> </td>
-      <td> <div class="error" id="Error"></div> </td>
+      <td class="Normal_RT"> </td>
+      <td> <div class="Error_CT" id="Error"></div> </td>
     </tr>
     <tr>
-      <td class="field"> Фамилия </td>
+      <td class="Normal_RT"> Фамилия </td>
       <td> <input type="text" size=60 name="Name_F" id="Name_F"> </td>
     </tr>
     <tr>
-      <td class="field"> Имя </td>
+      <td class="Normal_RT"> Имя </td>
       <td> <input type="text" size=60 name="Name_I" id="Name_I"> </td>
     </tr>
     <tr>
-      <td class="field"> Отчество </td>
+      <td class="Normal_RT"> Отчество </td>
       <td> <input type="text" size=60 name="Name_O" id="Name_O"> </td>
     </tr>
     <tr>
-      <td class="field"> Жалобы </td>
+      <td class="Normal_RT"> Жалобы </td>
       <td> 
         <textarea cols=60 rows=7 wrap="soft" name="Remark" id="Remark"> </textarea>
       </td>
     </tr>
     <tr>
-      <td class="field"> </td>
-      <td> <input type="hidden" size=60 name="Check" id="Check"> </td>
+      <td class="Normal_RT"> </td>
+      <td>
+        <input type="hidden" name="Check"   id="Check"  >
+        <input type="hidden" name="Anatomy" id="Anatomy">
+      </td>
     </tr>
     </tbody>
   </table>
 
   </form>
+
+  <br>
+  <div class="Normal_CT" id="AnatomyText"> 
+    <b>На анатомической схеме справа укажите болевые зоны</b>
+  </div>
 
 </body>
 

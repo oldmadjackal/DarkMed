@@ -418,8 +418,6 @@ function SuccessMsg($session) {
 <noscript>
 </noscript>
 
-<div class="inputF">
-
   <table width="90%">
     <thead>
     </thead>
@@ -487,8 +485,6 @@ function SuccessMsg($session) {
   </table>
 
   </form>
-
-</div>
 
 </body>
 

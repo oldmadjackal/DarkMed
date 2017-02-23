@@ -10,19 +10,40 @@
 
 <style type="text/css">
   @import url("common.css") ;
+  @import url("text.css") ;
+  @import url("tables.css") ;
+  @import url("buttons.css") ;
 </style>
 
 <script type="text/javascript">
 <!--
 
+   var  Init ;
+   var  Anatomy ;
+   var  Locked ;
+   var  Selected ;
+   var  SelectedClass="TableSelected_LT" ;
+   var  NoSelectedClass="Table_LT" ;
+
+   var  Spine_deseases=["38","39","40","41","42","51"] ;
+   var  Shoulder_deseases=["28","29","30","31","32","33","34","35","36"] ;
+   var  Elbow_deseases=["22","23","24","25","26"] ;
+   var  Hip_deseases=["44","45","46","47","48","49","50"] ;
+   var  Ankle_deseases=["7","8","9","10"] ;
+   var  Knee_deseases=["12","13","14","15","16","17","18","19","20"] ;
+
+
   function FirstField() 
   {
     var  groups ;
 
+          Init=true ;
+
+
         groups=window.location.search ;
      if(groups!="")
      {
-        if(groups.indexOf('Spine'        )!=-1)  SelectArea('Spine',         true) ;
+        if(groups.indexOf('SpineOne'     )!=-1)  SelectArea('SpineOne',      true) ;
         if(groups.indexOf('ShoulderRight')!=-1)  SelectArea('ShoulderRight', true) ;
         if(groups.indexOf('ShoulderLeft' )!=-1)  SelectArea('ShoulderLeft',  true) ;
         if(groups.indexOf('ElbowRight'   )!=-1)  SelectArea('ElbowRight',    true) ;
@@ -35,12 +56,67 @@
         if(groups.indexOf('AnkleLeft'    )!=-1)  SelectArea('AnkleLeft',     true) ;          
      }
 
+          Init=false ;
+
+                                     Anatomy= groups.substr(groups.indexOf('?')+1) ;
+                                     Anatomy=Anatomy.substr(Anatomy.indexOf('=')+1) ;
+       if(Anatomy.indexOf('&')!=-1)  Anatomy=Anatomy.substr(0, Anatomy.indexOf('&')) ;
+
          return true ;
   }
 
   function SelectArea(p_area, p_select) 
   {
-       document.getElementById(p_area).hidden=!p_select ;
+    var  groups ;
+    var  deseases_sel ;
+    var  deseases ;
+    var  elem ;
+    var  pos ;
+    var  n ;
+    var  i ;
+
+
+     if(window.location.search.indexOf('Doctor')==-1 || Init==true)
+     {
+        document.getElementById(p_area).hidden=!p_select ;
+     }
+     else
+     {
+                                              document.getElementById('Main'    ).hidden=true ;
+        if(p_area.indexOf('Spine'   )!=-1) {  document.getElementById('Spine'   ).hidden=false ;
+                                              deseases=Spine_deseases ;                          }
+        if(p_area.indexOf('Shoulder')!=-1) {  document.getElementById('Shoulder').hidden=false ;
+                                              deseases=Shoulder_deseases ;                       }
+        if(p_area.indexOf('Elbow'   )!=-1) {  document.getElementById('Elbow'   ).hidden=false ;
+                                              deseases=Elbow_deseases ;                          }
+        if(p_area.indexOf('Hip'     )!=-1) {  document.getElementById('Hip'     ).hidden=false ;
+                                              deseases=Hip_deseases ;                            }
+        if(p_area.indexOf('Knee'    )!=-1) {  document.getElementById('Knee'    ).hidden=false ;
+                                              deseases=Knee_deseases ;                           }
+        if(p_area.indexOf('Ankle'   )!=-1) {  document.getElementById('Ankle'   ).hidden=false ;
+                                              deseases=Ankle_deseases ;                          }
+
+              groups=Anatomy.split(",") ;
+              Locked="" ;
+
+          for(n=0 ; n<groups.length ; n++)
+            if(groups[n].indexOf(p_area)!=-1)
+            {
+              for(i=0 ; i<deseases.length ; i++)
+                if(groups[n].indexOf(deseases[i])!=-1) 
+                {
+                  elem          =document.getElementById(deseases[i]) ;
+                  elem.className=SelectedClass ;
+                }
+            }
+            else
+            {
+              for(i=0 ; i<deseases.length ; i++)
+                if(groups[n].indexOf(deseases[i])!=-1)   Locked+="_"+deseases[i]+"_" ;
+            }
+
+         Selected=p_area ;
+     }
   }
 
   function GetGroups() 
@@ -48,7 +124,7 @@
       var  groups ;
 
                                                                   groups = "" ;    
-      if(document.getElementById('Spine'        ).hidden==false)  groups+=','+'Spine' ;
+      if(document.getElementById('SpineOne'     ).hidden==false)  groups+=','+'SpineOne' ;
       if(document.getElementById('ShoulderRight').hidden==false)  groups+=','+'ShoulderRight' ;
       if(document.getElementById('ShoulderLeft' ).hidden==false)  groups+=','+'ShoulderLeft' ;
       if(document.getElementById('ElbowRight'   ).hidden==false)  groups+=','+'ElbowRight' ;
@@ -63,6 +139,131 @@
      return groups ;
   }
 
+  function SetGroups(p_groups)
+  {
+
+      if(Anatomy!="")  return ;
+
+                Init=true ;
+
+        if(p_groups.indexOf('SpineOne'     )!=-1)  SelectArea('SpineOne',      true) ;
+        if(p_groups.indexOf('ShoulderRight')!=-1)  SelectArea('ShoulderRight', true) ;
+        if(p_groups.indexOf('ShoulderLeft' )!=-1)  SelectArea('ShoulderLeft',  true) ;
+        if(p_groups.indexOf('ElbowRight'   )!=-1)  SelectArea('ElbowRight',    true) ;
+        if(p_groups.indexOf('ElbowLeft'    )!=-1)  SelectArea('ElbowLeft',     true) ;
+        if(p_groups.indexOf('HipRight'     )!=-1)  SelectArea('HipRight',      true) ;
+        if(p_groups.indexOf('HipLeft'      )!=-1)  SelectArea('HipLeft',       true) ;
+        if(p_groups.indexOf('KneeRight'    )!=-1)  SelectArea('KneeRight',     true) ;
+        if(p_groups.indexOf('KneeLeft'     )!=-1)  SelectArea('KneeLeft',      true) ;
+        if(p_groups.indexOf('AnkleRight'   )!=-1)  SelectArea('AnkleRight',    true) ;
+        if(p_groups.indexOf('AnkleLeft'    )!=-1)  SelectArea('AnkleLeft',     true) ;
+
+                Init=false ;
+             Anatomy=p_groups ;
+  }
+
+  function GetAnatomy() 
+  {
+       return(Anatomy) ;
+  }
+
+  function ReturnMain(p_page)
+  {
+    var  deseases ;
+    var  deseases_sel ;
+    var  elem ;
+    var  pos1,pos2 ;
+    var  i ;
+
+
+       document.getElementById('Main'  ).hidden=false ;
+       document.getElementById(p_page  ).hidden=true ;
+       document.getElementById(Selected).hidden=false ;
+
+     if(p_page=="Spine"   )  deseases=Spine_deseases ;
+     if(p_page=="Shoulder")  deseases=Shoulder_deseases ;
+     if(p_page=="Elbow"   )  deseases=Elbow_deseases ;
+     if(p_page=="Hip"     )  deseases=Hip_deseases ;
+     if(p_page=="Knee"    )  deseases=Knee_deseases ;
+     if(p_page=="Ankle"   )  deseases=Ankle_deseases ;
+
+             deseases_sel=":" ;
+
+      for(i=0 ; i<deseases.length ; i++)
+      {
+           elem=document.getElementById(deseases[i]) ;
+        if(elem.className==SelectedClass)  deseases_sel+="-"+deseases[i]+"-" ;
+
+           elem.className=NoSelectedClass ;
+      }
+
+          pos1=Anatomy.indexOf(Selected) ;
+       if(pos1!=-1)
+       {
+             pos2=Anatomy.indexOf(",",pos1) ;
+          if(pos2!=-1)  Anatomy=Anatomy.substr(0,pos1)+Anatomy.substr(pos2+1) ;
+          else          Anatomy=Anatomy.substr(0,pos1-1) ;
+       }
+
+         Anatomy+=","+Selected+deseases_sel ;
+  }
+
+  function NoDesease(p_page)
+  {
+    var  deseases ;
+    var  elem ;
+    var  pos1,pos2 ;
+    var  i ;
+
+
+      document.getElementById('Main'  ).hidden=false ;
+      document.getElementById(p_page  ).hidden=true ;
+      document.getElementById(Selected).hidden=true ;
+
+     if(p_page=="Spine"   )  deseases=Spine_deseases ;
+     if(p_page=="Shoulder")  deseases=Shoulder_deseases ;
+     if(p_page=="Elbow"   )  deseases=Elbow_deseases ;
+     if(p_page=="Hip"     )  deseases=Hip_deseases ;
+     if(p_page=="Knee"    )  deseases=Knee_deseases ;
+     if(p_page=="Ankle"   )  deseases=Ankle_deseases ;
+
+      for(i=0 ; i<deseases.length ; i++)
+      {
+            elem=document.getElementById(deseases[i]) ;
+
+         if(elem.className==SelectedClass) {
+          if(Locked.indexOf("_"+deseases[i]+"_")==-1)
+               parent.frames['details'].SetDeseaseSelection(false, deseases[i], elem.innerHTML) ;
+                                           }
+
+            elem.className= NoSelectedClass ;
+      }
+
+          pos1=Anatomy.indexOf(Selected) ;
+       if(pos1!=-1)
+       {
+             pos2=Anatomy.indexOf(",",pos1) ;
+          if(pos2!=-1)  Anatomy=Anatomy.substring(0,pos1)+Anatomy.substring(pos2+1) ;
+          else          Anatomy=Anatomy.substring(0,pos1-1) ;
+       }
+  }
+
+  function SelectDesease(p_desease) 
+  {
+    var  elem ;
+    var  checked ;
+
+        elem=document.getElementById(p_desease) ;
+     if(elem.className!=SelectedClass)  elem.className=  SelectedClass ;
+     else                               elem.className=NoSelectedClass ;
+
+     if(elem.className==SelectedClass)  checked=true ;
+     else                               checked=false ; 
+
+     if(Locked.indexOf("_"+p_desease+"_")==-1)
+          parent.frames['details'].SetDeseaseSelection(checked, p_desease, elem.innerHTML) ;
+  }
+
 //-->
 </script>
 
@@ -72,55 +273,321 @@
 
 <noscript>
 </noscript>
+   
+  <table>
+  <tbody>
+  <tr>
+  <td class="MultyPage" id="Main">
 
-  <img src="images/anatomia_gray.jpg" height=604px usemap="#anatomia">
-  <map name="anatomia">
-    <area shape="rect"  coords="160, 76,205,247" onclick="SelectArea('Spine',         true);" title="Позвоночник">
-    <area shape="rect"  coords=" 95, 94,149,171" onclick="SelectArea('ShoulderRight', true);" title="Правое плечо">
-    <area shape="rect"  coords="223, 94,273,171" onclick="SelectArea('ShoulderLeft',  true);" title="Левое плечо">
-    <area shape="rect"  coords=" 62,171,122,216" onclick="SelectArea('ElbowRight',    true);" title="Правый локоть">
-    <area shape="rect"  coords="247,171,308,216" onclick="SelectArea('ElbowLeft',     true);" title="Левый локоть">
-    <area shape="rect"  coords="120,258,180,316" onclick="SelectArea('HipRight',      true);" title="Правый тазо-бедренный сустав">
-    <area shape="rect"  coords="189,258,251,337" onclick="SelectArea('HipLeft',       true);" title="Левый тазо-бедренный сустав">
-    <area shape="rect"  coords="116,392,173,465" onclick="SelectArea('KneeRight',     true);" title="Правое колено">
-    <area shape="rect"  coords="194,387,256,466" onclick="SelectArea('KneeLeft',      true);" title="Левое колено">
-    <area shape="rect"  coords="101,532,161,607" onclick="SelectArea('AnkleRight',    true);" title="Правый голеностопный сустав">
-    <area shape="rect"  coords="206,532,278,605" onclick="SelectArea('AnkleLeft',     true);" title="Левый голеностопный сустав">
-  </map>
+    <img src="images/anatomia_gray.jpg" height=604px usemap="#anatomia">
+    <map name="anatomia">
+      <area shape="rect"  coords="160, 76,205,247" onclick="SelectArea('SpineOne',      true);" title="Позвоночник">
+      <area shape="rect"  coords=" 95, 94,149,171" onclick="SelectArea('ShoulderRight', true);" title="Правое плечо">
+      <area shape="rect"  coords="223, 94,273,171" onclick="SelectArea('ShoulderLeft',  true);" title="Левое плечо">
+      <area shape="rect"  coords=" 62,171,122,216" onclick="SelectArea('ElbowRight',    true);" title="Правый локоть">
+      <area shape="rect"  coords="247,171,308,216" onclick="SelectArea('ElbowLeft',     true);" title="Левый локоть">
+      <area shape="rect"  coords="120,258,180,316" onclick="SelectArea('HipRight',      true);" title="Правый тазо-бедренный сустав">
+      <area shape="rect"  coords="189,258,251,337" onclick="SelectArea('HipLeft',       true);" title="Левый тазо-бедренный сустав">
+      <area shape="rect"  coords="116,392,173,465" onclick="SelectArea('KneeRight',     true);" title="Правое колено">
+      <area shape="rect"  coords="194,387,256,466" onclick="SelectArea('KneeLeft',      true);" title="Левое колено">
+      <area shape="rect"  coords="101,532,161,607" onclick="SelectArea('AnkleRight',    true);" title="Правый голеностопный сустав">
+      <area shape="rect"  coords="206,532,278,605" onclick="SelectArea('AnkleLeft',     true);" title="Левый голеностопный сустав">
+    </map>
 
-  <div id="Spine" style=" position:absolute ; top : 76px ; left : 160px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_spine.jpg" onclick="SelectArea('Spine', false);" title="Позвоночник">
-  </div>
-  <div id="ShoulderRight" style=" position:absolute ; top : 94px ; left : 95px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_shoulder_right.jpg" onclick="SelectArea('ShoulderRight', false);" title="Правое плечо">
-  </div>
-  <div id="ShoulderLeft"  style=" position:absolute ; top : 94px ; left : 223px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_shoulder_left.jpg" onclick="SelectArea('ShoulderLeft',  false);" title="Левое плечо">
-  </div>
-  <div id="ElbowRight" style=" position:absolute ; top : 171px ; left : 62px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_elbow_right.jpg" onclick="SelectArea('ElbowRight', false);" title="Правый локоть">
-  </div>
-  <div id="ElbowLeft"  style=" position:absolute ; top : 171px ; left : 247px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_elbow_left.jpg" onclick="SelectArea('ElbowLeft',  false);" title="Левый локоть">
-  </div>
-  <div id="HipRight" style=" position:absolute ; top : 258px ; left : 120px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_hip_right.jpg" onclick="SelectArea('HipRight', false);" title="Правый тазо-бедренный сустав">
-  </div>
-  <div id="HipLeft"  style=" position:absolute ; top : 258px ; left : 189px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_hip_left.jpg" onclick="SelectArea('HipLeft',  false);" title="Левый тазо-бедренный сустав">
-  </div>
-  <div id="KneeRight" style=" position:absolute ; top : 393px ; left : 116px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_knee_right.jpg" onclick="SelectArea('KneeRight', false);" title="Правое колено">
-  </div>
-  <div id="KneeLeft"  style=" position:absolute ; top : 387px ; left : 194px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_knee_left.jpg" onclick="SelectArea('KneeLeft',  false);" title="Левое колено">
-  </div>
-  <div id="AnkleRight" style=" position:absolute ; top : 532px ; left : 101px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_ankle_right.jpg" onclick="SelectArea('AnkleRight', false);" title="Правый голеностопный сустав">
-  </div>
-  <div id="AnkleLeft"  style=" position:absolute ; top : 532px ; left : 206px ; z-index:1 ; " hidden>
-  <img src="images/anatomia_ankle_left.jpg" onclick="SelectArea('AnkleLeft',  false);" title="Левый голеностопный сустав">
-  </div>
+    <div id="SpineOne" style=" position:absolute ; top : 79px ; left : 162px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_spine.jpg" onclick="SelectArea('SpineOne', false);" title="Позвоночник">
+    </div>
+    <div id="ShoulderRight" style=" position:absolute ; top : 97px ; left : 97px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_shoulder_right.jpg" onclick="SelectArea('ShoulderRight', false);" title="Правое плечо">
+    </div>
+    <div id="ShoulderLeft"  style=" position:absolute ; top : 97px ; left : 225px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_shoulder_left.jpg" onclick="SelectArea('ShoulderLeft',  false);" title="Левое плечо">
+    </div>
+    <div id="ElbowRight" style=" position:absolute ; top : 174px ; left : 64px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_elbow_right.jpg" onclick="SelectArea('ElbowRight', false);" title="Правый локоть">
+    </div>
+    <div id="ElbowLeft"  style=" position:absolute ; top : 174px ; left : 249px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_elbow_left.jpg" onclick="SelectArea('ElbowLeft',  false);" title="Левый локоть">
+    </div>
+    <div id="HipRight" style=" position:absolute ; top : 261px ; left : 122px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_hip_right.jpg" onclick="SelectArea('HipRight', false);" title="Правый тазо-бедренный сустав">
+    </div>
+    <div id="HipLeft"  style=" position:absolute ; top : 261px ; left : 191px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_hip_left.jpg" onclick="SelectArea('HipLeft',  false);" title="Левый тазо-бедренный сустав">
+    </div>
+    <div id="KneeRight" style=" position:absolute ; top : 396px ; left : 118px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_knee_right.jpg" onclick="SelectArea('KneeRight', false);" title="Правое колено">
+    </div>
+    <div id="KneeLeft"  style=" position:absolute ; top : 390px ; left : 196px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_knee_left.jpg" onclick="SelectArea('KneeLeft',  false);" title="Левое колено">
+    </div>
+    <div id="AnkleRight" style=" position:absolute ; top : 535px ; left : 103px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_ankle_right.jpg" onclick="SelectArea('AnkleRight', false);" title="Правый голеностопный сустав">
+    </div>
+    <div id="AnkleLeft"  style=" position:absolute ; top : 535px ; left : 208px ; z-index:1 ; " hidden>
+    <img src="images/anatomia_ankle_left.jpg" onclick="SelectArea('AnkleLeft',  false);" title="Левый голеностопный сустав">
+    </div>
+
+  </td>
+  <td class="MultyPage" id="Spine" hidden>
+
+      <div class="Normal_CT">
+      <input type="button" class="GreenButton" value="Обратно" onclick=ReturnMain("Spine")>
+      <br>
+      <br>
+      <input type="button" class="RedButton" value="Не болит" onclick=NoDesease("Spine")>
+      <br>
+      <br>
+      </div>
+
+      <table>
+      <tbody>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("38") id="38">Вывих позвоночника</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("39") id="39">Грыжа позвоночника</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("40") id="40">Остеохондроз позвоночника</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("41") id="41">Перелом позоночника</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("42") id="42">Сколиоз</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("51") id="51">Спондилез</td>
+          <td class="Table_CT"></td>
+        </tr>
+      </tbody>
+      </table>
+  </td>
+  <td class="MultyPage" id="Shoulder" hidden>
+
+      <div class="Normal_CT">
+      <input type="button" class="GreenButton" value="Обратно" onclick=ReturnMain("Shoulder")>
+      <br>
+      <br>
+      <input type="button" class="RedButton" value="Не болит" onclick=NoDesease("Shoulder")>
+      <br>
+      <br>
+      </div>
+
+      <table>
+      <tbody>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("28") id="28">Артрит плечевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("29") id="29">Воспаление суставной сумки плечевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("30") id="30">Вывих плечевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("31") id="31">Импинджмент - синдром плечевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("32") id="32">Перелом плечевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("33") id="33">Разрыв вращательной манжеты плечевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("34") id="34">Разрыв акромиально-ключичного сочленения</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("35") id="35">Разрыв сухожилей бицепса</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("36") id="36">SLAP–синдром плечевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+      </tbody>
+      </table>
+  </td>
+  <td class="MultyPage" id="Elbow" hidden>
+
+      <div class="Normal_CT">
+      <input type="button" class="GreenButton" value="Обратно" onclick=ReturnMain("Elbow")>
+      <br>
+      <br>
+      <input type="button" class="RedButton" value="Не болит" onclick=NoDesease("Elbow")>
+      <br>
+      <br>
+      </div>
+
+      <table>
+      <tbody>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("22") id="22">Артроз локтевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("23") id="23">Воспаление суставной сумки локтевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("24") id="24">Вывих локтевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("25") id="25">Перелом локтевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("26") id="26">Эпиконделит локтевого сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+      </tbody>
+      </table>
+  </td>
+  <td class="MultyPage" id="Hip" hidden>
+
+      <div class="Normal_CT">
+      <input type="button" class="GreenButton" value="Обратно" onclick=ReturnMain("Hip")>
+      <br>
+      <br>
+      <input type="button" class="RedButton" value="Не болит" onclick=NoDesease("Hip")>
+      <br>
+      <br>
+      </div>
+
+      <table>
+      <tbody>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("44") id="44">Артрит тазобедренного сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("45") id="45">Артроз тазобедренного сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("46") id="46">Вывих тазобедренного сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("47") id="47">Перелом тазобедренного сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("48") id="48">Перелом шейки бедра</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("49") id="49">Трохантерит</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("50") id="50">Ушиб тазобедренного сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+      </tbody>
+      </table>
+  </td>
+  <td class="MultyPage" id="Knee" hidden>
+
+      <div class="Normal_CT">
+      <input type="button" class="GreenButton" value="Обратно" onclick=ReturnMain("Knee")>
+      <br>
+      <br>
+      <input type="button" class="RedButton" value="Не болит" onclick=NoDesease("Knee")>
+      <br>
+      <br>
+      </div>
+
+      <table>
+      <tbody>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("12") id="12">Артрит колена</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("13") id="13">Артроз колена</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("14") id="14">Вывих надколенника</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("16") id="16">Разрыв менисков колена</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("15") id="15">Разрыв связок колена</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("17") id="17">Рассекающий остеохондрит (Болезнь Кенинга)</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("18") id="18">Синовит колена</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("19") id="19">Тендинит связки надколенника</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("20") id="20">Хондромаляция хряща надколенника</td>
+          <td class="Table_CT"></td>
+        </tr>
+      </tbody>
+      </table>
+  </td>
+  <td class="MultyPage" id="Ankle" hidden>
+
+      <div class="Normal_CT">
+      <input type="button" class="GreenButton" value="Обратно" onclick=ReturnMain("Ankle")>
+      <br>
+      <br>
+      <input type="button" class="RedButton" value="Не болит" onclick=NoDesease("Ankle")>
+      <br>
+      <br>
+      </div>
+
+      <table>
+      <tbody>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("7") id="7">Перелом голеностопного сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("8") id="8">Повреждение ахиллова сухожилия</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("9") id="9">Повреждение связок голеностопного сустава</td>
+          <td class="Table_CT"></td>
+        </tr>
+        <tr>
+          <td class="Table_LT" onclick=SelectDesease("10") id="10">Пяточная шпора</td>
+          <td class="Table_CT"></td>
+        </tr>
+      </tbody>
+      </table>
+  </td>
+  </tr>
+  </tbody>
+  </table>
 
 </body>
 

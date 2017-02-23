@@ -71,6 +71,8 @@ function ProcessDB() {
   if($owner!=$user)  $read_only=true ; 
   else               $read_only=false ; 
 
+  if($read_only)  echo  "   doctor='Doctor' ;\n" ;
+
                       $owner_=$db->real_escape_string($owner) ;
                       $user_ =$db->real_escape_string($user ) ;
 
@@ -228,6 +230,7 @@ function SuccessMsg() {
     var  password ;
     var  page_key ;
     var  check_key ;
+    var  doctor ;
 
   function FirstField() 
   {
@@ -271,7 +274,14 @@ function SuccessMsg() {
        i_remark .value=Crypto_decode(i_remark.value, page_key) ;
        i_anatomy.value=Crypto_decode(i_anatomy.value, page_key) ;
 
-      parent.frames["anatomy"].location.replace('anatomia_main.html?groups='+i_anatomy.value) ;
+     if(doctor=="Doctor")
+     {
+        parent.frames["details"].SetAnatomy(i_anatomy.value) ;
+     }
+     else
+     {
+        parent.frames["anatomy"].location.replace('anatomia_main.html?groups='+i_anatomy.value) ;
+     }
 
          return true ;
   }
@@ -341,8 +351,6 @@ function SuccessMsg() {
 
   <form onsubmit="return SendFields();" method="POST">
   <table width="100%" id="Fields">
-    <thead>
-    </thead>
     <tbody>
     <tr>
       <td class="Normal_RT"> </td>

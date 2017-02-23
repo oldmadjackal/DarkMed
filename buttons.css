@@ -8,7 +8,7 @@
               background-color : white           ; 
 }
 .DeleteButton  /* Кнопка удаления */
- {
+{
                    font-weight : bold            ; 
                          color : red             ;
               background-color : white           ; 
@@ -18,17 +18,22 @@
                    font-weight : bold            ; 
               background-color : white           ; 
 }
-.GreenButton  /*Зеленая кнопка*/
- {
+.GreenButton  /* Зеленая кнопка */
+{
                          color : green           ;
               background-color : #BBFFBB         ; 
-}   
+}
+.RedButton  /* Красная кнопка */
+{
+                         color : red             ;
+              background-color : #FFBBBB         ; 
+}
 .HelpButton  /* Кнопка "Помощь" */
 {
               background-color : white           ; 
 }
 .InsertButton  /* Кнопка вставки */
- {
+{
                    font-weight : bold            ; 
                          color : green           ;
               background-color : white           ; 

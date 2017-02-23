@@ -24,17 +24,26 @@ function ProcessDB() {
           $session =$_GET ["Session"] ;
           $client  =$_GET ["Client"] ;
 
+  if(isset($_POST["Check"]))
+  {
           $check   =$_POST["Check"] ;
           $category=$_POST["Category"] ;
           $remark  =$_POST["Remark"] ;
           $deseases=$_POST["Deseases"] ;
+          $anatomy =$_POST["Anatomy"] ;
+  }
 
-  FileLog("START", "Session  :".$session) ;
-  FileLog("",      "Client   :".$client) ;
-  FileLog("",      "Check    :".$check) ;
-  FileLog("",      "Category :".$category) ;
-  FileLog("",      "Remark   :".$remark) ;
-  FileLog("",      "Deseases :".$deseases) ;
+     FileLog("START", "Session  :".$session) ;
+     FileLog("",      "Client   :".$client) ;
+ 
+ if(isset($check))
+ {
+     FileLog("",      "Check    :".$check) ;
+     FileLog("",      "Category :".$category) ;
+     FileLog("",      "Remark   :".$remark) ;
+     FileLog("",      "Deseases :".$deseases) ;
+     FileLog("",      "Anatomy  :".$anatomy) ;
+ }
 
 //--------------------------- Подключение БД
 
@@ -77,15 +86,19 @@ function ProcessDB() {
 //--------------------------- Приведение данных
 
           $client_  =$db->real_escape_string($client) ;
+
+  if(isset($check))
+  {
           $category_=$db->real_escape_string($category) ;
           $remark_  =$db->real_escape_string($remark) ;
           $deseases_=$db->real_escape_string($deseases) ;
-
+          $anatomy_ =$db->real_escape_string($anatomy) ;
+  }
 //--------------------------- Извлечение данных для отображения
 
   if(!isset($check))
   {
-                       $sql="Select `check`, category, remark, deseases".
+                       $sql="Select `check`, category, remark, deseases, anatomy".
                             " From  doctor_notes".
                             " Where owner='$user_' and client='$client_'" ;
        $res=$db->query($sql) ;
@@ -103,6 +116,7 @@ function ProcessDB() {
                    $category=$fields[1] ;
                    $remark  =$fields[2] ;
                    $deseases=$fields[3] ;
+                   $anatomy =$fields[4] ;
 
         FileLog("", "Doctor notes presented successfully") ;
   }
@@ -113,6 +127,7 @@ function ProcessDB() {
                             " Set   category='$category_'".
                             "      ,remark  ='$remark_'".
                             "      ,deseases='$deseases_'".
+                            "      ,anatomy ='$anatomy_'".
                             " Where owner='$user' and client='$client_'" ;
        $res=$db->query($sql) ;
     if($res===false) {
@@ -135,6 +150,7 @@ function ProcessDB() {
       echo     "  i_category.value='".$category."' ;	\n" ;
       echo     "  i_remark  .value='".$remark.  "' ;	\n" ;
       echo     "  i_deseases.value='".$deseases."' ;	\n" ;
+      echo     "  i_anatomy .value='".$anatomy. "' ;	\n" ;
 
 //--------------------------- Формирование списка заболеваний
 
@@ -232,6 +248,7 @@ function SuccessMsg() {
     var  i_category ;
     var  i_remark ;
     var  i_deseases ;
+    var  i_anatomy ;
     var  i_error ;
 
     var  a_dss_name ;
@@ -257,6 +274,7 @@ function SuccessMsg() {
        i_category =document.getElementById("Category") ;
        i_remark   =document.getElementById("Remark") ;
        i_deseases =document.getElementById("Deseases") ;
+       i_anatomy  =document.getElementById("Anatomy") ;
        i_error    =document.getElementById("Error") ;
 
        a_dss_name =new Array() ;
@@ -286,6 +304,7 @@ function SuccessMsg() {
        i_category.value=Crypto_decode(i_category.value, page_key) ;
        i_remark  .value=Crypto_decode(i_remark  .value, page_key) ;
        i_deseases.value=Crypto_decode(i_deseases.value, page_key) ;
+       i_anatomy .value=Crypto_decode(i_anatomy .value, page_key) ;
 
         dss_list=i_deseases.value.split("@") ;
 
@@ -304,6 +323,8 @@ function SuccessMsg() {
     for(i=0 ; i<a_dss_id.length ; i++)
       AddNewRow(i, a_dss_name[i], a_dss_group[i], a_dss_gcode[i], a_dss_id[i]) ;
 
+        parent.frames["anatomy"].location.replace('anatomia_main.html?groups='+i_anatomy.value+'&Doctor') ;
+
          return true ;
   }
 
@@ -321,12 +342,11 @@ function SuccessMsg() {
 
      if(error_text!="")  return false ;
 
-       i_client_cat          =parent.frames['section'].document.getElementById(i_client.value+'_category') ;
-       i_client_cat.innerHTML=  i_category.value ;
+        i_client_cat=parent.frames['section'].document.getElementById(i_client.value+'_category') ;
+    if(i_client_cat!=null)  i_client_cat.innerHTML=  i_category.value ;
 
        i_category.value=Crypto_encode(i_category.value, page_key) ;
        i_remark  .value=Crypto_encode(i_remark  .value, page_key) ;
-
 
         i_deseases.value=i_deseases.value.trim() ;
                    words=i_deseases.value.split(" ") ;
@@ -334,14 +354,23 @@ function SuccessMsg() {
         i_deseases.value="" ;
 
     for(i=0 ; i<words.length ; i++) {
-                 i_dss_name       =document.getElementById("DssName_"+words[i]) ;
+                 i_dss_name=document.getElementById("DssName_"+words[i]) ;
+              if(i_dss_name==null)  continue ;
                  i_deseases.value+=words[i]+"#"+i_dss_name.innerHTML+"@" ;
                                     }
 
-                 i_deseases.value=Crypto_encode(i_deseases.value, page_key) ;
+       i_deseases.value=Crypto_encode(i_deseases.value, page_key) ;
+
+       i_anatomy .value=parent.frames["anatomy"].GetAnatomy() ;
+       i_anatomy .value=Crypto_encode(i_anatomy .value, page_key) ;
 
                          return true ;         
   } 
+
+  function SetAnatomy(p_groups)
+  {
+      parent.frames["anatomy"].SetGroups(p_groups) ;
+  }
 
   function LinkDesease() 
   {
@@ -541,7 +570,6 @@ function SuccessMsg() {
 <noscript>
 </noscript>
 
-<div class="inputF">
   <form onsubmit="return SendFields();" method="POST">
 
   <div class="error" id="Error"></div>
@@ -557,8 +585,6 @@ function SuccessMsg() {
       </td>
       <td class="field"  id="Column1">
         <table width="80%" id="Fields">
-          <thead>
-          </thead>
           <tbody>
           <tr>
             <td class="fieldL"> <input type="submit" class="SaveButton" value="Сохранить"> </td>
@@ -575,6 +601,7 @@ function SuccessMsg() {
               <input type="hidden" name="Client"   id="Client">
               <input type="hidden" name="Check"    id="Check">
               <input type="hidden" name="Deseases" id="Deseases">
+              <input type="hidden" name="Anatomy"  id="Anatomy">
             </td>
           </tr>
           </tbody>
@@ -585,8 +612,6 @@ function SuccessMsg() {
           <input type="button" value="Добавить/удалить заболевания" onclick=LinkDesease()>
         </div> 
         <table width="100%">
-          <thead>
-          </thead>
           <tbody  id="Deseases_list">
           </tbody>
         </table>
@@ -611,8 +636,6 @@ function SuccessMsg() {
   </table>
 
   </form>
-
-</div>
 
 </body>
 

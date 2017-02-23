@@ -96,7 +96,7 @@ function ProcessDB() {
 
            $user_=$db->real_escape_string($user) ;
 
-           $sql ="Select owner, CONCAT_WS(' ', d.name_f, d.name_i, d.name_o), speciality, remark, portrait, m.done".
+           $sql ="Select distinct owner, CONCAT_WS(' ', d.name_f, d.name_i, d.name_o), speciality, remark, portrait, m.done".
                   " From doctor_page_main d inner join users    u on d.owner=u.login".
                   "                    left outer join messages m on m.receiver=u.login and m.sender='$user_' and type='CLIENT_ACCESS_INVITE'".
                   " Where d.confirmed='Y'" ;

@@ -42,11 +42,9 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                        $session=$_GET["Session"] ;
-                        $owner  =$_GET["Owner"] ;
+          $owner=$_GET["Owner"] ;
 
-   FileLog("START", "    Session:".$session) ;
-   FileLog("",      "      Owner:".$owner) ;
+   FileLog("START", " Owner:".$owner) ;
 
 //--------------------------- Подключение БД
 

@@ -32,11 +32,11 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-                        $session=$_GET ["Session"] ;
-  if(!isset($session))  $session=$_POST["Session"] ;
+                            $session=$_GET ["Session"] ;
+  if(!isset($session)    )  $session=$_POST["Session"] ;
 
-                         $get_id=$_GET ["Id"] ;
-                         $put_id=$_POST["Id"] ;
+  if( isset($_GET ["Id"]))  $get_id=$_GET ["Id"] ;
+  if( isset($_POST["Id"]))  $put_id=$_POST["Id"] ;
 
   if( isset($put_id )) 
   {
@@ -49,8 +49,12 @@ function ProcessDB() {
                          $delete     =$_POST["Delete"] ;
                          $reorder    =$_POST["ReOrder"] ;
   }
+
+  if(isset($_POST["OrderNew"]))
+  {
                          $new_order  =$_POST["OrderNew"] ;
                          $ext_edit   =$_POST["ExtEdit"] ;
+  }
 
                                $new_file  = "" ;
                                $new_link  = "" ;

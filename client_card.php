@@ -37,6 +37,8 @@ function ProcessDB() {
   }
 
              FileLog("START", "Session:".$session) ;
+
+  if(isset($owner))
              FileLog("",      "  Owner:".$owner) ;
 
   if(isset($name_f))

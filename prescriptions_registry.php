@@ -26,6 +26,9 @@ function ProcessDB() {
 
                         $session =$_GET ["Session"] ;
   if(!isset($session))  $session =$_POST["Session"] ;
+
+  if( isset($_POST["Title"]))
+  {
                         $title   =$_POST["Title"] ;
                         $type    =$_POST["Type"] ;
                         $keyword1=$_POST["KeyWord1"] ;
@@ -34,16 +37,21 @@ function ProcessDB() {
                         $deseases=$_POST["Deseases"] ;
                         $common  =$_POST["Common"] ;
                         $photos  =$_POST["Photos"] ;
+  }
 
-  FileLog("START", " Session:".$session) ;
-  FileLog("",      "   Title:".$title) ;
-  FileLog("",      "    Type:".$type) ;
-  FileLog("",      "KeyWord1:".$keyword1) ;
-  FileLog("",      "KeyWord2:".$keyword2) ;
-  FileLog("",      "KeyWord3:".$keyword3) ;
-  FileLog("",      "Deseases:".$deseases) ;
-  FileLog("",      "  Common:".$common) ;
-  FileLog("",      "  Photos:".$photos) ;
+         FileLog("START", " Session:".$session) ;
+
+  if( isset($title))
+  {
+         FileLog("",      "   Title:".$title) ;
+         FileLog("",      "    Type:".$type) ;
+         FileLog("",      "KeyWord1:".$keyword1) ;
+         FileLog("",      "KeyWord2:".$keyword2) ;
+         FileLog("",      "KeyWord3:".$keyword3) ;
+         FileLog("",      "Deseases:".$deseases) ;
+         FileLog("",      "  Common:".$common) ;
+         FileLog("",      "  Photos:".$photos) ;
+  }
 
     if($type    =="")  $type    ="dummy" ;
     if($keyword1=="")  $keyword1="dummy" ;

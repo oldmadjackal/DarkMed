@@ -3,6 +3,8 @@
 header("Content-type: text/html; charset=windows-1251") ;
 
    $glb_script="Prescription_pilot_2.php" ;
+   $glb_log_off=true ;
+
 
   require("stdlib.php") ;
 

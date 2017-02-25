@@ -22,17 +22,24 @@ function ProcessDB() {
 
 //--------------------------- Извлечение параметров
 
-                        $session =$_GET ["Session"] ;
-                        $receiver=$_GET ["Receiver"] ;
-                        $topread =$_GET ["TopRead"] ;
-                        $text    =$_POST["Text"] ;
-                        $copy    =$_POST["Copy"] ;
+                             $session =$_GET ["Session"] ;
+                             $receiver=$_GET ["Receiver"] ;
+                             $topread =$_GET ["TopRead"] ;
+  if(isset($_POST["Text"]))
+  {
+                             $text    =$_POST["Text"] ;
+                             $copy    =$_POST["Copy"] ;
+  }
+ 
+       FileLog("START", "    Session:".$session) ;
+       FileLog("",      "   Receiver:".$receiver) ;
+       FileLog("",      "    TopRead:".$topread) ;
 
-  FileLog("START", "    Session:".$session) ;
-  FileLog("",      "   Receiver:".$receiver) ;
-  FileLog("",      "    TopRead:".$topread) ;
-  FileLog("",      "       Text:".$text) ;
-  FileLog("",      "       Copy:".$copy) ;
+  if(isset($text))
+  {
+       FileLog("",      "       Text:".$text) ;
+       FileLog("",      "       Copy:".$copy) ;
+  }
 
 //--------------------------- Подключение БД
 

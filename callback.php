@@ -23,15 +23,23 @@ function RegistryDB() {
 
 	   $session =$_GET ["Session" ] ;
 	   $form    =$_GET ["Form"    ] ;
+
+  if(isset($_POST["Category"]))
+  {
 	   $category=$_POST["Category"] ;
 	   $message =$_POST["Message" ] ;
+  }
 
-   FileLog("START", "    Session:".$session) ;
-   FileLog("",      "       Form:".$form) ;
-   FileLog("",      "   Category:".$category) ;
-   FileLog("",      "    Message:".$message) ;
+       FileLog("START", "    Session:".$session) ;
+       FileLog("",      "       Form:".$form) ;
 
-    if(!isset($category) ) return ;
+  if(isset($category))
+  {
+       FileLog("",      "   Category:".$category) ;
+       FileLog("",      "    Message:".$message) ;
+  }
+
+  if(!isset($category) ) return ;
 
 //--------------------------- Вывод данных на экран
 

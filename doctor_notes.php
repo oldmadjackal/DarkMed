@@ -261,6 +261,9 @@ function SuccessMsg() {
     var  gshow_start ;
     var  gshow_end ;
 
+    var  NeedSave ;
+
+
   function FirstField() 
   {
      var  i_check ;
@@ -325,6 +328,8 @@ function SuccessMsg() {
 
         parent.frames["anatomy"].location.replace('anatomia_main.html?groups='+i_anatomy.value+'&Doctor') ;
 
+          CheckSave('Reset') ;
+
          return true ;
   }
 
@@ -334,6 +339,9 @@ function SuccessMsg() {
      var  i_dss_name ;
      var  error_text ;
      var  words ;
+
+
+          CheckSave('Reset') ;
 
 	error_text=""
      
@@ -518,6 +526,9 @@ function SuccessMsg() {
      var  i_txt_new ;
      var  v_id ;
 
+
+          CheckSave('Set') ;
+
                   v_id ="Desease_"+p_id ;
        i_deseases.value=" "+i_deseases.value+" " ;
 
@@ -554,6 +565,24 @@ function SuccessMsg() {
     return ;         
   } 
 
+  function CheckSave(p_action) 
+  {
+     if(p_action=='Set')
+     {
+        NeedSave=true ;
+         return(null) ;
+     }
+
+     if(p_action=='Reset')
+     {
+        NeedSave=false ;
+         return(null) ;
+     }
+
+     if(NeedSave==true)  return("Выйти с формы без сохранения данных?") ;
+                         return(null) ;
+  }
+
 
 <?php
   require("common.inc") ;
@@ -565,7 +594,7 @@ function SuccessMsg() {
 
 </head>
 
-<body onload="FirstField();">
+<body onload="FirstField();" onbeforeunload="return(CheckSave('Check'));">
 
 <noscript>
 </noscript>
@@ -588,12 +617,12 @@ function SuccessMsg() {
           <tbody>
           <tr>
             <td class="fieldL"> <input type="submit" class="SaveButton" value="Сохранить"> </td>
-            <td class="fieldL"> <input type="text" size=70 name="Category" id="Category" placeholder="Примечание"> </td>
+            <td class="fieldL"> <input type="text" size=70 name="Category" id="Category" placeholder="Примечание" onchange=CheckSave('Set')> </td>
           </tr>
           <tr>
             <td class="field"> Пoдробности </td>
             <td class="fieldL"> 
-              <textarea cols=65 rows=4 wrap="soft" name="Remark" id="Remark"> </textarea>
+              <textarea cols=65 rows=4 wrap="soft" name="Remark" id="Remark"  onchange=CheckSave('Set')> </textarea>
             </td>
           </tr>
           <tr>

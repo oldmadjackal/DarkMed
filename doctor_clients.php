@@ -362,9 +362,15 @@ function SuccessMsg() {
     var  i_roww_new ;
     var  i_list_new ;
     var  url ;
+    var  f_check_save ;
 
 
     if(client_prv==p_client)  return ;
+
+       f_check_save=parent.frames["details"].CheckSave ;
+    if(f_check_save!=null)
+     if(f_check_save('Check')!=null) 
+      if (confirm("Данные по предыдущему пациенту не были сохранены. Остаться для сохранения?"))  return ;
 
     if(client_prv!="NONE")
     {

@@ -235,6 +235,15 @@ function ShowExtensions() {
        echo "<br>							\n" ;
     }
 
+    if($sys_ext_type[$i]=="Video") {
+       echo "<div class='Normal_CT'>					\n" ; 
+       echo "<video height=300 controls='controls'>			\n" ; 
+       echo " <source src='".$sys_ext_file[$i]."'>			\n" ;
+       echo "</video>							\n" ; 
+       echo "</div>							\n" ; 
+       echo "<br>							\n" ;
+    }
+
     if($sys_ext_type[$i]=="File") {
        echo  "  <a href='".$sys_ext_file[$i]."'>—сылка на файл</a>	\n" ; 
     }

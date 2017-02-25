@@ -64,6 +64,7 @@ function ProcessDB() {
                                $new_remark=$_POST["RemarkNew"] ;
 
     if($new_type=="Image" or
+       $new_type=="Video" or
        $new_type=="File"    )  $new_file  =$_POST["FileName"] ;
 
     if($new_type=="Link"    )  $new_link  =$_POST["LinkNew"] ;
@@ -585,6 +586,15 @@ function ShowExtensions() {
        echo "<br>							\n" ;
     }
 
+    if($sys_ext_type[$i]=="Video") {
+       echo "<div class='Normal_CT'>					\n" ; 
+       echo "<video height=300 controls='controls'>			\n" ; 
+       echo " <source src='".$sys_ext_file[$i]."'>			\n" ;
+       echo "</video>							\n" ; 
+       echo "</div>							\n" ; 
+       echo "<br>							\n" ;
+    }
+
     if($sys_ext_type[$i]=="File") {
        echo  "  <a href='".$sys_ext_file[$i]."'>Ссылка на файл</a>	\n" ; 
     }
@@ -744,7 +754,12 @@ function SuccessMsg() {
 
        if(i_ext_type.value=='Image') {
             i_new=document.getElementById("FileNew") ;
-         if(i_new.value=="")    error_text="Не выбран файла изображения" ;
+         if(i_new.value=="")    error_text="Не выбран файл изображения" ;
+                                     }
+
+       if(i_ext_type.value=='Video') {
+            i_new=document.getElementById("FileNew") ;
+         if(i_new.value=="")    error_text="Не выбран файл видео-ролика" ;
                                      }
 
        if(i_ext_type.value=='File') {
@@ -873,6 +888,14 @@ function SuccessMsg() {
        i_fld_new . name     ='FileNew' ;
        i_fld_new . type     ="file" ;
        i_fld_new . accept   ="image/*" ;
+       i_col_new . appendChild(i_fld_new) ;
+     }
+     if(ext_type=="Video") {
+       i_fld_new = document.createElement("input") ;
+       i_fld_new . id       ='FileNew' ;
+       i_fld_new . name     ='FileNew' ;
+       i_fld_new . type     ="file" ;
+       i_fld_new . accept   ="video/*" ;
        i_col_new . appendChild(i_fld_new) ;
      }
      if(ext_type=="File") {
@@ -1401,6 +1424,7 @@ function SuccessMsg() {
   <div class="Normal_CT">
     <select name="ExtensionType" id="ExtensionType"> 
       <option value="Image">Картинка с пояснением</option>
+      <option value="Video">Видео с пояснением</option>
       <option value="Text">Текстовой блок</option>
       <option value="Link">Ссылка с пояснением</option>
       <option value="File">Файл с пояснением</option>

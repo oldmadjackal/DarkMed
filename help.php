@@ -213,8 +213,8 @@ function SuccessMsg($session) {
   <p>Ниже приведены документы, в которых описан весь процесс работы пользователя с порталом, в зависимости от его роли:</p>
 
   <ul class="menu">
-    <li><a href="DarkMed_doctor.docx"  target="section">Руководство пользователя для врача (docx-файл)</a></li> 
-    <li><a href="DarkMed_client.docx"  target="section">Руководство пользователя для пациента (docx-файл)</a></li> 
+    <li><a href="tutorial\DarkMed_doctor.docx"  target="section">Руководство пользователя для врача (docx-файл)</a></li> 
+    <li><a href="tutorial\DarkMed_client.docx"  target="section">Руководство пользователя для пациента (docx-файл)</a></li> 
   </ul>
 
   <p>Кроме того, предлагаются видеокурсы по использованию портала:</p>

@@ -36,7 +36,18 @@ function ProcessDB() {
                         $keyword3=$_POST["KeyWord3"] ;
                         $deseases=$_POST["Deseases"] ;
                         $common  =$_POST["Common"] ;
-                        $photos  =$_POST["Photos"] ;
+                        $photos  =$_POST["Photos"] ;  
+  }
+  else
+  {
+                        $title   ="" ;
+                        $type    ="" ;
+                        $keyword1="" ;
+                        $keyword2="" ;
+                        $keyword3="" ;
+                        $deseases="" ;
+                        $common  ="" ;
+                        $photos  ="" ;  
   }
 
          FileLog("START", " Session:".$session) ;

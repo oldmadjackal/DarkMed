@@ -23,9 +23,9 @@ function ProcessDB() {
   }
 //--------------------------- Извлечение параметров
 
-   if(isset($_GET ["Session"]))  $session=$_GET ["Session"] ;
-  if(!isset($session))  
-   if(isset($_POST["Session"]))  $session=$_POST["Session"] ;
+        if(isset($_GET ["Session"]))  $session=$_GET ["Session"] ;
+   else if(isset($_POST["Session"]))  $session=$_POST["Session"] ;
+   else                               $session="" ;
 
   FileLog("START", "    Session:".$session) ;
 

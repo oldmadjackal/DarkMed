@@ -298,10 +298,9 @@ function ProcessDB() {
             ErrorMsg("Ошибка на сервере. Повторите попытку позже.<br>Детали: ошибка создания сообщения") ;
                          return ;
     }
-
 //- - - - - - - - - - - - - - Формирование email-оповещения
-    if($action=="Accept")  Email_msg_notification($db, $owner, $error) ;
-    else                   Email_msg_notification($db, $owner, $error) ;
+    if($action=="Accept")  Email_acc_notification($db, $owner, $error) ;
+    else                   Email_rej_notification($db, $owner, $error) ;
 //- - - - - - - - - - - - - -
   }
 //--------------------------- Отметка о прочтении

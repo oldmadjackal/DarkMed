@@ -23,7 +23,7 @@ function ProcessDB() {
 
                                  $session =$_GET ["Session"] ;
                                  $sender  =$_GET ["Sender" ] ;
-                                 $parent  =$_GET ["Parent" ] ;
+  if(isset($_GET ["Parent"  ]))  $parent  =$_GET ["Parent" ] ;
   if(isset($_POST["Text"    ]))  $text    =$_POST["Text"] ;
   if(isset($_POST["Copy"    ]))  $copy    =$_POST["Copy"] ;
   if(isset($_POST["TopId"   ]))  $topid   =$_POST["TopId"] ;
